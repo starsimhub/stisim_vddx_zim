@@ -7,6 +7,7 @@ from utils import set_font
 
 location = 'zimbabwe'
 
+
 def plot_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], title='sim_plots'):
     """ Create quantile plots """
     set_font(size=20)
@@ -34,9 +35,5 @@ def plot_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], 
 
 if __name__ == '__main__':
 
-    # SETTINGS
-    debug = False
-    n_runs = [100, 2][debug]  # Number of runs when using multisim
-    seed = 1
-    sims = plot_sims(seed=seed, n_runs=n_runs)
+    sims = plot_sims()
 
