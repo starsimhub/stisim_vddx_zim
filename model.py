@@ -100,7 +100,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     stis = make_stis()
     hiv = make_hiv()
     diseases = stis + hiv
-    intvs = make_testing(stis) + make_hiv_intvs()
+    intvs = make_hiv_intvs()  # + make_testing(stis)
     analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
@@ -129,6 +129,6 @@ if __name__ == '__main__':
 
     sim = make_sim(seed=seed, debug=debug)
     sim.run(verbose=0.1)
-    sim.plot('ng')
+    sim.plot('hiv')
     pl.show()
 
