@@ -62,7 +62,7 @@ def make_testing(diseases):
     return intvs
 
 
-def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False):
+def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -115,6 +115,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         demographics=[pregnancy, death],
         interventions=intvs,
         analyzers=analyzers,
+        verbose=verbose,
     )
 
     return sim
