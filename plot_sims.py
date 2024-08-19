@@ -122,5 +122,5 @@ if __name__ == '__main__':
 
     df_stats = sc.loadobj('results/multi_res_stats.df')
     percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
-    sims = plot_sims(df_stats, percentile_pairs=percentile_pairs)
+    sims = plot_sims(df_stats, start_year=1990, percentile_pairs=percentile_pairs)
 

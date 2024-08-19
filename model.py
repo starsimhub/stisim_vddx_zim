@@ -82,13 +82,13 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/{location}_age_{start}.csv', index_col='age')['value'])
     sexual = sti.FastStructuredSexual(
         acts=ss.lognorm_ex(80, 30),
-        prop_f1=0.4,  # 0.2,
-        prop_f2=0.095,
+        prop_f1=0.2,
+        prop_f2=0.05,
         prop_m1=0.2,  # 0.05,
-        f1_conc=0.2,  # 0.15,
-        f2_conc=0.58,
-        m1_conc=0.02,  # 0.01,
-        m2_conc=0.78,
+        f1_conc=0.05,  # 0.15,
+        f2_conc=0.25,
+        m1_conc=0.15,  # 0.01,
+        m2_conc=0.3,
         p_pair_form=0.8,  # 0.6,
         condom_data=pd.read_csv(f'data/{location}_condom_use.csv'),
     )
