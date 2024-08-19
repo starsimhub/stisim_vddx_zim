@@ -10,6 +10,7 @@ import starsim as ss
 import stisim as sti
 import pandas as pd
 import pylab as pl
+from analyzers import overtreatment_stats, coinfection_stats
 
 
 def make_stis():
@@ -92,6 +93,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     stis = make_stis()
     intvs = make_testing(stis)
+    analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
         dt=dt,
@@ -104,6 +106,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         networks=ss.ndict(sexual, maternal),
         demographics=[pregnancy, death],
         interventions=intvs,
+        analyzers=analyzers,
     )
 
     return sim
@@ -117,6 +120,6 @@ if __name__ == '__main__':
 
     sim = make_sim(seed=seed, debug=debug)
     sim.run(verbose=0.1)
-    sim.plot('gonorrhea')
+    sim.plot('ng')
     pl.show()
 
