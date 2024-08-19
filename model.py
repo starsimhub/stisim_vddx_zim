@@ -10,6 +10,8 @@ import starsim as ss
 import stisim as sti
 import pandas as pd
 import pylab as pl
+
+from hiv_model import make_hiv, make_hiv_intvs
 from analyzers import overtreatment_stats, coinfection_stats
 
 
@@ -92,7 +94,9 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     # Diseases
     ####################################################################################################################
     stis = make_stis()
-    intvs = make_testing(stis)
+    hiv = make_hiv()
+    diseases = stis + hiv
+    intvs = make_testing(stis) + make_hiv_intvs()
     analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
@@ -102,7 +106,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         start=start,
         end=end,
         people=ppl,
-        diseases=stis,
+        diseases=diseases,
         networks=ss.ndict(sexual, maternal),
         demographics=[pregnancy, death],
         interventions=intvs,
