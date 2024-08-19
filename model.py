@@ -65,7 +65,7 @@ def make_testing(diseases):
 def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
-    if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
+    if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
     if dt is None: dt = [1/12, 1][debug]
 
     ####################################################################################################################
@@ -84,10 +84,10 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         acts=ss.lognorm_ex(80, 30),
         prop_f1=0.2,
         prop_f2=0.05,
-        prop_m1=0.2,  # 0.05,
-        f1_conc=0.05,  # 0.15,
+        prop_m1=0.2,
+        f1_conc=0.05,
         f2_conc=0.25,
-        m1_conc=0.15,  # 0.01,
+        m1_conc=0.15,
         m2_conc=0.3,
         p_pair_form=0.8,  # 0.6,
         condom_data=pd.read_csv(f'data/{location}_condom_use.csv'),
