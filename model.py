@@ -21,6 +21,11 @@ def make_stis():
         beta_f2m=0.019,
         init_prev=0.01,
     )
+    chlamydia = sti.Chlamydia(
+        beta_m2f=0.05,
+        beta_f2m=0.025,
+        init_prev=0.04,
+    )
     trich = sti.Trichomoniasis(
         beta_m2f=0.02,
         beta_f2m=0.01,
@@ -31,12 +36,7 @@ def make_stis():
         beta_f2m=0.05,
         init_prev=0.025,
     )
-    chlamydia = sti.Chlamydia(
-        beta_m2f=0.05,
-        beta_f2m=0.025,
-        init_prev=0.04,
-    )
-    stis = [gon, trich, chlamydia, vd]
+    stis = [gon, chlamydia, trich, vd]
     return stis
 
 
@@ -81,11 +81,15 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/{location}_age_{start}.csv', index_col='age')['value'])
     sexual = sti.FastStructuredSexual(
-        acts=ss.normal(100, 10),  # Annual acts
-        prop_f1=0.5,
-        prop_m1=0.5,
-        f1_conc=0.1,
-        m1_conc=0.3,
+        acts=ss.lognorm_ex(80, 30),
+        prop_f1=0.4,  # 0.2,
+        prop_f2=0.095,
+        prop_m1=0.2,  # 0.05,
+        f1_conc=0.2,  # 0.15,
+        f2_conc=0.58,
+        m1_conc=0.02,  # 0.01,
+        m2_conc=0.78,
+        p_pair_form=0.8,  # 0.6,
         condom_data=pd.read_csv(f'data/{location}_condom_use.csv'),
     )
     maternal = ss.MaternalNet()

@@ -86,13 +86,10 @@ def make_hiv():
     """ Make HIV arguments for sim"""
     hiv = sti.HIV(
         beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
-        beta_m2f=0.055,  # Move beta values here so they're easier to modify in calibration
-        beta_f2m=0.0275,
-        beta_m2c=0.025,
-        dur_latent=ss.lognorm_ex(8, 2),
-        dur_on_art=ss.lognorm_ex(8, 5),
-        dist_ti_init_infected=ss.constant(v=0),
-        init_diagnosed=0.0,  # Proportion of initially infected agents who start out as diagnosed
+        beta_m2f=0.073,  # 0.101341,
+        beta_f2m=0.025,  # 0.011625,
+        beta_m2c=0.068,
+        dur_on_art=ss.lognorm_ex(26, 5),
         init_prev_data=pd.read_csv('data/init_prev_hiv.csv'),
         rel_init_prev=0.5,
     )
