@@ -9,7 +9,7 @@ import pandas as pd
 import stisim as sti
 
 
-def get_testing_products(location='zimbabwe'):
+def get_testing_products(location='zimbabwe', end=2020):
     """
     Define HIV products and testing interventions
     """
@@ -21,7 +21,7 @@ def get_testing_products(location='zimbabwe'):
     HIV_tests_data_raw.index = HIV_tests_data_raw.iloc[:, 0]
     HIV_tests_data_raw = HIV_tests_data_raw.iloc[:, 1:]
     HIV_tests_data_raw.loc["Other_avg"] = HIV_tests_data_raw[HIV_tests_data_raw.index != "FSW"].mean()
-    tivec = np.arange(start=1990, stop=2020 + 1, step=1)
+    tivec = np.arange(start=1990, stop=end + 1, step=1)
     FSW_prop = np.interp(tivec,
                          HIV_tests_data_raw.loc["FSW"].index[~pd.isna(HIV_tests_data_raw.loc["FSW"].values)].astype(int),
                          HIV_tests_data_raw.loc["FSW"].values[~pd.isna(HIV_tests_data_raw.loc["FSW"].values)])
