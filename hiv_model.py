@@ -91,7 +91,7 @@ def make_hiv():
         beta_m2c=0.01,
         dur_on_art=ss.lognorm_ex(26, 5),
         init_prev_data=pd.read_csv('data/init_prev_hiv.csv'),
-        # rel_init_prev=0.5,
+        rel_init_prev=0.5,
     )
     return [hiv]
 
