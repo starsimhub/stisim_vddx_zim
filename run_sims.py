@@ -32,8 +32,8 @@ def get_results_to_save():
     return to_save
 
 
-def run_sims(seed=None, n_runs=None):
-    sims = [make_sim(seed=seed + i, verbose=0.01) for i in range(n_runs)]
+def run_sims(start=1990, seed=None, n_runs=None):
+    sims = [make_sim(start=start, seed=seed + i, verbose=0.01) for i in range(n_runs)]
     sims = ss.parallel(sims).sims
     return sims
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     debug = False
     n_runs = [100, 2][debug]  # Number of runs when using multisim
     seed = 1
-    sims = run_sims(seed=seed, n_runs=n_runs)
+    sims = run_sims(start=1980, seed=seed, n_runs=n_runs)
 
     percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
     percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]

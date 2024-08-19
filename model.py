@@ -111,7 +111,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         end=end,
         people=ppl,
         diseases=diseases,
-        networks=ss.ndict(sexual, maternal),
+        networks=[sexual, maternal],
         demographics=[pregnancy, death],
         interventions=intvs,
         analyzers=analyzers,
