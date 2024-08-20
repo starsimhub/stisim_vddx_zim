@@ -26,6 +26,7 @@ def get_results_to_save():
         'hiv.n_diagnosed',
         'hiv.n_on_art',
         'hiv.prevalence',
+        'syndromicmgmt.care_seekers',
         'n_alive',
        ]
 
