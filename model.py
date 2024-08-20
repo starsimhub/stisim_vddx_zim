@@ -17,8 +17,8 @@ from analyzers import overtreatment_stats, coinfection_stats
 
 def make_stis():
     gon = sti.Gonorrhea(
-        beta_m2f=0.038,
-        beta_f2m=0.019,
+        beta_m2f=0.08,
+        beta_f2m=0.04,
         init_prev=0.01,
     )
     chlamydia = sti.Chlamydia(
