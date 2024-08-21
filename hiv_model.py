@@ -88,7 +88,7 @@ def make_hiv():
         beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
         beta_m2f=0.007,
         beta_f2m=0.0035,
-        beta_m2c=0.005,
+        beta_m2c=0.01,
         dur_on_art=ss.lognorm_ex(25, 5),
         init_prev_data=pd.read_csv('data/init_prev_hiv.csv'),
         rel_init_prev=0.5,
