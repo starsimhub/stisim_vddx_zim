@@ -6,6 +6,7 @@ Used for evaluation of etiological tests compared to syndromic management.
 
 # %% Imports and settings
 # import sciris as sc
+import numpy as np
 import starsim as ss
 import stisim as sti
 import pandas as pd
@@ -40,7 +41,7 @@ def make_stis():
     return stis
 
 
-def make_testing(diseases):
+def make_testing(diseases, start=1980, end=2020):
     # Testing interventions
     def seeking_care_discharge(sim):
         ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
@@ -53,10 +54,14 @@ def make_testing(diseases):
     tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
     ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
     vd_tx = sti.STITreatment(disease='vd', name='vd_tx', label='vd_tx')
+
+    treat_prob = pd.read_csv('data/treat_prob.csv')
     syndromic = sti.SyndromicMgmt(
+        treat_prob_data=treat_prob,
         diseases=diseases,
         eligibility=seeking_care_discharge,
         treatments=[ng_tx, tv_tx, ct_tx, vd_tx],
+        p_treat=0.1,
     )
     intvs = [syndromic, ng_tx, tv_tx, ct_tx, vd_tx]
     return intvs
@@ -100,7 +105,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     stis = make_stis()
     hiv = make_hiv()
     diseases = stis + hiv
-    intvs = make_hiv_intvs(end=end) + make_testing(stis)
+    intvs = make_hiv_intvs(end=end) + make_testing(stis, start=start, end=end)
     analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
