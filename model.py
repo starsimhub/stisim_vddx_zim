@@ -18,9 +18,9 @@ from analyzers import overtreatment_stats, coinfection_stats
 
 def make_stis():
     gon = sti.Gonorrhea(
-        beta_m2f=0.05,
-        beta_f2m=0.03,
-        init_prev=0.01,
+        beta_m2f=0.06,
+        beta_f2m=0.04,
+        init_prev=0.02,
     )
     chlamydia = sti.Chlamydia(
         beta_m2f=0.05,
@@ -60,9 +60,9 @@ def make_testing(diseases, start=1980, end=2020):
         treat_prob_data=treat_prob,
         diseases=diseases,
         eligibility=seeking_care_discharge,
-        treatments=[tv_tx, ct_tx, vd_tx],  #ng_tx, 
+        treatments=[ng_tx, tv_tx, ct_tx, vd_tx],
     )
-    intvs = [syndromic, tv_tx, ct_tx, vd_tx]  #ng_tx,
+    intvs = [syndromic, ng_tx, tv_tx, ct_tx, vd_tx]
     return intvs
 
 
