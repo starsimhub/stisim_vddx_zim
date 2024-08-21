@@ -60,10 +60,9 @@ def make_testing(diseases, start=1980, end=2020):
         treat_prob_data=treat_prob,
         diseases=diseases,
         eligibility=seeking_care_discharge,
-        treatments=[ng_tx, tv_tx, ct_tx, vd_tx],
-        p_treat=0.1,
+        treatments=[tv_tx, ct_tx, vd_tx],  #ng_tx, 
     )
-    intvs = [syndromic, ng_tx, tv_tx, ct_tx, vd_tx]
+    intvs = [syndromic, tv_tx, ct_tx, vd_tx]  #ng_tx,
     return intvs
 
 
