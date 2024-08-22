@@ -97,6 +97,11 @@ class coinfection_stats(ss.Analyzer):
 
         self.results['ng_ct_tv_vd'][sim.ti] = len((care & ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ppl.vd.infected).uids)
 
+        not_infected = care & ~ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ~ppl.vd.infected
+        if not_infected.any():
+            errormsg = 'Should not be seeking care if not infected.'
+            raise ValueError(errormsg)
+
         return
 
 
