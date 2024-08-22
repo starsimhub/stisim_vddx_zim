@@ -97,7 +97,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
 def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], title='sti_plots'):
     """ Create quantile plots """
     set_font(size=20)
-    fig, axes = pl.subplots(2, 4, figsize=(15, 8))
+    fig, axes = pl.subplots(3, 4, figsize=(15, 12))
     axes = axes.ravel()
     alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
@@ -161,7 +161,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     # Prevalence
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
-        resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
+        resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
         for rlabel, rname in resnames.items():
             x = np.unique(dfplot['year'])
             y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
