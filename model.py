@@ -49,7 +49,7 @@ def make_stis():
     return stis
 
 
-def make_testing(diseases, start=1980, end=2020):
+def make_testing(diseases):
     # Testing interventions
     def seeking_care_discharge(sim):
         ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
@@ -112,7 +112,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     stis = make_stis()
     hiv = make_hiv()
     diseases = stis + hiv
-    intvs = make_testing(stis, start=start, end=end) + make_hiv_intvs(end=end)
+    intvs = make_testing(stis) + make_hiv_intvs(end=end)
     analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
@@ -144,13 +144,13 @@ if __name__ == '__main__':
     sim.plot('ng')
     pl.show()
 
-    # import sciris as sc
-    # si = sc.findfirst(sim.results.yearvec, 2020)
-    # ei = sc.findfirst(sim.results.yearvec, 2021)
-    # (sim.results.coinfection_stats.ng_only[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_ct[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_tv[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_vd[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_ct_tv[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_tv_vd[si:ei].mean()+
-    # sim.results.coinfection_stats.ng_ct_tv_vd[si:ei].mean())
+    import sciris as sc
+    si = sc.findfirst(sim.results.yearvec, 2020)
+    ei = sc.findfirst(sim.results.yearvec, 2021)
+    (sim.results.coinfection_stats.ng_only[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct[si:ei].mean()+
+    sim.results.coinfection_stats.ng_tv[si:ei].mean()+
+    sim.results.coinfection_stats.ng_vd[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct_tv[si:ei].mean()+
+    sim.results.coinfection_stats.ng_tv_vd[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct_tv_vd[si:ei].mean())
