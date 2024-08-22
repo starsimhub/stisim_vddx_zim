@@ -41,7 +41,6 @@ def post_process_sims(sims, percentiles, to_drop, save_all=False):
     if save_all:
         sc.saveobj(f'results/multi_res.df', bigdf)  # NB this is a big file (~7MB), don't commit to repo!!!
     else:
-        to_drop = [c for c in bigdf.columns if c not in to_save]
         alldf = bigdf.drop(columns=to_drop)
         sc.saveobj(f'results/multi_res.df', alldf)
         df_stats = alldf.groupby(['yearvec']).describe(percentiles=percentiles)
