@@ -18,20 +18,20 @@ from analyzers import overtreatment_stats, coinfection_stats
 
 def make_stis():
     gon = sti.Gonorrhea(
-        beta_m2f=0.05,
+        beta_m2f=0.055,
         beta_f2m=0.03,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     chlamydia = sti.Chlamydia(
-        beta_m2f=0.02,
-        beta_f2m=0.01,
+        beta_m2f=0.03,
+        beta_f2m=0.015,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=0.8
     )
     trich = sti.Trichomoniasis(
-        beta_m2f=0.01,
-        beta_f2m=0.005,
+        beta_m2f=0.012,
+        beta_f2m=0.006,
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
     )
     vd = sti.DischargingSTI(
