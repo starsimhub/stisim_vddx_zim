@@ -20,10 +20,6 @@ def make_stis():
     gon = sti.Gonorrhea(
         beta_m2f=0.055,
         beta_f2m=0.03,
-        p_symp_test=[
-                ss.bernoulli(p=1.),  # Women
-                ss.bernoulli(p=1.),  # Men
-            ],
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
@@ -36,7 +32,12 @@ def make_stis():
     trich = sti.Trichomoniasis(
         beta_m2f=0.012,
         beta_f2m=0.006,
+        p_clear=[
+            ss.bernoulli(p=0.2),
+            ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
+        ],
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
+        rel_init_prev=2
     )
     vd = sti.DischargingSTI(
         beta_m2f=0.2,
