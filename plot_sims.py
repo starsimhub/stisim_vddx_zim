@@ -89,7 +89,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + ".png", dpi=100)
+    sc.savefig("figures/" + title + str(start_year)+".png", dpi=100)
 
     return fig
 
@@ -97,7 +97,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
 def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], title='sti_plots'):
     """ Create quantile plots """
     set_font(size=20)
-    fig, axes = pl.subplots(2, 4, figsize=(12, 9))
+    fig, axes = pl.subplots(2, 4, figsize=(15, 8))
     axes = axes.ravel()
     alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
@@ -111,73 +111,32 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
     dfplot['year'] = np.floor(np.round(dfplot.index, 1)).astype(int)
 
-    # Gonorrhea infections
+    disease_map = {'ng': 'Gonorrhea', 'ct': 'Chlamydia', 'tv': 'Trich', 'vd': 'Other'}
+    disease_data = {'ng': ng_data, 'ct': ct_data, 'tv': tv_data, 'vd': None}
+
     pn = 0
-    ax = axes[pn]
-    resname = 'ng.new_infections'
-    ax.scatter(ng_data.year, ng_data[resname], label='Data', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-    ax.set_title('Gonorrhea infections')
-    ax.set_ylim(bottom=0)
-    sc.SIticks(ax=ax)
-    pn += 1
 
-    # Chlamydia infections
-    ax = axes[pn]
-    resname = 'ct.new_infections'
-    ax.scatter(ct_data.year, ct_data[resname], label='Data', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-    ax.set_title('Chlamydia infections')
-    ax.set_ylim(bottom=0)
-    sc.SIticks(ax=ax)
-    pn += 1
+    # Incidence
+    for dname, dlabel in disease_map.items():
+        ax = axes[pn]
+        resname = dname+'.new_infections'
+        data = disease_data[dname]
+        if data is not None:
+            ax.scatter(data.year, data[resname], label='Data', color='k')
 
-    # Trichomoniasis infections
-    ax = axes[pn]
-    resname = 'tv.new_infections'
-    ax.scatter(tv_data.year, tv_data[resname], label='Data', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-    ax.set_title('Trich infections')
-    ax.set_ylim(bottom=0)
-    sc.SIticks(ax=ax)
-    pn += 1
-
-    # Other vaginal infections
-    ax = axes[pn]
-    resname = 'vd.new_infections'
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-    ax.set_title('Other vaginal\ninfections')
-    ax.set_ylim(bottom=0)
-    sc.SIticks(ax=ax)
-    pn += 1
+        x = np.unique(dfplot['year'])
+        y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
+        line, = ax.plot(x[:-1], y[:-1], label='Total')
+        for idx, percentile_pair in enumerate(percentile_pairs):
+            yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
+            yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
+            ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+        ax.set_title(dlabel+' incidence')
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+        pn += 1
 
     # Burden
-    disease_map = {'ng': 'Gonorrhea', 'ct': 'Chlamydia', 'tv': 'Trichomoniasis', 'vd': 'Other'}
-    disease_data = {'ng': ng_data, 'ct': ct_data, 'tv': tv_data, 'vd': None}
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
         resname = dname+'.n_infected'
@@ -188,18 +147,37 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
         for rlabel, rname in resnames.items():
             x = np.unique(dfplot['year'])
             y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
-            line, = ax.plot(x[:-1], y[:-1], label='Total')
+            line, = ax.plot(x[:-1], y[:-1], label=rlabel)
             for idx, percentile_pair in enumerate(percentile_pairs):
                 yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
                 yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
                 ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
         ax.set_title(dlabel+' burden')
+        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+        pn += 1
+
+    # Prevalence
+    for dname, dlabel in disease_map.items():
+        ax = axes[pn]
+        resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
+        for rlabel, rname in resnames.items():
+            x = np.unique(dfplot['year'])
+            y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
+            line, = ax.plot(x[:-1], y[:-1], label=rlabel)
+            for idx, percentile_pair in enumerate(percentile_pairs):
+                yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
+                yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
+                ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+        ax.set_title(dlabel+' burden')
+        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + ".png", dpi=100)
+    sc.savefig("figures/" + title + str(start_year) + ".png", dpi=100)
 
     return fig
 

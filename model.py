@@ -21,11 +21,13 @@ def make_stis():
         beta_m2f=0.06,
         beta_f2m=0.04,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
+        rel_init_prev=0.2
     )
     chlamydia = sti.Chlamydia(
         beta_m2f=0.05,
         beta_f2m=0.025,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
+        rel_init_prev=0.8
     )
     trich = sti.Trichomoniasis(
         beta_m2f=0.02,
@@ -33,8 +35,8 @@ def make_stis():
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
     )
     vd = sti.DischargingSTI(
-        beta_m2f=0.1,
-        beta_f2m=0.05,
+        beta_m2f=0.2,
+        beta_f2m=0.1,
         init_prev_data=pd.read_csv('data/init_prev_vd.csv'),
     )
     stis = [gon, chlamydia, trich, vd]
