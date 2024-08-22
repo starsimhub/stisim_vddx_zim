@@ -123,15 +123,17 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
         data = disease_data[dname]
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
-
-        x = np.unique(dfplot['year'])
-        y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
-        line, = ax.plot(x[:-1], y[:-1], label='Total')
-        for idx, percentile_pair in enumerate(percentile_pairs):
-            yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-            yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
-            ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-        ax.set_title(dlabel+' incidence')
+        resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic' , 'Care seekers': dname+'.new_care_seekers'}
+        for rlabel, rname in resnames.items():
+            x = np.unique(dfplot['year'])
+            y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
+            line, = ax.plot(x[:-1], y[:-1], label=rlabel)
+            for idx, percentile_pair in enumerate(percentile_pairs):
+                yl = dfplot.groupby(by='year')[rname].sum()[(rname, f"{percentile_pair[0]:.0%}")]
+                yu = dfplot.groupby(by='year')[rname].sum()[(rname, f"{percentile_pair[1]:.0%}")]
+                ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+        ax.set_title(dlabel+' burden')
+        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
@@ -143,7 +145,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
         data = disease_data[dname]
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
-        resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic', 'Care-seeking': dname+'.n_seeking_care'}
+        resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic'}
         for rlabel, rname in resnames.items():
             x = np.unique(dfplot['year'])
             y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]

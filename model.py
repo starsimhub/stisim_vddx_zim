@@ -20,6 +20,10 @@ def make_stis():
     gon = sti.Gonorrhea(
         beta_m2f=0.055,
         beta_f2m=0.03,
+        p_symp_test=[
+                ss.bernoulli(p=1.),  # Women
+                ss.bernoulli(p=1.),  # Men
+            ],
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
@@ -39,7 +43,7 @@ def make_stis():
         beta_f2m=0.1,
         init_prev_data=pd.read_csv('data/init_prev_vd.csv'),
     )
-    stis = [gon, chlamydia, trich, vd]
+    stis = [gon]  #, chlamydia, trich, vd]
 
     return stis
 
@@ -48,24 +52,25 @@ def make_testing(diseases, start=1980, end=2020):
     # Testing interventions
     def seeking_care_discharge(sim):
         ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-        tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-        ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-        vd_care = sim.diseases.vd.symptomatic & (sim.diseases.vd.ti_seeks_care == sim.ti)
-        return (ng_care | tv_care | ct_care | vd_care).uids
+        return (ng_care).uids
+        # tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
+        # ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
+        # vd_care = sim.diseases.vd.symptomatic & (sim.diseases.vd.ti_seeks_care == sim.ti)
+        # return (ng_care | tv_care | ct_care | vd_care).uids
 
     ng_tx = sti.GonorrheaTreatment()
-    tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
-    ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
-    vd_tx = sti.STITreatment(disease='vd', name='vd_tx', label='vd_tx')
+    # tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
+    # ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
+    # vd_tx = sti.STITreatment(disease='vd', name='vd_tx', label='vd_tx')
 
     treat_prob = pd.read_csv('data/treat_prob.csv')
     syndromic = sti.SyndromicMgmt(
         treat_prob_data=treat_prob,
         diseases=diseases,
         eligibility=seeking_care_discharge,
-        treatments=[ng_tx, tv_tx, ct_tx, vd_tx],
+        treatments=[ng_tx ]  #, tv_tx, ct_tx, vd_tx],
     )
-    intvs = [syndromic, ng_tx, tv_tx, ct_tx, vd_tx]
+    intvs = [syndromic, ng_tx ]  #, tv_tx, ct_tx, vd_tx]
     return intvs
 
 
@@ -106,8 +111,8 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     stis = make_stis()
     hiv = make_hiv()
-    diseases = stis + hiv
-    intvs = make_hiv_intvs(end=end) + make_testing(stis, start=start, end=end)
+    diseases = stis   #+ hiv
+    intvs = make_testing(stis, start=start, end=end)  #make_hiv_intvs(end=end) +
     analyzers = [overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
@@ -120,8 +125,8 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         diseases=diseases,
         networks=[sexual, maternal],
         demographics=[pregnancy, death],
-        interventions=intvs,
-        analyzers=analyzers,
+        # interventions=intvs,
+        # analyzers=analyzers,
         verbose=verbose,
     )
 
@@ -134,18 +139,18 @@ if __name__ == '__main__':
     debug = False
     seed = 1
 
-    sim = make_sim(seed=seed, debug=debug)
+    sim = make_sim(seed=seed, debug=debug, dt=1/12)
     sim.run(verbose=0.1)
-    sim.plot('hiv')
+    sim.plot('ng')
     pl.show()
 
-    import sciris as sc
-    si = sc.findfirst(sim.results.yearvec, 2020)
-    ei = sc.findfirst(sim.results.yearvec, 2021)
-    (sim.results.coinfection_stats.ng_only[si:ei].mean()+
-    sim.results.coinfection_stats.ng_ct[si:ei].mean()+
-    sim.results.coinfection_stats.ng_tv[si:ei].mean()+
-    sim.results.coinfection_stats.ng_vd[si:ei].mean()+
-    sim.results.coinfection_stats.ng_ct_tv[si:ei].mean()+
-    sim.results.coinfection_stats.ng_tv_vd[si:ei].mean()+
-    sim.results.coinfection_stats.ng_ct_tv_vd[si:ei].mean())
+    # import sciris as sc
+    # si = sc.findfirst(sim.results.yearvec, 2020)
+    # ei = sc.findfirst(sim.results.yearvec, 2021)
+    # (sim.results.coinfection_stats.ng_only[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_ct[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_tv[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_vd[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_ct_tv[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_tv_vd[si:ei].mean()+
+    # sim.results.coinfection_stats.ng_ct_tv_vd[si:ei].mean())
