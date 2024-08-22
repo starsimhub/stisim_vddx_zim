@@ -40,6 +40,7 @@ def make_stis():
         init_prev_data=pd.read_csv('data/init_prev_vd.csv'),
     )
     stis = [gon, chlamydia, trich, vd]
+
     return stis
 
 
@@ -138,3 +139,13 @@ if __name__ == '__main__':
     sim.plot('hiv')
     pl.show()
 
+    import sciris as sc
+    si = sc.findfirst(sim.results.yearvec, 2020)
+    ei = sc.findfirst(sim.results.yearvec, 2021)
+    (sim.results.coinfection_stats.ng_only[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct[si:ei].mean()+
+    sim.results.coinfection_stats.ng_tv[si:ei].mean()+
+    sim.results.coinfection_stats.ng_vd[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct_tv[si:ei].mean()+
+    sim.results.coinfection_stats.ng_tv_vd[si:ei].mean()+
+    sim.results.coinfection_stats.ng_ct_tv_vd[si:ei].mean())

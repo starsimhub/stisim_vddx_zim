@@ -108,8 +108,8 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     ct_data = ct_data.loc[(ct_data.year >= start_year) & (ct_data.year <= end_year)]
     tv_data = tv_data.loc[(tv_data.year >= start_year) & (tv_data.year <= end_year)]
 
+    df['year'] = np.floor(np.round(df.index, 1)).astype(int)
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
-    dfplot['year'] = np.floor(np.round(dfplot.index, 1)).astype(int)
 
     disease_map = {'ng': 'Gonorrhea', 'ct': 'Chlamydia', 'tv': 'Trich', 'vd': 'Other'}
     disease_data = {'ng': ng_data, 'ct': ct_data, 'tv': tv_data, 'vd': None}
@@ -185,6 +185,11 @@ if __name__ == '__main__':
 
     df_stats = sc.loadobj('results/multi_res_stats.df')
     percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
-    plot_hiv_sims(df_stats, start_year=1980, percentile_pairs=percentile_pairs)
+    # plot_hiv_sims(df_stats, start_year=1980, percentile_pairs=percentile_pairs)
     plot_sti_sims(df_stats, start_year=1980, percentile_pairs=percentile_pairs)
 
+    # Coinfection stats
+    df_stats['year'] = np.floor(np.round(df_stats.index, 1)).astype(int)
+    dfplot = df_stats.iloc[(df_stats.index >= 2020) & (df_stats.index <= 2030)]
+
+    # sim.results.coinfection_stats.ng_only[si] + sim.results.coinfection_stats.ct_only[si] + sim.results.coinfection_stats.tv_only[si] + sim.results.coinfection_stats.vd_only[si]
