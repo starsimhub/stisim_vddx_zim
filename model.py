@@ -20,18 +20,21 @@ def make_stis():
     gon = sti.Gonorrhea(
         beta_m2f=0.055,
         beta_f2m=0.03,
+        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     chlamydia = sti.Chlamydia(
         beta_m2f=0.03,
         beta_f2m=0.015,
+        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=0.8
     )
     trich = sti.Trichomoniasis(
         beta_m2f=0.012,
         beta_f2m=0.006,
+        beta_m2c=0,
         p_clear=[
             ss.bernoulli(p=0.2),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
@@ -42,6 +45,7 @@ def make_stis():
     vd = sti.DischargingSTI(
         beta_m2f=0.2,
         beta_f2m=0.1,
+        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_vd.csv'),
     )
     stis = [gon, chlamydia, trich, vd]
@@ -58,7 +62,10 @@ def make_testing(diseases):
         vd_care = sim.diseases.vd.symptomatic & (sim.diseases.vd.ti_seeks_care == sim.ti)
         return (ng_care | tv_care | ct_care | vd_care).uids
 
-    ng_tx = sti.GonorrheaTreatment()
+    ng_tx = sti.GonorrheaTreatment(
+        rel_treat_unsucc=0.05,
+        rel_treat_unneed=0.01,
+    )
     tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
     ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
     vd_tx = sti.STITreatment(disease='vd', name='vd_tx', label='vd_tx')

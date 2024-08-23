@@ -18,8 +18,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     hiv_data = pd.read_csv(f'data/{location}_hiv_data.csv')
     hiv_data = hiv_data.loc[(hiv_data.year >= start_year) & (hiv_data.year <= end_year)]
 
+    df['year'] = np.floor(np.round(df.index, 1)).astype(int)
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
-    dfplot['year'] = np.floor(np.round(dfplot.index, 1)).astype(int)
 
     # HIV infections
     pn = 0
@@ -96,8 +96,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
 
 def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], title='sti_plots'):
     """ Create quantile plots """
-    set_font(size=20)
-    fig, axes = pl.subplots(3, 4, figsize=(15, 12))
+    set_font(size=30)
+    fig, axes = pl.subplots(3, 4, figsize=(25, 12))
     axes = axes.ravel()
     alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
@@ -133,7 +133,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
                 yu = dfplot.groupby(by='year')[rname].sum()[(rname, f"{percentile_pair[1]:.0%}")]
                 ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
         ax.set_title(dlabel+' incidence')
-        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
+        if pn == 2: ax.legend(frameon=False, prop={'size': 20})
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
@@ -155,7 +155,6 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
                 yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
                 ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
         ax.set_title(dlabel+' burden')
-        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
@@ -167,13 +166,12 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
         for rlabel, rname in resnames.items():
             x = np.unique(dfplot['year'])
             y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
-            line, = ax.plot(x[:-1], y[:-1], label=rlabel)
+            line, = ax.plot(x[:-1], y[:-1] * 100, label=rlabel)
             for idx, percentile_pair in enumerate(percentile_pairs):
                 yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
                 yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
-                ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
-        ax.set_title(dlabel+' prevalence')
-        if pn == 7: ax.legend(frameon=False, prop={'size': 15})
+                ax.fill_between(x[:-1], yl[:-1]* 100, yu[:-1]* 100, alpha=alphas[idx], facecolor=line.get_color())
+        ax.set_title(dlabel+' prevalence (%)')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
@@ -183,15 +181,143 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
 
     return fig
 
+
+def print_results(df):
+
+    year = 2020
+    metric = 'mean'
+    dfg = df.groupby(by='year')
+
+    output = ''
+    r1 = (dfg['ng.new_symptomatic'].sum()[('ng.new_symptomatic', metric)][year] +
+          dfg['ct.new_symptomatic'].sum()[('ct.new_symptomatic', metric)][year] +
+          dfg['tv.new_symptomatic'].sum()[('tv.new_symptomatic', metric)][year] +
+          dfg['vd.new_symptomatic'].sum()[('vd.new_symptomatic', metric)][year] )
+    r2 = dfg['syndromicmgmt.care_seekers'].sum()[('syndromicmgmt.care_seekers', metric)][year]
+    output += f'Total newly symptomatic: {int(r1)}\n'
+    output += f'Total seeking care: {int(r2)}\n'
+
+    r11 = (dfg['syndromicmgmt.ng_only'].sum()[('syndromicmgmt.ng_only', metric)][year])
+    r12 = (dfg['syndromicmgmt.ct_only'].sum()[('syndromicmgmt.ct_only', metric)][year])
+    r13 = (dfg['syndromicmgmt.tv_only'].sum()[('syndromicmgmt.tv_only', metric)][year])
+    r14 = (dfg['syndromicmgmt.vd_only'].sum()[('syndromicmgmt.vd_only', metric)][year])
+    output += f'NG only: {int(r11)}\n'
+    output += f'CT only: {int(r12)}\n'
+    output += f'TV only: {int(r13)}\n'
+    output += f'VD only: {int(r14)}\n'
+
+    ng1 = (dfg['syndromicmgmt.ng_ct'].sum()[('syndromicmgmt.ng_ct', metric)][year] +
+           dfg['syndromicmgmt.ng_tv'].sum()[('syndromicmgmt.ng_tv', metric)][year] +
+           dfg['syndromicmgmt.ng_vd'].sum()[('syndromicmgmt.ng_vd', metric)][year] )
+    ng2 = (dfg['syndromicmgmt.ng_ct_tv'].sum()[('syndromicmgmt.ng_ct_tv', metric)][year] +
+           dfg['syndromicmgmt.ng_ct_vd'].sum()[('syndromicmgmt.ng_ct_vd', metric)][year] +
+           dfg['syndromicmgmt.ng_tv_vd'].sum()[('syndromicmgmt.ng_tv_vd', metric)][year] )
+    sti4 = dfg['syndromicmgmt.ng_ct_tv_vd'].sum()[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
+
+    output += f'NG+1: {int(ng1)}\n'
+    output += f'NG+2: {int(ng2)}\n'
+    output += f'NG+3: {int(sti4)}\n'
+
+    ct1 = (dfg['syndromicmgmt.ng_ct'].sum()[('syndromicmgmt.ng_ct', metric)][year] +
+           dfg['syndromicmgmt.ct_tv'].sum()[('syndromicmgmt.ct_tv', metric)][year] +
+           dfg['syndromicmgmt.ct_vd'].sum()[('syndromicmgmt.ct_vd', metric)][year] )
+    ct2 = (dfg['syndromicmgmt.ng_ct_tv'].sum()[('syndromicmgmt.ng_ct_tv', metric)][year] +
+           dfg['syndromicmgmt.ng_ct_vd'].sum()[('syndromicmgmt.ng_ct_vd', metric)][year] +
+           dfg['syndromicmgmt.ct_tv_vd'].sum()[('syndromicmgmt.ct_tv_vd', metric)][year] )
+    sti4 = dfg['syndromicmgmt.ng_ct_tv_vd'].sum()[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
+
+    output += f'CT+1: {int(ct1)}\n'
+    output += f'CT+2: {int(ct2)}\n'
+    output += f'CT+3: {int(sti4)}\n'
+
+    tv1 = (dfg['syndromicmgmt.ng_tv'].sum()[('syndromicmgmt.ng_tv', metric)][year] +
+           dfg['syndromicmgmt.ct_tv'].sum()[('syndromicmgmt.ct_tv', metric)][year] +
+           dfg['syndromicmgmt.tv_vd'].sum()[('syndromicmgmt.tv_vd', metric)][year] )
+    tv2 = (dfg['syndromicmgmt.ng_ct_tv'].sum()[('syndromicmgmt.ng_ct_tv', metric)][year] +
+           dfg['syndromicmgmt.ng_tv_vd'].sum()[('syndromicmgmt.ng_tv_vd', metric)][year] +
+           dfg['syndromicmgmt.ct_tv_vd'].sum()[('syndromicmgmt.ct_tv_vd', metric)][year] )
+    sti4 = dfg['syndromicmgmt.ng_ct_tv_vd'].sum()[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
+
+    output += f'TV+1: {int(tv1)}\n'
+    output += f'TV+2: {int(tv2)}\n'
+    output += f'TV+3: {int(sti4)}\n'
+
+    vd1 = (dfg['syndromicmgmt.ng_vd'].sum()[('syndromicmgmt.ng_vd', metric)][year] +
+           dfg['syndromicmgmt.ct_vd'].sum()[('syndromicmgmt.ct_vd', metric)][year] +
+           dfg['syndromicmgmt.tv_vd'].sum()[('syndromicmgmt.tv_vd', metric)][year] )
+    vd2 = (dfg['syndromicmgmt.ng_ct_vd'].sum()[('syndromicmgmt.ng_ct_vd', metric)][year] +
+           dfg['syndromicmgmt.ng_tv_vd'].sum()[('syndromicmgmt.ng_tv_vd', metric)][year] +
+           dfg['syndromicmgmt.ct_tv_vd'].sum()[('syndromicmgmt.ct_tv_vd', metric)][year] )
+    sti4 = dfg['syndromicmgmt.ng_ct_tv_vd'].sum()[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
+
+    output += f'VD+1: {int(vd1)}\n'
+    output += f'VD+2: {int(vd2)}\n'
+    output += f'VD+3: {int(sti4)}\n'
+
+    # Number with 2 STIs
+    sti2 = (dfg['syndromicmgmt.ng_ct'].sum()[('syndromicmgmt.ng_ct', metric)][year] +
+            dfg['syndromicmgmt.ng_tv'].sum()[('syndromicmgmt.ng_tv', metric)][year] +
+            dfg['syndromicmgmt.ng_vd'].sum()[('syndromicmgmt.ng_vd', metric)][year] +
+            dfg['syndromicmgmt.ct_tv'].sum()[('syndromicmgmt.ct_tv', metric)][year] +
+            dfg['syndromicmgmt.ct_vd'].sum()[('syndromicmgmt.ct_vd', metric)][year] +
+            dfg['syndromicmgmt.tv_vd'].sum()[('syndromicmgmt.tv_vd', metric)][year] )
+
+    # Number with 3 STIs
+    sti3 = (dfg['syndromicmgmt.ng_ct_tv'].sum()[('syndromicmgmt.ng_ct_tv', metric)][year] +
+            dfg['syndromicmgmt.ng_ct_vd'].sum()[('syndromicmgmt.ng_ct_vd', metric)][year] +
+            dfg['syndromicmgmt.ng_tv_vd'].sum()[('syndromicmgmt.ng_tv_vd', metric)][year] +
+            dfg['syndromicmgmt.ct_tv_vd'].sum()[('syndromicmgmt.ct_tv_vd', metric)][year] )
+
+    output += f'Number with 1 STI: {int(r11+r12+r13+r14)}\n'
+    output += f'Number with 2 STIs: {int(sti2)}\n'
+    output += f'Number with 3 STIs: {int(sti3)}\n'
+
+    print(output)
+
+    return
+
+
+def plot_tx(df, start_year=2000, percentile_pairs=None, title='tx_plots'):
+    set_font(size=20)
+    fig, axes = pl.subplots(2, 2, figsize=(8, 7))
+
+    axes = axes.ravel()
+    alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
+
+    pn = 0
+    # AMR
+    ax = axes[pn]
+    rname = 'ng.rel_treat'
+    x = np.unique(dfplot['year'])
+    y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
+    line, = ax.plot(x[:-1], y[:-1] * 100)
+    for idx, percentile_pair in enumerate(percentile_pairs):
+        yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
+        yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
+        ax.fill_between(x[:-1], yl[:-1]* 100, yu[:-1]* 100, alpha=alphas[idx], facecolor=line.get_color())
+    ax.set_title('Susceptible to treatment (%)')
+    ax.set_ylim(bottom=0)
+    sc.SIticks(ax=ax)
+    pn += 1
+
+    sc.figlayout()
+    sc.savefig("figures/" + title + str(start_year) + ".png", dpi=100)
+
+    return fig
+
+
 if __name__ == '__main__':
 
     df_stats = sc.loadobj('results/multi_res_stats.df')
     percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
-    # plot_hiv_sims(df_stats, start_year=1980, percentile_pairs=percentile_pairs)
-    plot_sti_sims(df_stats, start_year=1980, percentile_pairs=percentile_pairs)
+    plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
+    plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
 
     # Coinfection stats
     df_stats['year'] = np.floor(np.round(df_stats.index, 1)).astype(int)
-    dfplot = df_stats.iloc[(df_stats.index >= 2020) & (df_stats.index <= 2030)]
+    dfplot = df_stats.iloc[(df_stats.index >= 2000) & (df_stats.index <= 2025)]
+    print_results(dfplot)
 
-    # sim.results.coinfection_stats.ng_only[si] + sim.results.coinfection_stats.ct_only[si] + sim.results.coinfection_stats.tv_only[si] + sim.results.coinfection_stats.vd_only[si]
+    # Treatment results
+    plot_tx(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
+
