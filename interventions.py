@@ -72,9 +72,28 @@ class SyndromicMgmt(sti.SyndromicMgmt):
 
         return
 
+
+class Panel(sti.STITest):
+    def __init__(self, pars=None, years=None, start=None, end=None, eligibility=None, product=None, name=None, label=None, **kwargs):
+        super().__init__(years=years, start=start, end=end, eligibility=eligibility, product=product, name=name, label=label, **kwargs)
+        self.default_pars(
+        )
+        self.update_pars(pars, **kwargs)
+        
+        return
+
+
+
 # %%  Algorithms
 
-def make_testing(diseases):
+def make_testing(diseases, scenario='soc', end=2040):
+
+    intv_year = 2027
+
+    if scenario == 'soc':
+        synd_end = 2027
+    else:
+        synd_end = end
 
     # Testing interventions
     def seeking_care_discharge(sim):
@@ -93,10 +112,21 @@ def make_testing(diseases):
     bv_tx = sti.STITreatment(disease='bv', name='bv_tx', label='bv_tx')
 
     syndromic = SyndromicMgmt(
+        end=synd_end,
         p_treat=0.8,
         diseases=diseases,
         eligibility=seeking_care_discharge,
         treatments=[ng_tx, tv_tx, ct_tx, bv_tx],
     )
+
     intvs = [syndromic, ng_tx, tv_tx, ct_tx, bv_tx]
+
+    if scenario == 'panel':
+        panel = sti.STITest(
+            start=intv_year,
+            eligibility=seeking_care_discharge,
+        )
+
+        intvs += [panel]
+
     return intvs

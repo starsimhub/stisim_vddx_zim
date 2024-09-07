@@ -52,7 +52,7 @@ def make_stis():
     return [gon, chlamydia, trich, bv]
 
 
-def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
+def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
@@ -94,7 +94,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
-    intvs = make_testing(stis) + make_hiv_intvs()
+    intvs = make_testing(stis, scenario=scenario, end=end) + make_hiv_intvs()
     analyzers = [overtreatment_stats]  #, coinfection_stats]
 
     sim = ss.Sim(
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     debug = False
     seed = 1
 
-    sim = make_sim(seed=seed, debug=debug, dt=1/12)
+    sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
     sim.run(verbose=0.1)
     sim.plot('ng')
     pl.show()
@@ -132,57 +132,57 @@ if __name__ == '__main__':
     (sim.results.syndromicmgmt.ng_only[si:ei].sum()+
     sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
     sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_vd[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
     sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_vd[si:ei].sum())
+    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
 
     (sim.results.syndromicmgmt.ct_only[si:ei].sum()+
     sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
     sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_vd[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
     sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_vd[si:ei].sum())
+    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
 
     (sim.results.syndromicmgmt.tv_only[si:ei].sum()+
     sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
     sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_vd[si:ei].sum()+
+    sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
     sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_vd[si:ei].sum())
+    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
 
-    (sim.results.syndromicmgmt.vd_only[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_vd[si:ei].sum())
+    (sim.results.syndromicmgmt.bv_only[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
 
     # Number with two infections
     (sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
     sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_vd[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
     sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_vd[si:ei].sum())
+    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.tv_bv[si:ei].sum())
 
     # Number with three infections
     (sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_vd[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_vd[si:ei].sum())
+    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum())
 
     # Number new symptomatic
     (sim.results.ng.new_symptomatic[si:ei].sum()+
     sim.results.ct.new_symptomatic[si:ei].sum()+
     sim.results.tv.new_symptomatic[si:ei].sum()+
-    sim.results.vd.new_symptomatic[si:ei].sum())
+    sim.results.bv.new_symptomatic[si:ei].sum())
 
 
