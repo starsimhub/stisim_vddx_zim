@@ -74,21 +74,42 @@ class SyndromicMgmt(sti.SyndromicMgmt):
 
 
 class Panel(sti.STITest):
-    def __init__(self, pars=None, years=None, start=None, end=None, eligibility=None, product=None, name=None, label=None, **kwargs):
+    def __init__(self, treatments=None, diseases=None, pars=None, years=None, start=None, end=None, eligibility=None, product=None, name=None, label=None, **kwargs):
         super().__init__(years=years, start=start, end=end, eligibility=eligibility, product=product, name=name, label=label, **kwargs)
         self.default_pars(
         )
         self.update_pars(pars, **kwargs)
-        
+
+        # Store treatments and diseases
+        self.treatments = treatments
+        self.diseases = diseases
+
         return
 
+    def apply(self, sim, uids=None):
+        """ Apply the testing intervention """
+        # Apply if within the start years
+        if (sim.year >= self.start) & (sim.year < self.end):
+
+            if uids is None:
+                uids = self.get_testers(sim)
+                self.ti_tested[uids] = sim.ti
+
+            if len(uids):
+                for disease in self.diseases:
+                    a = 44
+
+            # Update results
+            self.update_results()
+
+        return
 
 
 # %%  Algorithms
 
 def make_testing(diseases, scenario='soc', end=2040):
 
-    intv_year = 2027
+    intv_year = 2000
 
     if scenario == 'soc':
         synd_end = 2027
@@ -110,21 +131,24 @@ def make_testing(diseases, scenario='soc', end=2040):
     tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
     ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
     bv_tx = sti.STITreatment(disease='bv', name='bv_tx', label='bv_tx')
+    treatments = [ng_tx, tv_tx, ct_tx, bv_tx]
 
     syndromic = SyndromicMgmt(
         end=synd_end,
         p_treat=0.8,
         diseases=diseases,
         eligibility=seeking_care_discharge,
-        treatments=[ng_tx, tv_tx, ct_tx, bv_tx],
+        treatments=treatments,
     )
 
     intvs = [syndromic, ng_tx, tv_tx, ct_tx, bv_tx]
 
     if scenario == 'panel':
-        panel = sti.STITest(
+        panel = Panel(
             start=intv_year,
             eligibility=seeking_care_discharge,
+            diseases=diseases,
+            treatments=treatments,
         )
 
         intvs += [panel]

@@ -121,7 +121,7 @@ if __name__ == '__main__':
     debug = False
     seed = 1
 
-    sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
+    sim = make_sim(scenario='panel', seed=seed, debug=debug, end=2030)
     sim.run(verbose=0.1)
     sim.plot('ng')
     pl.show()
