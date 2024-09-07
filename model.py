@@ -49,7 +49,7 @@ def make_stis():
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
 
-    return gon, chlamydia, trich, bv
+    return [gon, chlamydia, trich, bv]
 
 
 def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
@@ -87,9 +87,9 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     # Diseases
     ####################################################################################################################
-    gon, chlamydia, trich, bv = make_stis()
+    stis = make_stis()
     hiv = make_hiv()
-    diseases = [gon, chlamydia, trich, vd, hiv]
+    diseases = stis + [hiv]
 
     ####################################################################################################################
     # Interventions and analyzers
