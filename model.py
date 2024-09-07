@@ -13,8 +13,8 @@ import pandas as pd
 import pylab as pl
 
 from hiv_model import make_hiv, make_hiv_intvs
-from analyzers import overtreatment_stats, coinfection_stats
-
+from analyzers import overtreatment_stats
+from interventions import make_testing
 
 def make_stis():
     gon = sti.Gonorrhea(
@@ -46,39 +46,11 @@ def make_stis():
         beta_m2f=0.2,
         beta_f2m=0.1,
         beta_m2c=0,
-        init_prev_data=pd.read_csv('data/init_prev_vd.csv'),
+        init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
     stis = [gon, chlamydia, trich, vd]
 
     return stis
-
-
-def make_testing(diseases):
-    # Testing interventions
-    def seeking_care_discharge(sim):
-        ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-        tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-        ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-        vd_care = sim.diseases.vd.symptomatic & (sim.diseases.vd.ti_seeks_care == sim.ti)
-        return (ng_care | tv_care | ct_care | vd_care).uids
-
-    ng_tx = sti.GonorrheaTreatment(
-        rel_treat_unsucc=0.05,
-        rel_treat_unneed=0.01,
-    )
-    tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
-    ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
-    vd_tx = sti.STITreatment(disease='vd', name='vd_tx', label='vd_tx')
-
-    treat_prob = pd.read_csv('data/treat_prob.csv')
-    syndromic = sti.SyndromicMgmt(
-        treat_prob_data=treat_prob,
-        diseases=diseases,
-        eligibility=seeking_care_discharge,
-        treatments=[ng_tx, tv_tx, ct_tx, vd_tx],
-    )
-    intvs = [syndromic, ng_tx, tv_tx, ct_tx, vd_tx]
-    return intvs
 
 
 def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
@@ -90,15 +62,15 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     ####################################################################################################################
     # Demographic modules
     ####################################################################################################################
-    fertility_rates = {'fertility_rate': pd.read_csv(f'data/{location}_asfr.csv')}
+    fertility_rates = {'fertility_rate': pd.read_csv(f'data/asfr.csv')}
     pregnancy = ss.Pregnancy(pars=fertility_rates)
-    death_rates = {'death_rate': pd.read_csv(f'data/{location}_deaths.csv'), 'units': 1}
+    death_rates = {'death_rate': pd.read_csv(f'data/deaths.csv'), 'units': 1}
     death = ss.Deaths(death_rates)
 
     ####################################################################################################################
     # People and networks
     ####################################################################################################################
-    ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/{location}_age_{start}.csv', index_col='age')['value'])
+    ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
     sexual = sti.FastStructuredSexual(
         acts=ss.lognorm_ex(80, 30),
         prop_f1=0.2,
@@ -109,7 +81,7 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
         m1_conc=0.15,
         m2_conc=0.3,
         p_pair_form=0.8,  # 0.6,
-        condom_data=pd.read_csv(f'data/{location}_condom_use.csv'),
+        condom_data=pd.read_csv(f'data/condom_use.csv'),
     )
     maternal = ss.MaternalNet()
 
@@ -119,7 +91,11 @@ def make_sim(location='zimbabwe', seed=1, n_agents=None, dt=1/12, start=1990, en
     stis = make_stis()
     hiv = make_hiv()
     diseases = stis + hiv
-    intvs = make_testing(stis) + make_hiv_intvs(end=end)
+
+    ####################################################################################################################
+    # Interventions and analyzers
+    ####################################################################################################################
+    intvs = make_testing(stis) + make_hiv_intvs()
     analyzers = [overtreatment_stats]  #, coinfection_stats]
 
     sim = ss.Sim(
