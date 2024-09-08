@@ -77,12 +77,23 @@ class Panel(sti.STITest):
     def __init__(self, treatments=None, diseases=None, pars=None, years=None, start=None, end=None, eligibility=None, product=None, name=None, label=None, **kwargs):
         super().__init__(years=years, start=start, end=end, eligibility=eligibility, product=product, name=name, label=label, **kwargs)
         self.default_pars(
+            sens=dict(
+                ng=ss.bernoulli(0.9),
+                ct=ss.bernoulli(0.9),
+                tv=ss.bernoulli(0.9),
+            ),
+            spec=dict(
+                ng=ss.bernoulli(0.95),
+                ct=ss.bernoulli(0.95),
+                tv=ss.bernoulli(0.95),
+            ),
         )
         self.update_pars(pars, **kwargs)
 
         # Store treatments and diseases
         self.treatments = treatments
         self.diseases = diseases
+        self.disease_treatment_map = {t.disease:t for t in self.treatments}
 
         return
 
@@ -91,13 +102,26 @@ class Panel(sti.STITest):
         # Apply if within the start years
         if (sim.year >= self.start) & (sim.year < self.end):
 
+            for treatment in self.treatments:
+                treatment.eligibility = ss.uids()  # Reset
+
             if uids is None:
                 uids = self.get_testers(sim)
                 self.ti_tested[uids] = sim.ti
 
             if len(uids):
                 for disease in self.diseases:
-                    a = 44
+                    inf = uids & disease.infected
+                    sus = uids & disease.susceptible
+
+                    sens = self.pars.sens[disease.name]
+                    spec = self.pars.spec[disease.name]
+
+                    true_pos, false_pos = sens.split(inf)
+                    true_neg, false_neg = spec.split(sus)
+
+                    tx = self.disease_treatment_map[disease.name]
+                    tx.eligibility = true_pos | false_neg
 
             # Update results
             self.update_results()
@@ -107,12 +131,12 @@ class Panel(sti.STITest):
 
 # %%  Algorithms
 
-def make_testing(diseases, scenario='soc', end=2040):
+def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
 
     intv_year = 2000
 
     if scenario == 'soc':
-        synd_end = 2027
+        synd_end = intv_year
     else:
         synd_end = end
 
@@ -122,21 +146,22 @@ def make_testing(diseases, scenario='soc', end=2040):
         tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
         ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
         bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
-        return (ng_care | tv_care | ct_care | bv_care).uids
+        return (ng_care | ct_care | tv_care | bv_care).uids
 
     ng_tx = sti.GonorrheaTreatment(
+        name='ng_tx',
         rel_treat_unsucc=0.05,
         rel_treat_unneed=0.01,
     )
-    tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
     ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
+    tv_tx = sti.STITreatment(disease='tv', name='tv_tx', label='tv_tx')
     bv_tx = sti.STITreatment(disease='bv', name='bv_tx', label='bv_tx')
-    treatments = [ng_tx, tv_tx, ct_tx, bv_tx]
+    treatments = [ng_tx, ct_tx, tv_tx, bv_tx]
 
     syndromic = SyndromicMgmt(
         end=synd_end,
         p_treat=0.8,
-        diseases=diseases,
+        diseases=[ng, ct, tv, bv],
         eligibility=seeking_care_discharge,
         treatments=treatments,
     )
@@ -147,7 +172,7 @@ def make_testing(diseases, scenario='soc', end=2040):
         panel = Panel(
             start=intv_year,
             eligibility=seeking_care_discharge,
-            diseases=diseases,
+            diseases=[ng, ct, tv],
             treatments=treatments,
         )
 

@@ -5,7 +5,7 @@ Used for evaluation of etiological tests compared to syndromic management.
 """
 
 # %% Imports and settings
-# import sciris as sc
+import sciris as sc
 import numpy as np
 import starsim as ss
 import stisim as sti
@@ -13,25 +13,25 @@ import pandas as pd
 import pylab as pl
 
 from hiv_model import make_hiv, make_hiv_intvs
-from analyzers import overtreatment_stats
 from interventions import make_testing
 
+
 def make_stis():
-    gon = sti.Gonorrhea(
+    ng = sti.Gonorrhea(
         beta_m2f=0.055,
         beta_f2m=0.03,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
-    chlamydia = sti.Chlamydia(
+    ct = sti.Chlamydia(
         beta_m2f=0.03,
         beta_f2m=0.015,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=0.8
     )
-    trich = sti.Trichomoniasis(
+    tv = sti.Trichomoniasis(
         beta_m2f=0.012,
         beta_f2m=0.006,
         beta_m2c=0,
@@ -49,13 +49,13 @@ def make_stis():
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
 
-    return [gon, chlamydia, trich, bv]
+    return ng, ct, tv, bv
 
 
 def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
-    if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
+    if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
     if dt is None: dt = [1/12, 1][debug]
 
     ####################################################################################################################
@@ -87,15 +87,16 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=203
     ####################################################################################################################
     # Diseases
     ####################################################################################################################
-    stis = make_stis()
+    ng, ct, tv, bv = make_stis()
+    stis = [ng, ct, tv, bv]
     hiv = make_hiv()
     diseases = stis + [hiv]
 
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
-    intvs = make_testing(stis, scenario=scenario, end=end) + make_hiv_intvs()
-    analyzers = [overtreatment_stats]  #, coinfection_stats]
+    intvs = make_testing(ng, ct, tv, bv, scenario=scenario, end=end) + make_hiv_intvs()
+    analyzers = []  #, overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
         dt=dt,
@@ -112,6 +113,9 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=203
         verbose=verbose,
     )
 
+    # Store scenario for grouping
+    sim.scenario = scenario
+
     return sim
 
 
@@ -126,63 +130,61 @@ if __name__ == '__main__':
     sim.plot('ng')
     pl.show()
 
-    import sciris as sc
-    si = sc.findfirst(sim.results.yearvec, 2020)
-    ei = sc.findfirst(sim.results.yearvec, 2021)
-    (sim.results.syndromicmgmt.ng_only[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
-
-    (sim.results.syndromicmgmt.ct_only[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
-
-    (sim.results.syndromicmgmt.tv_only[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
-
-    (sim.results.syndromicmgmt.bv_only[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
-
-    # Number with two infections
-    (sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.tv_bv[si:ei].sum())
-
-    # Number with three infections
-    (sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum())
-
-    # Number new symptomatic
-    (sim.results.ng.new_symptomatic[si:ei].sum()+
-    sim.results.ct.new_symptomatic[si:ei].sum()+
-    sim.results.tv.new_symptomatic[si:ei].sum()+
-    sim.results.bv.new_symptomatic[si:ei].sum())
-
-
+    # import sciris as sc
+    # si = sc.findfirst(sim.results.yearvec, 2020)
+    # ei = sc.findfirst(sim.results.yearvec, 2021)
+    # (sim.results.syndromicmgmt.ng_only[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    #
+    # (sim.results.syndromicmgmt.ct_only[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    #
+    # (sim.results.syndromicmgmt.tv_only[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    #
+    # (sim.results.syndromicmgmt.bv_only[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    #
+    # # Number with two infections
+    # (sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.tv_bv[si:ei].sum())
+    #
+    # # Number with three infections
+    # (sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
+    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum())
+    #
+    # # Number new symptomatic
+    # (sim.results.ng.new_symptomatic[si:ei].sum()+
+    # sim.results.ct.new_symptomatic[si:ei].sum()+
+    # sim.results.tv.new_symptomatic[si:ei].sum()+
+    # sim.results.bv.new_symptomatic[si:ei].sum())

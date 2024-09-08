@@ -4,6 +4,7 @@ Analyzers for the discharging STI model
 
 # %% Imports and settings
 import starsim as ss
+import stisim as sti
 
 
 class overtreatment_stats(ss.Analyzer):
@@ -20,11 +21,10 @@ class overtreatment_stats(ss.Analyzer):
     def init_results(self):
         npts = self.sim.npts
         self.results += [
-            ss.Result(self.name, 'n_treated', npts, dtype=int, scale=False, label='Total treated'),
-            ss.Result(self.name, 'ng', npts, dtype=int, scale=True, label='NG'),
-            ss.Result(self.name, 'ct', npts, dtype=int, scale=True, label='CT'),
-            ss.Result(self.name, 'tv', npts, dtype=int, scale=True, label='TV'),
-            ss.Result(self.name, 'bv', npts, dtype=int, scale=True, label='BV'),
+            ss.Result(self.name, 'new_ng_care_seekers', npts, dtype=int, scale=True, label='NG'),
+            ss.Result(self.name, 'new_ct_care_seekers', npts, dtype=int, scale=True, label='CT'),
+            ss.Result(self.name, 'new_tv_care_seekers', npts, dtype=int, scale=True, label='TV'),
+            ss.Result(self.name, 'new_bv_care_seekers', npts, dtype=int, scale=True, label='BV'),
         ]
 
     def init_post(self):
@@ -35,7 +35,7 @@ class overtreatment_stats(ss.Analyzer):
         ppl = sim.people
         care = (ppl.ng.ti_seeks_care == sim.ti) | (ppl.ct.ti_seeks_care == sim.ti) | (ppl.tv.ti_seeks_care == sim.ti) | (ppl.bv.ti_seeks_care == sim.ti)
         for k in ['ng', 'ct', 'tv', 'bv']:
-            self.results[k][sim.ti] = len((care & ~ppl[k].infected).uids)
+            self.results[f'new_{k}_care_seekers'][sim.ti] = len((care & ~ppl[k].infected).uids)
         return
 
 
