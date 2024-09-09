@@ -78,22 +78,23 @@ class Panel(sti.STITest):
         super().__init__(years=years, start=start, end=end, eligibility=eligibility, product=product, name=name, label=label, **kwargs)
         self.default_pars(
             sens=dict(
-                ng=ss.bernoulli(0.9),
-                ct=ss.bernoulli(0.9),
-                tv=ss.bernoulli(0.9),
-            ),
-            spec=dict(
                 ng=ss.bernoulli(0.95),
                 ct=ss.bernoulli(0.95),
                 tv=ss.bernoulli(0.95),
             ),
+            spec=dict(
+                ng=ss.bernoulli(0.9),
+                ct=ss.bernoulli(0.9),
+                tv=ss.bernoulli(0.9),
+            ),
+            dt_scale=False,
         )
         self.update_pars(pars, **kwargs)
 
         # Store treatments and diseases
         self.treatments = treatments
         self.diseases = diseases
-        self.disease_treatment_map = {t.disease:t for t in self.treatments}
+        self.disease_treatment_map = {t.disease: t for t in self.treatments}
 
         return
 
@@ -117,11 +118,16 @@ class Panel(sti.STITest):
                     sens = self.pars.sens[disease.name]
                     spec = self.pars.spec[disease.name]
 
-                    true_pos, false_pos = sens.split(inf)
-                    true_neg, false_neg = spec.split(sus)
+                    true_pos, false_neg = sens.split(inf)
+                    true_neg, false_pos = spec.split(sus)
 
                     tx = self.disease_treatment_map[disease.name]
-                    tx.eligibility = true_pos | false_neg
+                    tx.eligibility = true_pos | false_pos
+                    nothing_detected = uids.remove(true_pos | false_pos)
+
+            # Give BV treatment to anyone where nothing was detected
+            # Question, should this be for women only? Retain symptomatic care for men. Reduce symptoms for BV for men
+            self.sim.interventions.bv_tx.eligibility = nothing_detected & self.sim.people.female
 
             # Update results
             self.update_results()
@@ -136,9 +142,9 @@ def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
     intv_year = 2000
 
     if scenario == 'soc':
-        synd_end = intv_year
-    else:
         synd_end = end
+    else:
+        synd_end = intv_year
 
     # Testing interventions
     def seeking_care_discharge(sim):
