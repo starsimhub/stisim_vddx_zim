@@ -170,6 +170,9 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
         resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
+        if dname == 'ng':
+            data = disease_data[dname]
+            ax.scatter(data.year, data['ng.adult_prevalence'], label='Data', color='k')
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -273,7 +276,7 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
         ]
         labels = ["Treatment success", "Treatment failure", "Overtreatment"]
         ax.stackplot(x, *Y, baseline='zero', labels=labels)
-        ax.set_title(disease.upper() + ' treatment outcomes')
+        ax.set_title('Care seekers treated for ' + disease.upper())
         ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)

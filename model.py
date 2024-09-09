@@ -19,33 +19,33 @@ from analyzers import total_symptomatic
 
 def make_stis():
     ng = sti.Gonorrhea(
-        beta_m2f=0.055,
-        beta_f2m=0.03,
+        beta_m2f=0.07,
+        beta_f2m=0.035,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.03,
-        beta_f2m=0.015,
+        beta_m2f=0.028,
+        beta_f2m=0.014,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=0.8
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.012,
-        beta_f2m=0.006,
+        beta_m2f=0.022,
+        beta_f2m=0.011,
         beta_m2c=0,
         p_clear=[
-            ss.bernoulli(p=0.2),
+            ss.bernoulli(p=0.4),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
         ],
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
         rel_init_prev=2
     )
     bv = sti.DischargingSTI(
-        beta_m2f=0.2,
-        beta_f2m=0.1,
+        beta_m2f=0.04,
+        beta_f2m=0.02,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     seed = 1
     do_save = True
 
-    if False:
+    if True:
         sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)

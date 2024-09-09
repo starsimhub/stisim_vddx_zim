@@ -49,20 +49,20 @@ if __name__ == '__main__':
     n_scen_runs = [1, 1][debug]  # Number of seeds per scenarios
     scenarios = ['soc', 'panel']
 
-    if True:
+    if False:
         # Run analyses
         sims, df = run_analyses(scenarios, parallel=False, end=2010)
         sc.saveobj('results/scens.obj', df)
 
     df = sc.loadobj('results/scens.obj')
-    fig, axes = pl.subplots(2, 2, figsize=(15, 10))
+    fig, axes = pl.subplots(1, 3, figsize=(15, 7))
     axes = axes.ravel()
     intv_year = 2000
 
-    for pn, dis in enumerate(['ng', 'ct', 'tv', 'bv']):
+    for pn, tx in enumerate(['ng_tx', 'ct_tx', 'metronidazole']):
         ax = axes[pn]
         # sns.lineplot(df, x=df.index, y=dis+".new_infections", hue="scenario", ax=ax)
-        sns.lineplot(df, x=df.index, y=f"{dis}_tx.new_treated", hue="scenario", ax=ax)
+        sns.lineplot(df, x=df.index, y=f"{tx}.new_treated_unnecessary", hue="scenario", ax=ax)
     pl.show()
 
 
