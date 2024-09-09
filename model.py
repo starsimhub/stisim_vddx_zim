@@ -10,10 +10,11 @@ import numpy as np
 import starsim as ss
 import stisim as sti
 import pandas as pd
-import pylab as pl
 
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
+from utils import unneeded_results
+from analyzers import total_symptomatic
 
 
 def make_stis():
@@ -96,7 +97,7 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=203
     # Interventions and analyzers
     ####################################################################################################################
     intvs = make_testing(ng, ct, tv, bv, scenario=scenario, end=end) + make_hiv_intvs()
-    analyzers = []  #, overtreatment_stats, coinfection_stats]
+    analyzers = [total_symptomatic]  #, overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
         dt=dt,
@@ -116,8 +117,6 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1990, end=203
     # Store scenario for grouping
     sim.scenario = scenario
 
-    sdf = sti.finalize_results(sim, modules_to_drop=modules_to_drop)
-
     return sim
 
 
@@ -126,11 +125,22 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
+    do_save = True
 
-    sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
-    sim.run(verbose=0.1)
-    sim.plot('ng')
-    pl.show()
+    if False:
+        sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
+        sim.run(verbose=0.1)
+        df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
+        if do_save: sc.saveobj('results/sim.df', df)
+
+    # Process and plot
+    from plot_sims import plot_sti_sims, plot_sti_tx
+    df = sc.loadobj('results/sim.df')
+    plot_sti_sims(df, start_year=2000, which='single')
+    plot_sti_tx(df, start_year=2000)
+
+    # sim.plot('ng')
+    # pl.show()
 
     # import sciris as sc
     # si = sc.findfirst(sim.results.yearvec, 2020)

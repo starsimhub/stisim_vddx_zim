@@ -5,7 +5,7 @@ Analyzers for the discharging STI model
 # %% Imports and settings
 import starsim as ss
 import stisim as sti
-
+from utils import count
 
 class overtreatment_stats(ss.Analyzer):
     def __init__(self, *args, **kwargs):
@@ -105,3 +105,28 @@ class coinfection_stats(ss.Analyzer):
         return
 
 
+class total_symptomatic(ss.Analyzer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = 'total_symptomatic'
+        return
+
+    def init_pre(self, sim):
+        super().init_pre(sim)
+        self.init_results()
+        return
+
+    def init_results(self):
+        npts = self.sim.npts
+        self.results += [
+            ss.Result(self.name, 'new_symptoms', npts, dtype=int, scale=True),
+        ]
+        return
+
+    def apply(self, sim):
+        ppl = sim.people
+        new_symp = ss.uids()
+        for disease in ['ng', 'ct', 'tv', 'bv']:
+            new_symp = new_symp | (ppl[disease].ti_symptomatic == sim.ti).uids
+
+        self.results['new_symptoms'][sim.ti] = len(new_symp)

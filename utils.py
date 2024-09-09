@@ -17,3 +17,5 @@ unneeded_results = [
     'fsw_testing', 'other_testing', 'low_cd4_testing', 'art', 'vmmc', 'hivdx'
 ]
 
+
+def count(arr): return np.count_nonzero(arr)
