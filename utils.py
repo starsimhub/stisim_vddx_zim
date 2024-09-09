@@ -17,17 +17,3 @@ unneeded_results = [
     'fsw_testing', 'other_testing', 'low_cd4_testing', 'art', 'vmmc', 'hivdx'
 ]
 
-
-def process_results(sim):
-    for key in unneeded_results:
-        if key in sim.results.keys(): del sim.results[key]
-
-    df = sim.export_df()
-    df['year'] = np.floor(np.round(df.index, 1)).astype(int)
-    df['seed'] = sim.pars.rand_seed
-    df['scenario'] = sim.scenario
-
-    ymean = df.groupby(by=['scenario', 'seed', 'year'])[mean_results].mean()
-    ysums = df.groupby(by=['scenario', 'seed', 'year'])[sum_results].sum()
-
-    return df
