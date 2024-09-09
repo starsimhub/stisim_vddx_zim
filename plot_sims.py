@@ -18,7 +18,6 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     hiv_data = pd.read_csv(f'data/{location}_hiv_data.csv')
     hiv_data = hiv_data.loc[(hiv_data.year >= start_year) & (hiv_data.year <= end_year)]
 
-    df['year'] = np.floor(np.round(df.index, 1)).astype(int)
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
 
     # HIV infections
@@ -30,8 +29,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
     line, = ax.plot(x[:-1], y[:-1], label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
+        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
         ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV infections')
     ax.set_ylim(bottom=0)
@@ -46,8 +45,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
     line, = ax.plot(x[:-1], y[:-1], label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].sum()[(resname, f"{percentile_pair[1]:.0%}")]
+        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
         ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV-related deaths')
     ax.set_ylim(bottom=0)
@@ -60,11 +59,11 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     resnames = {'Total': 'hiv.n_infected', 'Dx': 'hiv.n_diagnosed', 'Treated': 'hiv.n_on_art'}
     for rlabel, rname in resnames.items():
         x = np.unique(dfplot['year'])
-        y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
+        y = dfplot[(rname, '50%')]
         line, = ax.plot(x[:-1], y[:-1], label=rlabel)
         for idx, percentile_pair in enumerate(percentile_pairs):
-            yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
-            yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
+            yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
+            yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
             ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('PLHIV')
     ax.legend(frameon=False)
@@ -80,8 +79,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     y = dfplot.groupby(by='year')[resname].mean()[(resname, '50%')]
     line, = ax.plot(x, y * 100, label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[resname].mean()[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[resname].mean()[(resname, f"{percentile_pair[1]:.0%}")]
+        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
         ax.fill_between(x, yl * 100, yu * 100, alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV prevalence (%)')
     ax.legend(frameon=False)
@@ -117,7 +116,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     pn = 0
     def get_y(df, which, rname):
         if which == 'single': y = df[rname]
-        elif which == 'multi': y = dfplot[rname][(rname, '50%')]
+        elif which == 'multi': y = dfplot[(rname, '50%')]
         return y
 
     # Incidence
@@ -294,30 +293,30 @@ def print_results(df):
     dfg = df.groupby(by='year')
 
     output = ''
-    r1 = (dfg['ng.new_symptomatic'].sum()[('ng.new_symptomatic', metric)][year] +
-          dfg['ct.new_symptomatic'].sum()[('ct.new_symptomatic', metric)][year] +
-          dfg['tv.new_symptomatic'].sum()[('tv.new_symptomatic', metric)][year] +
-          dfg['vd.new_symptomatic'].sum()[('vd.new_symptomatic', metric)][year] )
-    r2 = dfg['syndromicmgmt.care_seekers'].sum()[('syndromicmgmt.care_seekers', metric)][year]
+    r1 = (dfg[('ng.new_symptomatic', metric)][year] +
+          dfg[('ct.new_symptomatic', metric)][year] +
+          dfg[('tv.new_symptomatic', metric)][year] +
+          dfg[('vd.new_symptomatic', metric)][year] )
+    r2 = dfg[('syndromicmgmt.care_seekers', metric)][year]
     output += f'Total newly symptomatic: {int(r1)}\n'
     output += f'Total seeking care: {int(r2)}\n'
 
-    r11 = (dfg['syndromicmgmt.ng_only'].sum()[('syndromicmgmt.ng_only', metric)][year])
-    r12 = (dfg['syndromicmgmt.ct_only'].sum()[('syndromicmgmt.ct_only', metric)][year])
-    r13 = (dfg['syndromicmgmt.tv_only'].sum()[('syndromicmgmt.tv_only', metric)][year])
-    r14 = (dfg['syndromicmgmt.vd_only'].sum()[('syndromicmgmt.vd_only', metric)][year])
+    r11 = (dfg[('syndromicmgmt.ng_only', metric)][year])
+    r12 = (dfg[('syndromicmgmt.ct_only', metric)][year])
+    r13 = (dfg[('syndromicmgmt.tv_only', metric)][year])
+    r14 = (dfg[('syndromicmgmt.vd_only', metric)][year])
     output += f'NG only: {int(r11)}\n'
     output += f'CT only: {int(r12)}\n'
     output += f'TV only: {int(r13)}\n'
     output += f'VD only: {int(r14)}\n'
 
-    ng1 = (dfg['syndromicmgmt.ng_ct'].sum()[('syndromicmgmt.ng_ct', metric)][year] +
-           dfg['syndromicmgmt.ng_tv'].sum()[('syndromicmgmt.ng_tv', metric)][year] +
-           dfg['syndromicmgmt.ng_vd'].sum()[('syndromicmgmt.ng_vd', metric)][year] )
-    ng2 = (dfg['syndromicmgmt.ng_ct_tv'].sum()[('syndromicmgmt.ng_ct_tv', metric)][year] +
-           dfg['syndromicmgmt.ng_ct_vd'].sum()[('syndromicmgmt.ng_ct_vd', metric)][year] +
-           dfg['syndromicmgmt.ng_tv_vd'].sum()[('syndromicmgmt.ng_tv_vd', metric)][year] )
-    sti4 = dfg['syndromicmgmt.ng_ct_tv_vd'].sum()[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
+    ng1 = (dfg[('syndromicmgmt.ng_ct', metric)][year] +
+           dfg[('syndromicmgmt.ng_tv', metric)][year] +
+           dfg[('syndromicmgmt.ng_vd', metric)][year] )
+    ng2 = (dfg[('syndromicmgmt.ng_ct_tv', metric)][year] +
+           dfg[('syndromicmgmt.ng_ct_vd', metric)][year] +
+           dfg[('syndromicmgmt.ng_tv_vd', metric)][year] )
+    sti4 = dfg[('syndromicmgmt.ng_ct_tv_vd', metric)][year]
 
     output += f'NG+1: {int(ng1)}\n'
     output += f'NG+2: {int(ng2)}\n'
@@ -413,8 +412,8 @@ def plot_tx(df, start_year=2000, percentile_pairs=None, title='tx_plots'):
 
 if __name__ == '__main__':
 
-    plot_single = True
-    plot_multi = False
+    plot_single = False
+    plot_multi = True
 
     if plot_multi:
         df_stats = sc.loadobj('results/multi_res_stats.df')
@@ -422,13 +421,12 @@ if __name__ == '__main__':
         plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
         plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, which='multi')
 
-        # Coinfection stats
-        df_stats['year'] = np.floor(np.round(df_stats.index, 1)).astype(int)
-        dfplot = df_stats.iloc[(df_stats.index >= 2000) & (df_stats.index <= 2025)]
-        print_results(dfplot)
+        # # Coinfection stats
+        # dfplot = df_stats.iloc[(df_stats.index >= 2000) & (df_stats.index <= 2025)]
+        # print_results(dfplot)
 
-        # Treatment results
-        plot_tx(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
+        # # Treatment results
+        # plot_tx(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
 
     if plot_single:
         df = sc.loadobj('results/sim.df')
