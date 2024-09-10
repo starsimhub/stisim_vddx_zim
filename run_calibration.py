@@ -2,6 +2,16 @@
 Test calibration
 """
 
+# Additions to handle numpy multithreading
+import os
+
+os.environ.update(
+    OMP_NUM_THREADS='1',
+    OPENBLAS_NUM_THREADS='1',
+    NUMEXPR_NUM_THREADS='1',
+    MKL_NUM_THREADS='1',
+)
+
 #%% Imports and settings
 import starsim as ss
 import sciris as sc
@@ -11,17 +21,19 @@ import pylab as pl
 import pandas as pd
 from model import make_sim
 
-do_plot = 1
-do_save = 0
-n_agents = 2e3
+
+debug = False  # If True, this will do smaller runs that can be run locally for debugging
+do_save = True
+
+# Run settings for calibration (dependent on debug)
+n_trials = [5000, 10][debug]  # How many trials to run for calibration
+n_workers = [40, 1][debug]  # How many cores to use
+storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 
 
-#%% Define the tests
+def run_calibration():
 
-
-def test_calibration():
-
-    sc.heading('Testing calibration')
+    sc.heading(f'Running calibration with ')
 
     # Define the calibration parameters
     calib_pars = dict(
@@ -61,9 +73,8 @@ if __name__ == '__main__':
 
     T = sc.tic()
 
-    sim, calib = test_calibration()
+    sim, calib = run_calibration()
     sc.saveobj('results/calib.obj', calib)
-
 
     sc.toc(T)
     print('Done.')
