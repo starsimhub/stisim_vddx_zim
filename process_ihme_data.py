@@ -20,13 +20,13 @@ if __name__ == '__main__':
 
     load_cs_data = True
 
-    value_vars = [str(i) for i in range(2022, 2051)]
+    value_vars = [str(i) for i in range(2000, 2051)]
 
-    disease = 'trichomoniasis'
+    disease = 'tv'
     disease_mapping = {
-        'chlamydia': '395_chlamydial_infection.csv',
-        'gonorrhea': '396_gonococcal_infection.csv',
-        'trichomoniasis': '397_trichomoniasis.csv',
+        'ct': '395_chlamydial_infection.csv',
+        'ng': '396_gonococcal_infection.csv',
+        'tv': '397_trichomoniasis.csv',
     }
 
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
             'Prevalence': disease+'.n_infected',
         }
         dalycols = ['DALYs (Disability-Adjusted Life Years)', 'YLDs (Years Lived with Disability)']
-        if disease != 'trichomoniasis':
+        if disease != 'tv':
             dalycols += ['YLLs (Years of Life Lost)']
 
         if save_totals:

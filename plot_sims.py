@@ -100,9 +100,9 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     axes = axes.ravel()
     if which == 'multi': alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
-    ng_data = pd.read_csv(f'data/{location}_gonorrhea_data.csv')
-    ct_data = pd.read_csv(f'data/{location}_chlamydia_data.csv')
-    tv_data = pd.read_csv(f'data/{location}_trichomoniasis_data.csv')
+    ng_data = pd.read_csv(f'data/{location}_ng_data.csv')
+    ct_data = pd.read_csv(f'data/{location}_ct_data.csv')
+    tv_data = pd.read_csv(f'data/{location}_tv_data.csv')
     ng_data = ng_data.loc[(ng_data.year >= start_year) & (ng_data.year <= end_year)]
     ct_data = ct_data.loc[(ct_data.year >= start_year) & (ct_data.year <= end_year)]
     tv_data = tv_data.loc[(tv_data.year >= start_year) & (tv_data.year <= end_year)]
@@ -169,9 +169,9 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
         resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
-        if dname == 'ng':
-            data = disease_data[dname]
-            ax.scatter(data.year, 100*data['ng.adult_prevalence'], label='Data', color='k')
+        # if dname == 'ng':
+        #     data = disease_data[dname]
+        #     ax.scatter(data.year, 100*data['ng.adult_prevalence'], label='Data', color='k')
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
