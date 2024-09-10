@@ -25,8 +25,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     ax = axes[pn]
     resname = 'hiv.new_infections'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
+    x = dfplot.index
+    y = dfplot[(resname, '50%')]
     line, = ax.plot(x[:-1], y[:-1], label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
         yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
@@ -41,8 +41,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     ax = axes[pn]
     resname = 'hiv.new_deaths'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].sum()[(resname, '50%')]
+    x = dfplot.index
+    y = dfplot[(resname, '50%')]
     line, = ax.plot(x[:-1], y[:-1], label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
         yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
@@ -58,7 +58,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     ax.scatter(hiv_data.year, hiv_data['hiv.n_infected'], color='k')  # label='UNAIDS',
     resnames = {'Total': 'hiv.n_infected', 'Dx': 'hiv.n_diagnosed', 'Treated': 'hiv.n_on_art'}
     for rlabel, rname in resnames.items():
-        x = np.unique(dfplot['year'])
+        x = dfplot.index
         y = dfplot[(rname, '50%')]
         line, = ax.plot(x[:-1], y[:-1], label=rlabel)
         for idx, percentile_pair in enumerate(percentile_pairs):
@@ -75,8 +75,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     ax = axes[pn]
     resname = 'hiv.prevalence'
     ax.scatter(hiv_data.year, hiv_data[resname] * 100, label='Data', color='k')
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[resname].mean()[(resname, '50%')]
+    x = dfplot.index
+    y = dfplot[(resname, '50%')]
     line, = ax.plot(x, y * 100, label='Total')
     for idx, percentile_pair in enumerate(percentile_pairs):
         yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
@@ -135,7 +135,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
                 for idx, percentile_pair in enumerate(percentile_pairs):
                     yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
                     yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
-                    ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+                    ax.fill_between(x, yl, yu, alpha=alphas[idx], facecolor=line.get_color())
 
         ax.set_title(dlabel+' incidence')
         if pn == 2: ax.legend(frameon=False, prop={'size': 20})
@@ -159,7 +159,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
                 for idx, percentile_pair in enumerate(percentile_pairs):
                     yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
                     yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
-                    ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+                    ax.fill_between(x, yl, yu, alpha=alphas[idx], facecolor=line.get_color())
         ax.set_title(dlabel+' burden')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
@@ -171,16 +171,16 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
         if dname == 'ng':
             data = disease_data[dname]
-            ax.scatter(data.year, data['ng.adult_prevalence'], label='Data', color='k')
+            ax.scatter(data.year, 100*data['ng.adult_prevalence'], label='Data', color='k')
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
-            line, = ax.plot(x, y, label=rlabel)
+            line, = ax.plot(x, y*100, label=rlabel)
             if which == 'multi':
                 for idx, percentile_pair in enumerate(percentile_pairs):
                     yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
                     yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
-                    ax.fill_between(x[:-1], yl[:-1]* 100, yu[:-1]* 100, alpha=alphas[idx], facecolor=line.get_color())
+                    ax.fill_between(x, yl* 100, yu* 100, alpha=alphas[idx], facecolor=line.get_color())
         ax.set_title(dlabel+' prevalence (%)')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
