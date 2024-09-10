@@ -57,7 +57,8 @@ def run_calibration():
         calib_pars=calib_pars,
         sim=sim,
         data=data,
-        total_trials=n_trials, n_workers=n_workers, die=True
+        total_trials=n_trials, die=True,
+        # n_workers=n_workers,
     )
 
     calib.calibrate(confirm_fit=False)
