@@ -20,21 +20,18 @@ from analyzers import total_symptomatic
 def make_stis():
     ng = sti.Gonorrhea(
         beta_m2f=0.082,
-        beta_f2m=0.041,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
         beta_m2f=0.0346,
-        beta_f2m=0.0173,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.022,
-        beta_f2m=0.011,
+        beta_m2f=0.03,
         beta_m2c=0,
         p_clear=[
             ss.bernoulli(p=0.5),

@@ -71,7 +71,9 @@ if __name__ == '__main__':
     T = sc.tic()
 
     sim, calib = run_calibration()
-    sc.saveobj('results/calib.obj', calib)
+    from utils import shrink_calib
+    cal = shrink_calib(calib, n_results=100)
+    sc.saveobj('results/calib.obj', cal)
 
     sc.toc(T)
     print('Done.')
