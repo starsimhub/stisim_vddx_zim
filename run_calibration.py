@@ -13,11 +13,8 @@ os.environ.update(
 )
 
 #%% Imports and settings
-import starsim as ss
 import sciris as sc
 import stisim as sti
-import numpy as np
-import pylab as pl
 import pandas as pd
 from model import make_sim
 
