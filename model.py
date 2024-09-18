@@ -25,7 +25,7 @@ def make_stis():
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.032,
+        beta_m2f=0.034,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
