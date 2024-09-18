@@ -133,7 +133,7 @@ class Panel(sti.SymptomaticTesting):
 
 def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
 
-    intv_year = 2000
+    intv_year = 2027
 
     if scenario == 'soc':
         synd_end = end

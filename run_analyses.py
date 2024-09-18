@@ -9,7 +9,7 @@ import seaborn as sns
 
 # From this repo
 from model import make_sim
-from utils import unneeded_results
+from utils import unneeded_results, set_font
 
 def run_analyses(scenarios, end=2040, parallel=True):
     """
@@ -51,19 +51,29 @@ if __name__ == '__main__':
 
     if False:
         # Run analyses
-        sims, df = run_analyses(scenarios, parallel=False, end=2010)
+        sims, df = run_analyses(scenarios, parallel=True, end=2040)
         sc.saveobj('results/scens.obj', df)
 
     df = sc.loadobj('results/scens.obj')
+    set_font(size=20)
     fig, axes = pl.subplots(1, 3, figsize=(15, 7))
     axes = axes.ravel()
-    intv_year = 2000
+    intv_year = 2027
+    pn = 0
+    labels = {'ng_tx': "Ceftriaxone", 'ct_tx': "Doxycycline", 'metronidazole': "Metronidazole"}
 
-    for pn, tx in enumerate(['ng_tx', 'ct_tx', 'metronidazole']):
+    for tx, txlabel in labels.items():
         ax = axes[pn]
         # sns.lineplot(df, x=df.index, y=dis+".new_infections", hue="scenario", ax=ax)
         sns.lineplot(df, x=df.index, y=f"{tx}.new_treated_unnecessary", hue="scenario", ax=ax)
-    pl.show()
+        ax.set_title(txlabel)
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+        pn += 1
+
+    fig.tight_layout()
+    pl.savefig(f"figures/sti_analyses.png", dpi=100)
+
 
 
 

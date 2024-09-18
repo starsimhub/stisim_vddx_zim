@@ -19,7 +19,7 @@ from analyzers import total_symptomatic
 
 def make_stis():
     ng = sti.Gonorrhea(
-        beta_m2f=0.082,
+        beta_m2f=0.07,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
@@ -41,8 +41,7 @@ def make_stis():
         rel_init_prev=10
     )
     bv = sti.DischargingSTI(
-        beta_m2f=0.05,
-        beta_f2m=0.025,
+        beta_m2f=0.08,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
