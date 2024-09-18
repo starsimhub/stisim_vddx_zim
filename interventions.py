@@ -148,11 +148,12 @@ def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
         bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
         return (ng_care | ct_care | tv_care | bv_care).uids
 
-    ng_tx = sti.GonorrheaTreatment(
-        name='ng_tx',
-        rel_treat_unsucc=0.05,
-        rel_treat_unneed=0.01,
-    )
+    # ng_tx = sti.GonorrheaTreatment(
+    #     name='ng_tx',
+    #     rel_treat_unsucc=0.05,
+    #     rel_treat_unneed=0.01,
+    # )
+    ng_tx = sti.STITreatment(disease='ng', name='ng_tx', label='ng_tx')
     ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
     metronidazole = sti.STITreatment(disease=['tv', 'bv'], name='metronidazole', label='metronidazole')
     treatments = [ng_tx, ct_tx, metronidazole]
