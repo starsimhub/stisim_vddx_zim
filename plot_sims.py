@@ -126,7 +126,9 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         data = disease_data[dname]
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
-        resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic', 'Care seekers': dname+'.new_care_seekers'}
+        resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
+        if dname == 'bv':
+            resnames = {'Total': dname+'.female_new_infections', 'Symptomatic': dname+'.female_new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -151,6 +153,8 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
         resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic'}
+        if dname == 'bv':
+            resnames = {'Total': dname+'.female_n_infected', 'Symptomatic': dname+'.female_n_symptomatic'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -169,6 +173,8 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
         resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
+        if dname == 'bv':
+            resnames = {'Total': dname+'.female_adult_prevalence', 'Symptomatic': dname+'.female_symp_adult_prevalence'}
         # if dname == 'ng':
         #     data = disease_data[dname]
         #     ax.scatter(data.year, 100*data['ng.adult_prevalence'], label='Data', color='k')

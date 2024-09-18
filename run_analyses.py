@@ -49,7 +49,7 @@ if __name__ == '__main__':
     n_scen_runs = [1, 1][debug]  # Number of seeds per scenarios
     scenarios = ['soc', 'panel']
 
-    if False:
+    if True:
         # Run analyses
         sims, df = run_analyses(scenarios, parallel=True, end=2040)
         sc.saveobj('results/scens.obj', df)
@@ -60,7 +60,8 @@ if __name__ == '__main__':
     axes = axes.ravel()
     intv_year = 2027
     pn = 0
-    labels = {'ng_tx': "Ceftriaxone", 'ct_tx': "Doxycycline", 'metronidazole': "Metronidazole"}
+    labels = {'ng': "Ceftriaxone", 'ct_tx': "Doxycycline", 'metronidazole': "Metronidazole"}
+    # labels = {'ng_tx': "Ceftriaxone", 'ct_tx': "Doxycycline", 'metronidazole': "Metronidazole"}
 
     for tx, txlabel in labels.items():
         ax = axes[pn]
