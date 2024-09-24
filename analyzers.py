@@ -1,6 +1,7 @@
 """
 Analyzers for the discharging STI model
 """
+import numpy as np
 
 # %% Imports and settings
 import starsim as ss
@@ -119,14 +120,34 @@ class total_symptomatic(ss.Analyzer):
     def init_results(self):
         npts = self.sim.npts
         self.results += [
-            ss.Result(self.name, 'new_symptoms', npts, dtype=int, scale=True),
+            ss.Result(self.name, 'new_symptoms', npts, dtype=int, scale=True, label='Symptomatic incidence'),
+            ss.Result(self.name, 'n_symptomatic', npts, dtype=int, scale=True, label='Number with symptoms'),
+            ss.Result(self.name, 'symp_prev', npts, dtype=float, scale=False, label='Adult symptomatic prevalence'),
+            ss.Result(self.name, 'symp_prev_f', npts, dtype=float, scale=False, label='Vaginal discharge prevalence'),
+            ss.Result(self.name, 'symp_prev_m', npts, dtype=float, scale=False, label='Urethral discharge prevalence'),
         ]
         return
 
     def apply(self, sim):
-        ppl = sim.people
-        new_symp = ss.uids()
-        for disease in ['ng', 'ct', 'tv', 'bv']:
-            new_symp = new_symp | (ppl[disease].ti_symptomatic == sim.ti).uids
+        adults = (sim.people.age >= 15) & (sim.people.age <= 65)
+        women = adults & sim.people.female
+        men = adults & sim.people.male
 
-        self.results['new_symptoms'][sim.ti] = len(new_symp)
+        new_symptoms = (sim.people.ng.ti_symptomatic == sim.ti) | (sim.people.ct.ti_symptomatic == sim.ti) | (sim.people.tv.ti_symptomatic == sim.ti) | (sim.people.bv.ti_symptomatic == sim.ti)
+        any_symptoms = sim.people.ng.symptomatic | sim.people.ct.symptomatic | sim.people.tv.symptomatic | sim.people.bv.symptomatic
+
+        n_symp = any_symptoms & adults
+        n_symp_f = any_symptoms & women
+        n_symp_m = any_symptoms & men
+
+        self.results['new_symptoms'][sim.ti] = np.count_nonzero(new_symptoms)
+        self.results['n_symptomatic'][sim.ti] = np.count_nonzero(any_symptoms)
+        self.results['symp_prev'][sim.ti] = np.count_nonzero(n_symp) / np.count_nonzero(adults)
+        self.results['symp_prev_f'][sim.ti] = np.count_nonzero(n_symp_f) / np.count_nonzero(women)
+        self.results['symp_prev_m'][sim.ti] = np.count_nonzero(n_symp_m) / np.count_nonzero(men)
+
+        for disease in ['ng', 'ct', 'tv', 'bv']:
+            if self.results['symp_prev_f'][sim.ti] < sim.results[disease]['female_symp_adult_prevalence'][sim.ti]:
+                errormsg = f'Overall symptomatic prevalence should not be lower than for disease {disease}'
+                raise ValueError(errormsg)
+

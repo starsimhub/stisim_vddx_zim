@@ -8,8 +8,14 @@ from utils import set_font
 location = 'zimbabwe'
 
 
-def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99]], title='hiv_plots'):
-    """ Create quantile plots of HIV """
+def get_y(df, which, rname):
+    if which == 'single': y = df[rname]
+    elif which == 'multi': y = df[(rname, '50%')]
+    return y
+
+
+def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='hiv_plots'):
+    """ Create quantile or individual plots of HIV epi dynamics """
     set_font(size=20)
     fig, axes = pl.subplots(2, 2, figsize=(8, 7))
     axes = axes.ravel()
@@ -26,12 +32,13 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     resname = 'hiv.new_infections'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
     x = dfplot.index
-    y = dfplot[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+    y = get_y(dfplot, which, resname)
+    line, = ax.plot(x, y, label='HIV infections')
+    if which == 'multi':
+        for idx, percentile_pair in enumerate(percentile_pairs):
+            yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+            yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
+            ax.fill_between(x, yl, yu, alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV infections')
     ax.set_ylim(bottom=0)
     sc.SIticks(ax=ax)
@@ -42,12 +49,13 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     resname = 'hiv.new_deaths'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
     x = dfplot.index
-    y = dfplot[(resname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1], label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+    y = get_y(dfplot, which, resname)
+    line, = ax.plot(x, y, label='HIV deaths')
+    if which == 'multi':
+        for idx, percentile_pair in enumerate(percentile_pairs):
+            yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+            yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
+            ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV-related deaths')
     ax.set_ylim(bottom=0)
     sc.SIticks(ax=ax)
@@ -59,12 +67,13 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     resnames = {'Total': 'hiv.n_infected', 'Dx': 'hiv.n_diagnosed', 'Treated': 'hiv.n_on_art'}
     for rlabel, rname in resnames.items():
         x = dfplot.index
-        y = dfplot[(rname, '50%')]
-        line, = ax.plot(x[:-1], y[:-1], label=rlabel)
-        for idx, percentile_pair in enumerate(percentile_pairs):
-            yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
-            yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
-            ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
+        y = get_y(dfplot, which, rname)
+        line, = ax.plot(x, y, label=rlabel)
+        if which == 'multi':
+            for idx, percentile_pair in enumerate(percentile_pairs):
+                yl = dfplot[(rname, f"{percentile_pair[0]:.0%}")]
+                yu = dfplot[(rname, f"{percentile_pair[1]:.0%}")]
+                ax.fill_between(x[:-1], yl[:-1], yu[:-1], alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('PLHIV')
     ax.legend(frameon=False)
     ax.set_ylim(bottom=0)
@@ -76,25 +85,26 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, percentile_pairs=[[.1, .99
     resname = 'hiv.prevalence'
     ax.scatter(hiv_data.year, hiv_data[resname] * 100, label='Data', color='k')
     x = dfplot.index
-    y = dfplot[(resname, '50%')]
-    line, = ax.plot(x, y * 100, label='Total')
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x, yl * 100, yu * 100, alpha=alphas[idx], facecolor=line.get_color())
+    y = get_y(dfplot, which, resname)
+    line, = ax.plot(x, y*100, label='Prevalence')
+    if which == 'multi':
+        for idx, percentile_pair in enumerate(percentile_pairs):
+            yl = dfplot[(resname, f"{percentile_pair[0]:.0%}")]
+            yu = dfplot[(resname, f"{percentile_pair[1]:.0%}")]
+            ax.fill_between(x, yl * 100, yu * 100, alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV prevalence (%)')
     ax.legend(frameon=False)
     ax.set_ylim(bottom=0)
     pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + str(start_year)+".png", dpi=100)
+    sc.savefig("figures/" + title + str(start_year) + "_" + which + ".png", dpi=100)
 
     return fig
 
 
 def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots'):
-    """ Create quantile plots """
+    """ Create quantile or individual sim plots of STIs """
     set_font(size=30)
     fig, axes = pl.subplots(3, 4, figsize=(25, 12))
     axes = axes.ravel()
@@ -114,10 +124,6 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     disease_data = {'ng': ng_data, 'ct': ct_data, 'tv': tv_data, 'bv': None}
 
     pn = 0
-    def get_y(df, which, rname):
-        if which == 'single': y = df[rname]
-        elif which == 'multi': y = dfplot[(rname, '50%')]
-        return y
 
     # Incidence
     for dname, dlabel in disease_map.items():
@@ -128,7 +134,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
             ax.scatter(data.year, data[resname], label='Data', color='k')
         resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
         if dname == 'bv':
-            resnames = {'Total': dname+'.female_new_infections', 'Symptomatic': dname+'.female_new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
+            resnames = {'Total': dname+'.new_female_infections', 'Symptomatic': dname+'.new_female_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -154,7 +160,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
             ax.scatter(data.year, data[resname], label='Data', color='k')
         resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic'}
         if dname == 'bv':
-            resnames = {'Total': dname+'.female_n_infected', 'Symptomatic': dname+'.female_n_symptomatic'}
+            resnames = {'Total': dname+'.n_female_infected', 'Symptomatic': dname+'.n_female_symptomatic'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -200,25 +206,25 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
 def plot_sti_tx(df, start_year=2000, end_year=2020):
     set_font(size=24)
-    legend_font=16
-    fig, axes = pl.subplots(2, 4, figsize=(25, 8))
+    legend_font = 20
+    fig, axes = pl.subplots(2, 3, figsize=(20, 8))
     axes = axes.ravel()
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
 
     pn = 0
 
-    # Care seeking plot
-    ax = axes[pn]
-    x = dfplot.index
-    y1 = dfplot['total_symptomatic.new_symptoms']
-    y2 = dfplot['syndromicmgmt.new_care_seekers']
-    ax.plot(x, y1, label='Discharge incidence')
-    ax.plot(x, y2, label='Number seeking care')
-    ax.set_title('Symptomatic care')
-    ax.legend(frameon=False, prop={'size': legend_font})
-    ax.set_ylim(bottom=0)
-    sc.SIticks(ax=ax)
-    pn += 1
+    # # Care seeking plot
+    # ax = axes[pn]
+    # x = dfplot.index
+    # y1 = dfplot['total_symptomatic.new_symptoms']
+    # y2 = dfplot['syndromicmgmt.new_care_seekers']
+    # ax.plot(x, y1, label='Discharge incidence')
+    # # ax.plot(x, y2, label='Number seeking care')
+    # ax.set_title('New cases of discharge')
+    # ax.legend(frameon=False, prop={'size': legend_font})
+    # ax.set_ylim(bottom=0)
+    # sc.SIticks(ax=ax)
+    # pn += 1
 
     # Care seeker epidemiology
     ax = axes[pn]
@@ -229,8 +235,8 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
         dfplot['syndromicmgmt.new_sti3'],
         dfplot['syndromicmgmt.new_sti4'],
     ]
-    labels = ["1 STI ", "2 STIs", "3 STIs", "4 STIs"]
-    ax.stackplot(x, *Y, baseline='zero', labels=labels)
+    labels = ["1 infection", "2 infections", "3 infections", "4 infections"]
+    ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
     ax.set_title('Coinfection among care seekers')
     ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
     ax.set_ylim(bottom=0)
@@ -247,7 +253,7 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
         dfplot['syndromicmgmt.new_tx3'],
     ]
     labels = ["0", "1", "2", "3"]
-    ax.stackplot(x, *Y, baseline='zero', labels=labels)
+    ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
     ax.set_title('Treatments prescribed')
     ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
     ax.set_ylim(bottom=0)
@@ -263,7 +269,7 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
         dfplot['metronidazole.new_treated_unnecessary'],
     ]
     labels = ["Ceftriaxone", "Doxycycline", "Metronidazole"]
-    ax.stackplot(x, *Y, baseline='zero', labels=labels)
+    ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
     ax.set_title('Treatments overprescribed')
     ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
     ax.set_ylim(bottom=0)
@@ -271,18 +277,19 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
     pn += 1
 
     # Treatment stats by disease
-    for disease in ['ng', 'ct', 'tv', 'bv']:
+    for disease in ['ng', 'ct', 'tv']:  #, 'bv']:
         ax = axes[pn]
         x = dfplot.index
         Y = [
-            dfplot[disease+'.new_treated_success'],
+            dfplot[disease+'.new_treated_success_symp'],
+            dfplot[disease+'.new_treated_success_asymp'],
             dfplot[disease+'.new_treated_failure'],
             dfplot[disease+'.new_treated_unnecessary'],
         ]
-        labels = ["Treatment success", "Treatment failure", "Overtreatment"]
-        ax.stackplot(x, *Y, baseline='zero', labels=labels)
+        labels = ["Treatment success (symp)", "Treatment success (asymp)", "Treatment failure", "Overtreatment"]
+        ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
         ax.set_title('Care seekers treated for ' + disease.upper())
-        ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
+        if pn == 5: ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
         pn += 1
@@ -387,31 +394,105 @@ def print_results(df):
     return
 
 
-def plot_tx(df, start_year=2000, percentile_pairs=None, title='tx_plots'):
+def plot_ng_sim(df, start_year=2000, end_year=2025, which='single', title='ng_plots'):
+    """ Create quantile or individual sim plots of NG """
     set_font(size=20)
-    fig, axes = pl.subplots(2, 2, figsize=(8, 7))
-
+    fig, axes = pl.subplots(2, 3, figsize=(15, 8))
     axes = axes.ravel()
-    alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
+
+    ng_data = pd.read_csv(f'data/zimbabwe_ng_data.csv')
+    ng_data = ng_data.loc[(ng_data.year >= start_year) & (ng_data.year <= end_year)]
+    dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
 
     pn = 0
-    # AMR
+    dname = 'ng'
+
+    # Incidence
+    ax = axes[pn]
+    resname = 'ng.new_infections'
+    ax.scatter(ng_data.year, ng_data[resname], label='Data', color='k')
+    resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
+    for rlabel, rname in resnames.items():
+        x = dfplot.index
+        y = dfplot[rname]
+        ax.plot(x, y, label=rlabel)
+        ax.set_title('Infections')
+        ax.legend(frameon=False, prop={'size': 20})
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+    pn += 1
+
+    # Burden
+    ax = axes[pn]
+    resname = dname+'.n_infected'
+    ax.scatter(ng_data.year, ng_data[resname], label='Data', color='k')
+    resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic'}
+    for rlabel, rname in resnames.items():
+        x = dfplot.index
+        y = dfplot[rname]
+        ax.plot(x, y, label=rlabel)
+        ax.set_title('Burden')
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+    pn += 1
+
+    # Prevalence
+    ax = axes[pn]
+    resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
+    for rlabel, rname in resnames.items():
+        x = dfplot.index
+        y = dfplot[rname]
+        ax.plot(x, y*100, label=rlabel)
+        ax.set_title('Prevalence (%)')
+        ax.set_ylim(bottom=0)
+        sc.SIticks(ax=ax)
+    pn += 1
+
+    # Testing outcomes
+    ax = axes[pn]
+    x = dfplot.index
+    Y = [
+        dfplot['ng.new_true_pos'],
+        dfplot['ng.new_false_pos'],
+        dfplot['ng.new_true_neg'],
+        dfplot['ng.new_false_neg'],
+    ]
+    labels = ["True positive", "False positives", "True negatives", "False negatives"]
+    ax.stackplot(x, *Y, baseline='zero', labels=labels)
+    ax.set_title('Testing outcomes')
+    ax.legend(frameon=True, prop={'size': 14}, loc='lower left')
+    ax.set_ylim(bottom=0)
+    sc.SIticks(ax=ax)
+    pn += 1
+
+    # Treatment stats by disease
+    ax = axes[pn]
+    x = dfplot.index
+    Y = [
+        dfplot['ng.new_treated_unnecessary'],
+        dfplot['ng.new_treated_success'],
+        dfplot['ng.new_treated_failure'],
+    ]
+    labels = ["Overtreatment", "Success", "Failure"]
+    ax.stackplot(x, *Y, baseline='zero', labels=labels)
+    ax.set_title('Care seekers treated for NG')
+    ax.legend(frameon=True, prop={'size': 14}, loc='lower left')
+    ax.set_ylim(bottom=0)
+    sc.SIticks(ax=ax)
+    pn += 1
+
     ax = axes[pn]
     rname = 'ng.rel_treat'
-    x = np.unique(dfplot['year'])
-    y = dfplot.groupby(by='year')[rname].mean()[(rname, '50%')]
-    line, = ax.plot(x[:-1], y[:-1] * 100)
-    for idx, percentile_pair in enumerate(percentile_pairs):
-        yl = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[0]:.0%}")]
-        yu = dfplot.groupby(by='year')[rname].mean()[(rname, f"{percentile_pair[1]:.0%}")]
-        ax.fill_between(x[:-1], yl[:-1]* 100, yu[:-1]* 100, alpha=alphas[idx], facecolor=line.get_color())
+    x = dfplot.index
+    y = dfplot[rname]
+    ax.plot(x, y)
     ax.set_title('Susceptible to treatment (%)')
     ax.set_ylim(bottom=0)
     sc.SIticks(ax=ax)
     pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + str(start_year) + ".png", dpi=100)
+    sc.savefig("figures/" + title + str(start_year) + "_" + which + ".png", dpi=100)
 
     return fig
 
@@ -426,13 +507,6 @@ if __name__ == '__main__':
         percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
         plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
         plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, which='multi')
-
-        # # Coinfection stats
-        # dfplot = df_stats.iloc[(df_stats.index >= 2000) & (df_stats.index <= 2025)]
-        # print_results(dfplot)
-
-        # # Treatment results
-        # plot_tx(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
 
     if plot_single:
         df = sc.loadobj('results/sim.df')

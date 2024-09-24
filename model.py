@@ -17,31 +17,31 @@ from utils import unneeded_results
 from analyzers import total_symptomatic
 
 
-def make_stis():
+def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
-        beta_m2f=0.055,
+        beta_m2f=0.1,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.038,
+        beta_m2f=0.07,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.04,
+        beta_m2f=0.15,
         beta_m2c=0,
         p_clear=[
-            ss.bernoulli(p=0.2),
+            ss.bernoulli(p=0.1),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
         ],
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
         rel_init_prev=10
     )
     bv = sti.DischargingSTI(
-        beta_m2f=0.1,
+        beta_m2f=bv_beta_m2f,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
@@ -49,7 +49,7 @@ def make_stis():
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1980, end=2030, debug=False, verbose=0.1):
+def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, end=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -84,7 +84,7 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1980, end=203
     ####################################################################################################################
     # Diseases
     ####################################################################################################################
-    ng, ct, tv, bv = make_stis()
+    ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
     stis = [ng, ct, tv, bv]
     hiv = make_hiv()
     diseases = stis + [hiv]
@@ -107,11 +107,13 @@ def make_sim(scenario='soc', seed=1, n_agents=None, dt=1/12, start=1980, end=203
         demographics=[pregnancy, death],
         interventions=intvs,
         analyzers=analyzers,
+        connectors=[sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)],
         verbose=verbose,
     )
 
-    # Store scenario for grouping
+    # Store scenario and background BV rate for grouping
     sim.scenario = scenario
+    sim.bv_beta_m2f = bv_beta_m2f
 
     return sim
 
@@ -124,75 +126,56 @@ if __name__ == '__main__':
     do_save = True
 
     if True:
-        sim = make_sim(scenario='soc', seed=seed, debug=debug, end=2030)
+        sim = make_sim(scenario='soc', seed=seed, debug=debug, start=1980, end=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
-        if do_save: sc.saveobj('results/sim.df', df)
+        # if do_save: sc.saveobj('results/sim.df', df)
+        df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
 
-    # Process and plot
-    from plot_sims import plot_sti_sims, plot_sti_tx
-    df = sc.loadobj('results/sim.df')
-    plot_sti_sims(df, start_year=2000, which='single')
-    plot_sti_tx(df, start_year=2000)
+        # # Save age/sex epi results
+        # dfs = sc.autolist()
+        # for disease in ['ng', 'ct', 'tv']:
+        #     for sex in ['female', 'male']:
+        #         dd = dict()
+        #         dd['age'] = sim.diseases[disease].age_bins[:-1]
+        #         dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:,-1]
+        #         dd['symp_prevalence'] = sim.diseases[disease].age_sex_results['symp_prevalence'][sex][:,-1]
+        #         dd['disease'] = disease
+        #         dd['sex'] = sex
+        #         dfs += pd.DataFrame(dd)
+        # epi_df = pd.concat(dfs)
+        # if do_save: sc.saveobj('results/epi_df.df', epi_df)
 
-    # sim.plot('ng')
-    # pl.show()
+    # # Process and plot
+    # from plot_sims import *
+    # df = sc.loadobj('results/sim.df')
+    # plot_sti_sims(df, start_year=2000, which='single')
+    # plot_sti_tx(df, start_year=2000)
+    # plot_hiv_sims(df, start_year=2000, which='single')
+    # plot_ng_sim(df, start_year=1990)
 
-    # import sciris as sc
-    # si = sc.findfirst(sim.results.yearvec, 2020)
-    # ei = sc.findfirst(sim.results.yearvec, 2021)
-    # (sim.results.syndromicmgmt.ng_only[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    # from utils import set_font
+    # import pylab as pl
+    # import seaborn as sns
     #
-    # (sim.results.syndromicmgmt.ct_only[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    # epi_df = sc.loadobj('results/epi_df.df')
+    # set_font(size=20)
+    # fig, axes = pl.subplots(1, 3, figsize=(10, 4))
+    # axes = axes.ravel()
+    # colors = ['#ee7989', '#4682b4']
     #
-    # (sim.results.syndromicmgmt.tv_only[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
+    # for pn, disease in enumerate(['ng', 'ct', 'tv']):
+    #     ax = axes[pn]
+    #     thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
+    #     sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
+    #     ax.set_title(disease.upper())
+    #     ax.set_ylabel('')
+    #     ax.set_xlabel('')
+    #     # ax.legend_.remove()
     #
-    # (sim.results.syndromicmgmt.bv_only[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_tv_bv[si:ei].sum())
-    #
-    # # Number with two infections
-    # (sim.results.syndromicmgmt.ng_ct[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.tv_bv[si:ei].sum())
-    #
-    # # Number with three infections
-    # (sim.results.syndromicmgmt.ng_ct_tv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_ct_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ng_tv_bv[si:ei].sum()+
-    # sim.results.syndromicmgmt.ct_tv_bv[si:ei].sum())
-    #
-    # # Number new symptomatic
-    # (sim.results.ng.new_symptomatic[si:ei].sum()+
-    # sim.results.ct.new_symptomatic[si:ei].sum()+
-    # sim.results.tv.new_symptomatic[si:ei].sum()+
-    # sim.results.bv.new_symptomatic[si:ei].sum())
+    # sc.figlayout()
+    # sc.savefig("figures/epi.png", dpi=100)
+
+
+
+
