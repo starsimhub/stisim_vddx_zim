@@ -126,11 +126,11 @@ if __name__ == '__main__':
     do_save = True
 
     if True:
-        sim = make_sim(scenario='soc', seed=seed, debug=debug, start=1980, end=2030)
+        sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, end=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
         # if do_save: sc.saveobj('results/sim.df', df)
-        df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
+        # df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
 
         # # Save age/sex epi results
         # dfs = sc.autolist()

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [1, 1][debug]  # Number of seeds per scenarios
+    n_scen_runs = [20, 1][debug]  # Number of seeds per scenarios
     scenarios = ['soc', 'panel']  #, 'panel']
 
     # Run analyses

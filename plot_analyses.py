@@ -101,20 +101,25 @@ def plot_result2(df):
         ax.set_ylabel("")
         ax.set_title(txlabel + ' - new infections')
         sc.SIticks(ax=ax)
+        if pn == 0: ax.legend(frameon=False, prop={'size': legend_font}, loc='upper left')
+        else: ax.legend_.remove()
+        ax.axvline(x=intv_year, color='k', ls='--')
         pn += 1
 
-    test_res = {'new_true_pos': ' - true positives'}
+    test_res = {'new_true_pos': ' - true positives (F)'}
     labels = {'ng': "NG", 'ct': "CT", 'tv': "TV"}  #, 'bv': 'BV'}
     # test_res = {'new_true_pos': ' - true positives', 'new_false_pos': ' - false positives', 'new_false_neg': ' - false negatives', 'new_true_neg': ' - true negatives'}
 
     for trname, trlabel in test_res.items():
         for dname, dlabel in labels.items():
             ax = axes[pn]
-            sns.lineplot(df, x=df.index, y=f"{dname}.{trname}", hue="scenario", ax=ax)
+            sns.lineplot(df, x=df.index, y=f"{dname}.{trname}_f", hue="scenario", ax=ax)
             ax.set_title(dlabel + trlabel)
             ax.set_ylim(bottom=0)
             ax.set_xlabel("")
             ax.set_ylabel("")
+            ax.axvline(x=intv_year, color='k', ls='--')
+            ax.legend_.remove()
             sc.SIticks(ax=ax)
             pn += 1
 
@@ -122,6 +127,44 @@ def plot_result2(df):
     pl.savefig(f"figures/analyses_epi.png", dpi=100)
     return
 
+
+def plot_result3(df):
+    set_font(size=20)
+    legend_font = 18
+    fig, axes = pl.subplots(1, 3, figsize=(15, 4))
+    axes = axes.ravel()
+    intv_year = 2027
+    pn = 0
+
+    labels = {'ng': "NG", 'ct': "CT", 'tv': "TV"}
+    # labels = {'ng_tx': "Ceftriaxone", 'ct_tx': "Doxycycline", 'metronidazole': "Metronidazole"}
+
+    test_res = {'new_false_pos': ' - false positives averted'}  #, 'new_infections': ' - incremental infections'}
+    labels = {'ng': "NG", 'ct': "CT", 'tv': "TV"}  #, 'bv': 'BV'}
+    bv_dict = {0.12: '15%', 0.15: '20%', 0.2: '25%'}
+    colors = ['#E2D6BF', '#B6985E', '#5F4D2B']  #sc.vectocolor(4, cmap='cividis')
+    # test_res = {'new_true_pos': ' - true positives', 'new_false_pos': ' - false positives', 'new_false_neg': ' - false negatives', 'new_true_neg': ' - true negatives'}
+
+    for trname, trlabel in test_res.items():
+        for dname, dlabel in labels.items():
+            ax = axes[pn]
+            cn = 0
+            for bv_val, bv_label in bv_dict.items():
+                df_base = df.loc[(df.scenario == 'soc') & (df.bv_beta == bv_val)]
+                df_intv = df.loc[(df.scenario == 'panel') & (df.bv_beta == bv_val)]
+                ax.plot(df_base.index, df_base[f"{dname}.{trname}"] - df_intv[f"{dname}.{trname}"], label=bv_label, color=colors[cn])
+                cn += 1
+            ax.set_title(dlabel + trlabel)
+            # ax.set_ylim(bottom=0)
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            sc.SIticks(ax=ax)
+            if pn == 2: ax.legend(frameon=False, prop={'size': legend_font}, loc='upper left')
+            pn += 1
+
+    fig.tight_layout()
+    pl.savefig(f"figures/analyses_sens.png", dpi=100)
+    return
 
 
 def plot_health(df):

@@ -102,10 +102,10 @@ class Panel(sti.SymptomaticTesting):
                 bv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
             ),
             spec=dict(
-                ng=[ss.bernoulli(0.9), ss.bernoulli(0.9)],
-                ct=[ss.bernoulli(0.9), ss.bernoulli(0.9)],
-                tv=[ss.bernoulli(0.9), ss.bernoulli(0.9)],
-                bv=[ss.bernoulli(0.9), ss.bernoulli(0.9)],
+                ng=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
+                ct=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
+                tv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
+                bv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
             ),
             dt_scale=False,
         )
