@@ -29,3 +29,9 @@ def shrink_calib(calib, n_results=100):
     cal.df = calib.df.iloc[0:n_results, ]
     return cal
 
+
+def get_y(df, which, rname):
+    if which == 'single': y = df[rname]
+    elif which == 'multi': y = df[(rname, '50%')]
+    return y
+

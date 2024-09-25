@@ -3,15 +3,9 @@ import sciris as sc
 import pylab as pl
 import numpy as np
 import pandas as pd
-from utils import set_font
+from utils import set_font, get_y
 
 location = 'zimbabwe'
-
-
-def get_y(df, which, rname):
-    if which == 'single': y = df[rname]
-    elif which == 'multi': y = df[(rname, '50%')]
-    return y
 
 
 def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='hiv_plots'):
@@ -103,7 +97,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
     return fig
 
 
-def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots'):
+def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext=None):
     """ Create quantile or individual sim plots of STIs """
     set_font(size=30)
     fig, axes = pl.subplots(3, 4, figsize=(25, 12))
@@ -199,12 +193,12 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + str(start_year) + "_" + which + ".png", dpi=100)
+    sc.savefig("figures/" + title + str(start_year) + "_" + which + fext + ".png", dpi=100)
 
     return fig
 
 
-def plot_sti_tx(df, start_year=2000, end_year=2020):
+def plot_sti_tx(df, start_year=2000, end_year=2020, fext=None):
     set_font(size=24)
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))
@@ -212,19 +206,6 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
     dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
 
     pn = 0
-
-    # # Care seeking plot
-    # ax = axes[pn]
-    # x = dfplot.index
-    # y1 = dfplot['total_symptomatic.new_symptoms']
-    # y2 = dfplot['syndromicmgmt.new_care_seekers']
-    # ax.plot(x, y1, label='Discharge incidence')
-    # # ax.plot(x, y2, label='Number seeking care')
-    # ax.set_title('New cases of discharge')
-    # ax.legend(frameon=False, prop={'size': legend_font})
-    # ax.set_ylim(bottom=0)
-    # sc.SIticks(ax=ax)
-    # pn += 1
 
     # Care seeker epidemiology
     ax = axes[pn]
@@ -295,7 +276,7 @@ def plot_sti_tx(df, start_year=2000, end_year=2020):
         pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/sti_tx.png", dpi=100)
+    sc.savefig(f"figures/sti_tx{fext}.png", dpi=100)
     return
 
 

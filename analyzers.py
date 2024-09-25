@@ -8,6 +8,7 @@ import starsim as ss
 import stisim as sti
 from utils import count
 
+
 class overtreatment_stats(ss.Analyzer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -19,22 +19,22 @@ from analyzers import total_symptomatic
 
 def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
-        beta_m2f=0.1,
+        beta_m2f=0.07,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.07,
+        beta_m2f=0.05,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.15,
+        beta_m2f=0.08,
         beta_m2c=0,
         p_clear=[
-            ss.bernoulli(p=0.1),
+            ss.bernoulli(p=0.05),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
         ],
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, end=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
-        # if do_save: sc.saveobj('results/sim.df', df)
+        if do_save: sc.saveobj('results/sim1.df', df)
         # df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
 
         # # Save age/sex epi results
@@ -146,12 +146,12 @@ if __name__ == '__main__':
         # epi_df = pd.concat(dfs)
         # if do_save: sc.saveobj('results/epi_df.df', epi_df)
 
-    # # Process and plot
-    # from plot_sims import *
-    # df = sc.loadobj('results/sim.df')
-    # plot_sti_sims(df, start_year=2000, which='single')
-    # plot_sti_tx(df, start_year=2000)
-    # plot_hiv_sims(df, start_year=2000, which='single')
+    # Process and plot
+    from plot_sims import *
+    df = sc.loadobj('results/sim1.df')
+    plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext='_alt')
+    plot_sti_tx(df, start_year=2000, fext='_alt')
+    # plot_hiv_sims(df, start_year=2000, which='single', fext='_alt')
     # plot_ng_sim(df, start_year=1990)
 
     # from utils import set_font
