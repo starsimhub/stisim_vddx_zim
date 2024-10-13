@@ -2,6 +2,7 @@
 import sciris as sc
 import pylab as pl
 import seaborn as sns
+import pandas as pd
 
 # From this repo
 from utils import set_font, get_y
@@ -183,6 +184,54 @@ def plot_result3(df):
     return
 
 
+def plot_result4(df):
+    """ Comparison of the direct model and the transmission model """
+    set_font(size=20)
+    legend_font = 18
+    fig, axes = pl.subplots(1, 2, figsize=(10, 5))
+    axes = axes.ravel()
+    pn = 0
+    bi = 20
+
+    resdict = {'new_female_symptomatic': ' - cases averted in women'}  #,'new_symptomatic': ' - incremental true positives'}  #,
+    ddict = {'ng': "NG", 'ct': "CT"}  #, 'tv': "TV"}
+    colors = sc.gridcolors(2)
+    dm = pd.read_csv('data/new_tp_zim.csv')
+    bv_val = 0.15
+
+    for rname, rlabel in resdict.items():
+        for dname, dlabel in ddict.items():
+            ax = axes[pn]
+            df_base = df[df.index.get_level_values('bv_beta') == bv_val].loc[['soc']]
+            df_intv = df[df.index.get_level_values('bv_beta') == bv_val].loc[['panel']]
+
+            # df_base = df.loc[['soc']]
+            # df_intv = df.loc[['panel']]
+            x = df_base.index.get_level_values('year')[bi:]
+            y = (df_base[(f"{dname}.{rname}", '50%')].values - df_intv[(f"{dname}.{rname}", '50%')].values)[bi:]
+            ax.plot(x, y, color=colors[0], label='Indirect impact')
+            quartiles1 = (df_base[(f"{dname}.{rname}", '10%')].values - df_intv[(f"{dname}.{rname}", '10%')].values)[bi:]
+            quartiles3 = (df_base[(f"{dname}.{rname}", '90%')].values - df_intv[(f"{dname}.{rname}", '90%')].values)[bi:]
+            ax.fill_between(x, quartiles1, quartiles3, alpha=0.3, color=colors[0])
+
+            # Add direct model
+            xdm = dm.year
+            ydm = dm[dname+'.new_true_pos']
+            ax.plot(xdm, ydm, color=colors[1], label='Direct impact')
+
+            ax.set_title(dlabel + rlabel)
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            sc.SIticks(ax=ax)
+            ax.set_ylim(bottom=0)
+            # if pn == 2: ax.legend(frameon=False, prop={'size': legend_font}, loc='upper left')
+            pn += 1
+
+    fig.tight_layout()
+    pl.savefig(f"figures/analyses_comparison.png", dpi=100)
+    return
+
+
 def plot_health(df):
 
     # Health impact
@@ -232,8 +281,9 @@ if __name__ == '__main__':
     df_stats = sc.loadobj('results/scen_stats.obj')
 
     # Plots
-    plot_result1(central_df_stats)
-    plot_result2(central_df_stats)
-    plot_result3(df_stats)
+    # plot_result1(central_df_stats)
+    # plot_result2(central_df_stats)
+    # plot_result3(df_stats)
+    plot_result4(df_stats)
 
 

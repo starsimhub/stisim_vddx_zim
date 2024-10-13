@@ -25,16 +25,16 @@ def make_stis(bv_beta_m2f=0.2):
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.05,
+        beta_m2f=0.07,
         beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.08,
+        beta_m2f=0.15,
         beta_m2c=0,
         p_clear=[
-            ss.bernoulli(p=0.05),
+            ss.bernoulli(p=0.1),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
         ],
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
@@ -49,7 +49,7 @@ def make_stis(bv_beta_m2f=0.2):
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, end=2030, debug=False, verbose=0.1):
+def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=0.1):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -92,15 +92,15 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
-    intvs = make_testing(ng, ct, tv, bv, scenario=scenario, end=end) + make_hiv_intvs()
-    analyzers = [total_symptomatic]  #, overtreatment_stats, coinfection_stats]
+    intvs = make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop) + make_hiv_intvs()
+    analyzers = [total_symptomatic()]  #, overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
         dt=dt,
         rand_seed=seed,
         total_pop=total_pop,
         start=start,
-        end=end,
+        stop=stop,
         people=ppl,
         diseases=diseases,
         networks=[sexual, maternal],
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     do_save = True
 
     if True:
-        sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, end=2030)
+        sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, stop=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
         if do_save: sc.saveobj('results/sim1.df', df)
@@ -177,5 +177,26 @@ if __name__ == '__main__':
     # sc.savefig("figures/epi.png", dpi=100)
 
 
+    set_font(size=16)
+    fig, ax = pl.subplots(1, 1, figsize=(10, 4))
+    colors = ['#ee7989', '#ee7989', '#4682b4', '#4682b4']
+    linestyles = ['--', '-', '--', '-']
+    rdict = {'symp_prev_no_hiv_f': 'HIV- F', 'symp_prev_has_hiv_f': 'HIV+ F', 'symp_prev_no_hiv_m': 'HIV- M', 'symp_prev_has_hiv_m': 'HIV+ M'}
+
+    cn = 0
+    bi = 20*12
+    for rname, rlabel in rdict.items():
+        x = sim.yearvec[bi:]
+        y = pd.Series(sim.results.total_symptomatic[rname][bi:])
+        y = y.rolling(10, min_periods=1).mean()
+        ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)
+        ax.legend()
+        ax.set_ylabel('')
+        ax.set_xlabel('')
+        ax.set_title('Prevalence of discharge (%)')
+        cn += 1
+
+    sc.figlayout()
+    sc.savefig("figures/epi_hiv.png", dpi=100)
 
 
