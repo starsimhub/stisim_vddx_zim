@@ -20,19 +20,16 @@ from analyzers import total_symptomatic
 def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
         beta_m2f=0.07,
-        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
         beta_m2f=0.07,
-        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.15,
-        beta_m2c=0,
         p_clear=[
             ss.bernoulli(p=0.1),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
@@ -42,7 +39,6 @@ def make_stis(bv_beta_m2f=0.2):
     )
     bv = sti.DischargingSTI(
         beta_m2f=bv_beta_m2f,
-        beta_m2c=0,
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
 
@@ -126,10 +122,10 @@ if __name__ == '__main__':
     do_save = True
 
     if True:
-        sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, stop=2030)
+        sim = make_sim(scenario='soc', seed=seed, debug=debug, start=1980, stop=2030)
         sim.run(verbose=0.1)
         df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
-        if do_save: sc.saveobj('results/sim1.df', df)
+        if do_save: sc.saveobj('results/sim.df', df)
         # df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
 
         # # Save age/sex epi results
@@ -186,7 +182,7 @@ if __name__ == '__main__':
     cn = 0
     bi = 20*12
     for rname, rlabel in rdict.items():
-        x = sim.yearvec[bi:]
+        x = sim.timevec[bi:]
         y = pd.Series(sim.results.total_symptomatic[rname][bi:])
         y = y.rolling(10, min_periods=1).mean()
         ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)

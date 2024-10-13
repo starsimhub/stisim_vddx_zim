@@ -147,15 +147,15 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
             rel_treat_unsucc=0.005,
             rel_treat_unneed=0.0005,
         )
-        ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
-        metronidazole = sti.STITreatment(disease=['tv', 'bv'], name='metronidazole', label='metronidazole')
+        ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
+        metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
         treatments = [ng_tx, ct_tx, metronidazole]
         disease_treatment_map = {
             'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
         }
 
         syndromic = SyndromicMgmt(
-            end=synd_end,
+            stop=synd_end,
             diseases=[ng, ct, tv, bv],
             eligibility=seeking_care_discharge,
             treatments=treatments,

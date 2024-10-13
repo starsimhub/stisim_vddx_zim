@@ -8,7 +8,7 @@ from utils import unneeded_results
 
 
 def run_sims(start=1990, seed=None, n_runs=None):
-    sims = [make_sim(start=start, seed=seed + i, verbose=0.01, end=2040) for i in range(n_runs)]
+    sims = [make_sim(start=start, seed=seed + i, verbose=0.01, stop=2040) for i in range(n_runs)]
     sims = ss.parallel(sims).sims
 
     print("Processing... ")
@@ -23,13 +23,13 @@ def run_sims(start=1990, seed=None, n_runs=None):
     return sims, df
 
 
-def run_sens_sims(start=1980, seed=None, n_runs=None, bv_range=None, end=2025):
+def run_sens_sims(start=1980, seed=None, n_runs=None, bv_range=None, stop=2025):
 
     sims = sc.autolist()
     for bv_beta_m2f in bv_range:
         for i in range(n_runs):
             print(f"Making sim: {bv_beta_m2f=}, seed={seed + i}")
-            sim = make_sim(start=start, seed=seed + i, bv_beta_m2f=bv_beta_m2f, verbose=0.01, end=end)
+            sim = make_sim(start=start, seed=seed + i, bv_beta_m2f=bv_beta_m2f, verbose=0.01, stop=stop)
             sim.label = f"BV beta {bv_beta_m2f}: {str(i)}"
             sims += sim
 
