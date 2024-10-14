@@ -192,7 +192,7 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
         }
 
         syndromic = SyndromicMgmt(
-            end=synd_end,
+            stop=synd_end,
             diseases=[ng, ct, tv, bv],
             eligibility=seeking_care_discharge,
             treatments=treatments,
