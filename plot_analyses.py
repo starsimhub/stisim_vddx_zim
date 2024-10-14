@@ -263,7 +263,7 @@ def plot_health(df):
 
 if __name__ == '__main__':
 
-    make_stats = False
+    make_stats = True
 
     # Make stats
     if make_stats:

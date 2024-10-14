@@ -49,8 +49,8 @@ def run_calibration():
         calib_pars = calib_pars,
         sim = sim,
         data = data,
-        total_trials = 2,
-        n_workers = 2,
+        total_trials = n_trials,
+        n_workers = n_workers,
         die = True,
         debug = False,
     )
