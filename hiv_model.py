@@ -63,7 +63,6 @@ def make_hiv():
     hiv = sti.HIV(
         beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
         beta_m2f=0.006,
-        beta_f2m=0.003,
         beta_m2c=0.01,
         eff_condom=0.95,
         dur_on_art=ss.lognorm_ex(25, 5),

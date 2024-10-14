@@ -14,7 +14,7 @@ os.environ.update(
 
 #%% Imports and settings
 import sciris as sc
-import starsim as ss
+import stisim as sti
 import pandas as pd
 from model import make_sim
 
@@ -45,7 +45,7 @@ def run_calibration():
     data = pd.read_csv('data/zimbabwe_calib.csv')
 
     # Make the calibration
-    calib = ss.Calibration(
+    calib = sti.Calibration(
         calib_pars = calib_pars,
         sim = sim,
         data = data,
