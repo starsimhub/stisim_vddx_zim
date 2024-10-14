@@ -19,17 +19,20 @@ from analyzers import total_symptomatic
 
 def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
-        beta_m2f=0.07,
+        beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
+        beta_m2f=0.06,
         init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
         rel_init_prev=0.2
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.07,
+        beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
+        beta_m2f=0.06,
         init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
         rel_init_prev=1.5
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.15,
+        beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
+        beta_m2f=0.1,
         p_clear=[
             ss.bernoulli(p=0.1),
             ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
@@ -38,6 +41,7 @@ def make_stis(bv_beta_m2f=0.2):
         rel_init_prev=10
     )
     bv = sti.DischargingSTI(
+        beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
         beta_m2f=bv_beta_m2f,
         init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
     )
@@ -144,7 +148,7 @@ if __name__ == '__main__':
 
     # Process and plot
     from plot_sims import *
-    df = sc.loadobj('results/sim1.df')
+    df = sc.loadobj('results/sim.df')
     plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext='_alt')
     plot_sti_tx(df, start_year=2000, fext='_alt')
     # plot_hiv_sims(df, start_year=2000, which='single', fext='_alt')

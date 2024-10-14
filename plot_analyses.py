@@ -281,9 +281,9 @@ if __name__ == '__main__':
     df_stats = sc.loadobj('results/scen_stats.obj')
 
     # Plots
-    # plot_result1(central_df_stats)
-    # plot_result2(central_df_stats)
-    # plot_result3(df_stats)
+    plot_result1(central_df_stats)
+    plot_result2(central_df_stats)
+    plot_result3(df_stats)
     plot_result4(df_stats)
 
 

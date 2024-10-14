@@ -14,7 +14,7 @@ os.environ.update(
 
 #%% Imports and settings
 import sciris as sc
-import stisim as sti
+import starsim as ss
 import pandas as pd
 from model import make_sim
 
@@ -24,27 +24,19 @@ do_save = True
 
 # Run settings for calibration (dependent on debug)
 n_trials = [1000, 10][debug]  # How many trials to run for calibration
-n_workers = [40, 1][debug]  # How many cores to use
-storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
+n_workers = [50, 1][debug]  # How many cores to use
+storage = ["mysql://hpvsim_user@localhost/stisim_db", None][debug]  # Storage for calibrations
 
 
 def run_calibration():
 
-    sc.heading(f'Running calibration with ')
+    sc.heading(f'Running calibration')
 
     # Define the calibration parameters
     calib_pars = dict(
-        diseases=dict(
-            ng=dict(
-                beta_m2f=[0.08, 0.06, 0.18],
-            ),
-            ct=dict(
-                beta_m2f=[0.04, 0.02, 0.1],
-            ),
-            tv=dict(
-                beta_m2f=[0.02, 0.005, 0.05],
-            ),
-        ),
+        beta_m2f_ng = dict(low=0.02, high=0.08, guess=0.06, path=('diseases', 'ng', 'beta_m2f')),
+        beta_m2f_ct = dict(low=0.02, high=0.08, guess=0.06, path=('diseases', 'ct', 'beta_m2f')),
+        beta_m2f_tv = dict(low=0.04, high=0.12, guess=0.06, path=('diseases', 'tv', 'beta_m2f')),
     )
 
     # Make the sim
@@ -53,14 +45,18 @@ def run_calibration():
     data = pd.read_csv('data/zimbabwe_calib.csv')
 
     # Make the calibration
-    calib = sti.Calibration(
-        calib_pars=calib_pars,
-        sim=sim,
-        data=data,
-        total_trials=n_trials, die=True,
-        # n_workers=n_workers,
+    calib = ss.Calibration(
+        calib_pars = calib_pars,
+        sim = sim,
+        data = data,
+        total_trials = 2,
+        n_workers = 2,
+        die = True,
+        debug = False,
     )
 
+    # Perform the calibration
+    sc.printcyan('\nPeforming calibration...')
     calib.calibrate(confirm_fit=False)
 
     return sim, calib
