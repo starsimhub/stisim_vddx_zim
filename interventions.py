@@ -93,8 +93,8 @@ class SyndromicMgmt(sti.SymptomaticTesting):
 
 
 class Panel(sti.SymptomaticTesting):
-    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, years=None, start=None, end=None, eligibility=None, name=None, label=None, **kwargs):
-        super().__init__(treatments=treatments, diseases=diseases, disease_treatment_map=disease_treatment_map, years=years, start=start, end=end, eligibility=eligibility, name=name, label=label, **kwargs)
+    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, years=None, start=None, stop=None, eligibility=None, name=None, label=None, **kwargs):
+        super().__init__(treatments=treatments, diseases=diseases, disease_treatment_map=disease_treatment_map, years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label, **kwargs)
         self.define_pars(
             sens=dict(
                 ng=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
