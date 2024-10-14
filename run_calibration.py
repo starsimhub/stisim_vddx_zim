@@ -57,7 +57,7 @@ def run_calibration():
 
     # Perform the calibration
     sc.printcyan('\nPeforming calibration...')
-    calib.calibrate(confirm_fit=False)
+    calib.calibrate(confirm_fit=False, load=True)
 
     return sim, calib
 
