@@ -23,8 +23,8 @@ debug = False  # If True, this will do smaller runs that can be run locally for 
 do_save = True
 
 # Run settings for calibration (dependent on debug)
-n_trials = [1000, 10][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]  # How many cores to use
+n_trials = [1, 10][debug]  # How many trials to run for calibration
+n_workers = [1, 1][debug]  # How many cores to use
 storage = ["mysql://hpvsim_user@localhost/stisim_db", None][debug]  # Storage for calibrations
 
 
@@ -53,6 +53,7 @@ def run_calibration():
         n_workers = n_workers,
         die = True,
         debug = False,
+        save_results = True
     )
 
     # Perform the calibration
