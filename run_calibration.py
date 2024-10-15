@@ -34,9 +34,9 @@ def run_calibration():
 
     # Define the calibration parameters
     calib_pars = dict(
-        beta_m2f_ng = dict(low=0.02, high=0.08, guess=0.06, path=('diseases', 'ng', 'beta_m2f')),
-        beta_m2f_ct = dict(low=0.02, high=0.08, guess=0.06, path=('diseases', 'ct', 'beta_m2f')),
-        beta_m2f_tv = dict(low=0.04, high=0.12, guess=0.06, path=('diseases', 'tv', 'beta_m2f')),
+        beta_m2f_ng = dict(low=0.055, high=0.065, guess=0.06, path=('diseases', 'ng', 'beta_m2f')),
+        beta_m2f_ct = dict(low=0.055, high=0.065, guess=0.06, path=('diseases', 'ct', 'beta_m2f')),
+        beta_m2f_tv = dict(low=0.09, high=0.11, guess=0.10, path=('diseases', 'tv', 'beta_m2f')),
     )
 
     # Make the sim

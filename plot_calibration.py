@@ -24,19 +24,19 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
 
         # Pull out model results and data
         res = calib.sim_results
-        target_data = calib.target_data[dname+'.new_infections']
+        target_data = calib.data[dname+'.new_infections']
         resname = dname+'.new_infections'
 
         year = []
         values = []
         seed = []
         for run_num, run in enumerate(res):
-            year += list(run['year'])
+            year += list(run['time'])
             values += list(run[resname])
-            seed += [run_num]*len(run['year'])
+            seed += [run_num]*len(run['time'])
 
-        modeldf = pd.DataFrame({'year': year, resname: values, 'seed': seed})
-        model_stats = modeldf.groupby(['year']).describe()
+        modeldf = pd.DataFrame({'time': year, resname: values, 'seed': seed})
+        model_stats = modeldf.groupby(['time']).describe()
         model_plot = model_stats.iloc[(model_stats.index >= start_year) & (model_stats.index <= end_year)]
 
         x = model_plot.index
