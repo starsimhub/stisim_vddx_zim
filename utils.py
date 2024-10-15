@@ -25,7 +25,7 @@ def shrink_calib(calib, n_results=100):
     cal = sc.objdict()
     plot_indices = calib.df.iloc[0:n_results, 0].values
     cal.sim_results = [calib.sim_results[i] for i in plot_indices]
-    cal.target_data = calib.target_data
+    cal.data = calib.data
     cal.df = calib.df.iloc[0:n_results, ]
     return cal
 
