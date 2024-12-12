@@ -66,7 +66,7 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     )
 
     # Make the sim
-    sim = make_sim(location='zimbabwe', n_agents=5e3)
+    sim = make_sim(scenario='soc', start=1990, stop=2030, n_agents=5e3)
     data = pd.read_csv('data/zimbabwe_hiv_data.csv')
 
     # Make the calibration
