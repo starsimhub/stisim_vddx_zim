@@ -20,7 +20,7 @@ from model import make_sim
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
 n_workers = [40, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -76,7 +76,7 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
-        die=True, reseed=False, storage=storage, save_results=True,
+        die=True, reseed=True, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
