@@ -75,7 +75,8 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
         build_fn = build_sim,
         sim=sim,
         data=data,
-        total_trials=n_trials, n_workers=n_workers, die=True, reseed=False, storage=storage,
+        total_trials=n_trials, n_workers=n_workers,
+        die=True, reseed=False, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
