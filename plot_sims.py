@@ -11,14 +11,15 @@ location = 'zimbabwe'
 def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='hiv_plots'):
     """ Create quantile or individual plots of HIV epi dynamics """
     set_font(size=20)
-    fig, axes = pl.subplots(2, 2, figsize=(8, 7))
+    fig, axes = pl.subplots(2, 3, figsize=(18, 7))
     axes = axes.ravel()
     alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
     hiv_data = pd.read_csv(f'data/{location}_hiv_data.csv')
     hiv_data = hiv_data.loc[(hiv_data.year >= start_year) & (hiv_data.year <= end_year)]
 
-    dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
+    dfplot = df.loc[(df.timevec >= start_year) & (df.timevec <= end_year)]
+    dfplot = dfplot.set_index('timevec')
 
     # HIV infections
     pn = 0
@@ -88,6 +89,17 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
             ax.fill_between(x, yl * 100, yu * 100, alpha=alphas[idx], facecolor=line.get_color())
     ax.set_title('HIV prevalence (%)')
     ax.legend(frameon=False)
+    ax.set_ylim(bottom=0)
+    pn += 1
+
+    # Population size
+    ax = axes[pn]
+    ax.scatter(hiv_data.year, hiv_data['n_alive'], color='k', label='UNAIDS')
+    y0 = dfplot['n_alive']
+    ax.plot(x, y0, label='Modeled')
+    ax.set_title('Population size')
+    ax.legend(frameon=False)
+    sc.SIticks(ax)
     ax.set_ylim(bottom=0)
     pn += 1
 

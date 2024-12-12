@@ -23,8 +23,8 @@ debug = False  # If True, this will do smaller runs that can be run locally for 
 do_save = True
 
 # Run settings for calibration (dependent on debug)
-n_trials = [1000, 10][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]  # How many cores to use
+n_trials = [1, 10][debug]  # How many trials to run for calibration
+n_workers = [1, 1][debug]  # How many cores to use
 storage = ["mysql://hpvsim_user@localhost/stisim_db", None][debug]  # Storage for calibrations
 
 
@@ -37,6 +37,7 @@ def run_calibration():
         beta_m2f_ng = dict(low=0.055, high=0.065, guess=0.06, path=('diseases', 'ng', 'beta_m2f')),
         beta_m2f_ct = dict(low=0.055, high=0.065, guess=0.06, path=('diseases', 'ct', 'beta_m2f')),
         beta_m2f_tv = dict(low=0.09, high=0.11, guess=0.10, path=('diseases', 'tv', 'beta_m2f')),
+        beta_m2c_ng = dict(low=0.09, high=0.11, guess=0.10, path=('diseases', 'tv', 'beta_m2f')),
     )
 
     # Make the sim
@@ -69,9 +70,11 @@ if __name__ == '__main__':
     T = sc.tic()
 
     sim, calib = run_calibration()
-    from utils import shrink_calib
-    cal = shrink_calib(calib, n_results=100)
-    sc.saveobj('results/calib.obj', cal)
+    # from utils import shrink_calib
+    # cal = shrink_calib(calib, n_results=100)
+    # sc.saveobj('results/calib.obj', cal)
 
     sc.toc(T)
     print('Done.')
+
+

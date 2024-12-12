@@ -13,11 +13,12 @@ def get_testing_products():
     """
     Define HIV products and testing interventions
     """
-    years = np.arange(1990, 2021)  # Years for testing
-    n_years = len(years)
-    fsw_prob = np.linspace(0, 0.75, n_years)
-    low_cd4_prob = np.linspace(0, 0.85, n_years)
-    gp_prob = np.linspace(0, 0.5, n_years)
+    scaleup_years = np.arange(1990, 2021)  # Years for testing
+    years = np.arange(1990, 2041)  # Years for simulation
+    n_years = len(scaleup_years)
+    fsw_prob = np.concatenate([np.linspace(0, 0.75, n_years), np.linspace(0.75, 0.85, len(years) - n_years)])
+    low_cd4_prob = np.concatenate([np.linspace(0, 0.85, n_years), np.linspace(0.85, 0.95, len(years) - n_years)])
+    gp_prob = np.concatenate([np.linspace(0, 0.5, n_years), np.linspace(0.5, 0.6, len(years) - n_years)])
 
     # FSW agents who haven't been diagnosed or treated yet
     def fsw_eligibility(sim):
@@ -61,13 +62,10 @@ def get_testing_products():
 def make_hiv():
     """ Make HIV arguments for sim"""
     hiv = sti.HIV(
-        beta={'structuredsexual': [1, 1], 'maternal': [1, 0.]},
-        beta_m2f=0.006,
-        beta_m2c=0.01,
+        beta_m2f=0.05,
         eff_condom=0.95,
-        dur_on_art=ss.lognorm_ex(25, 5),
         init_prev_data=pd.read_csv('data/init_prev_hiv.csv'),
-        rel_init_prev=0.6,
+        rel_init_prev=0.5,
     )
     return hiv
 
@@ -79,13 +77,15 @@ def make_hiv_intvs():
     fsw_testing, other_testing, low_cd4_testing = get_testing_products()
     art = sti.ART(coverage_data=n_art)
     vmmc = sti.VMMC(coverage_data=n_vmmc)
+    prep = sti.Prep()
 
     interventions = [
         fsw_testing,
         other_testing,
         low_cd4_testing,
         art,
-        vmmc
+        vmmc,
+        prep,
     ]
 
     return interventions

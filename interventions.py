@@ -137,13 +137,6 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
 
         ng_tx = sti.GonorrheaTreatment(
             name='ng_tx',
-            # # Ciprofloxacin
-            # rel_treat_unsucc=0.02,
-            # rel_treat_unneed=0.01,
-            # # Azythromycin
-            # rel_treat_unsucc=0.01,
-            # rel_treat_unneed=0.005,
-            # Default
             rel_treat_unsucc=0.005,
             rel_treat_unneed=0.0005,
         )
