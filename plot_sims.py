@@ -123,8 +123,8 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     ct_data = ct_data.loc[(ct_data.year >= start_year) & (ct_data.year <= end_year)]
     tv_data = tv_data.loc[(tv_data.year >= start_year) & (tv_data.year <= end_year)]
 
-    # df['year'] = np.floor(np.round(df.index, 1)).astype(int)
-    dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
+    dfplot = df.loc[(df.timevec >= start_year) & (df.timevec <= end_year)]
+    dfplot = dfplot.set_index('timevec')
 
     disease_map = {'ng': 'Gonorrhea', 'ct': 'Chlamydia', 'tv': 'Trich', 'bv': 'Other'}
     disease_data = {'ng': ng_data, 'ct': ct_data, 'tv': tv_data, 'bv': None}
@@ -139,8 +139,6 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
         resnames = {'Total': dname+'.new_infections', 'Symptomatic': dname+'.new_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
-        if dname == 'bv':
-            resnames = {'Total': dname+'.new_female_infections', 'Symptomatic': dname+'.new_female_symptomatic'}  #, 'Care seekers': dname+'.new_care_seekers'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -165,8 +163,6 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         if data is not None:
             ax.scatter(data.year, data[resname], label='Data', color='k')
         resnames = {'Total': dname+'.n_infected', 'Symptomatic': dname+'.n_symptomatic'}
-        if dname == 'bv':
-            resnames = {'Total': dname+'.n_female_infected', 'Symptomatic': dname+'.n_female_symptomatic'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -186,10 +182,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
         ax = axes[pn]
         resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
         if dname == 'bv':
-            resnames = {'Total': dname+'.female_adult_prevalence', 'Symptomatic': dname+'.female_symp_adult_prevalence'}
-        # if dname == 'ng':
-        #     data = disease_data[dname]
-        #     ax.scatter(data.year, 100*data['ng.adult_prevalence'], label='Data', color='k')
+            resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
         for rlabel, rname in resnames.items():
             x = dfplot.index
             y = get_y(dfplot, which, rname)
@@ -215,7 +208,8 @@ def plot_sti_tx(df, start_year=2000, end_year=2020, fext=None):
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))
     axes = axes.ravel()
-    dfplot = df.iloc[(df.index >= start_year) & (df.index <= end_year)]
+    dfplot = df.loc[(df.timevec >= start_year) & (df.timevec <= end_year)]
+    dfplot = dfplot.set_index('timevec')
 
     pn = 0
 

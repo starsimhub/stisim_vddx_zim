@@ -13,6 +13,7 @@ import pandas as pd
 
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
+from plot_sims import *
 from utils import unneeded_results
 from analyzers import total_symptomatic
 
@@ -42,7 +43,7 @@ def make_stis(bv_beta_m2f=0.2):
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12):
+def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -76,16 +77,22 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
     ####################################################################################################################
     # Diseases
     ####################################################################################################################
-    # ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
-    # stis = [ng, ct, tv, bv]
     hiv = make_hiv()
-    diseases = [hiv]  # + stis
+    diseases = [hiv]
+    if add_stis:
+        ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
+        stis = [ng, ct, tv, bv]
+        diseases += stis
 
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
-    # intvs = make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop) + make_hiv_intvs()
     intvs = make_hiv_intvs()
+    if add_stis:
+        intvs += make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop)
+        connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
+    else:
+        connectors = []
     # analyzers = [total_symptomatic()]  #, overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
@@ -100,7 +107,7 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
         demographics=[pregnancy, death],
         interventions=intvs,
         # analyzers=analyzers,
-        # connectors=[sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)],
+        connectors=connectors,
         verbose=verbose,
     )
 
@@ -116,22 +123,35 @@ if __name__ == '__main__':
     debug = False
     seed = 1
     do_save = True
+    do_run = True
     scenario = 'soc'
 
-    if True:
-        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2030)
+    # What to run
+    to_run = [
+        # 'hiv',
+        'stis',
+    ]
+
+    if 'hiv' in to_run:
+        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2030)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
-    # Process and plot
-    from plot_sims import *
-    df = sc.loadobj(f'results/{scenario}_sim.df')
-    plot_hiv_sims(df, start_year=1990, which='single')
+        # Process and plot
+        df = sc.loadobj(f'results/{scenario}_sim.df')
+        plot_hiv_sims(df, start_year=1990, which='single')
 
-    # plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext='_alt')
-    # plot_sti_tx(df, start_year=2000, fext='_alt')
-    # plot_ng_sim(df, start_year=1990)
+    if 'stis' in to_run:
+        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2030)
+        sim.run()
+        df = sim.to_df(resample='year', use_years=True, sep='.')
+        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+
+        # Process and plot
+        df = sc.loadobj(f'results/{scenario}_sim.df')
+        plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext='_alt')
+        plot_sti_tx(df, start_year=2000, fext='_alt')
 
     # from utils import set_font
     # import pylab as pl
