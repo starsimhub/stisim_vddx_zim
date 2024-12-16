@@ -68,17 +68,7 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
 if __name__ == '__main__':
 
     calib = sc.loadobj('results/zim_calib.obj')
-
-    def shrink_calib(calib, n_results=1000):
-        cal = sc.objdict()
-        plot_indices = calib.df.iloc[:n_results, 0].values
-        cal.sim_results = [calib.sim_results[i] for i in plot_indices]
-        cal.data = calib.data
-        cal.df = calib.df.iloc[0:n_results, ]
-        return cal
-
-    cal = shrink_calib(calib)
-
+    cal = calib.shrink()
     plot_calibration(cal)
 
     print('Done.')
