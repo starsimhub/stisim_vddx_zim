@@ -149,7 +149,7 @@ if __name__ == '__main__':
         df = sc.loadobj(f'results/{scenario}_sim.df')
         plot_hiv_sims(df, start_year=1990, which='single')
         plot_sti_sims(df, start_year=1990, end_year=2040, which='single')
-        plot_sti_tx(df, start_year=1990, fext='_alt')
+        plot_sti_tx(df, start_year=1990)
 
     # from utils import set_font
     # import pylab as pl

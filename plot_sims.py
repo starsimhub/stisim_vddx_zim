@@ -203,7 +203,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     return fig
 
 
-def plot_sti_tx(df, start_year=2000, end_year=2020, fext=''):
+def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
     set_font(size=24)
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))
