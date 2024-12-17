@@ -109,7 +109,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
     return fig
 
 
-def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext=None):
+def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext=''):
     """ Create quantile or individual sim plots of STIs """
     set_font(size=30)
     fig, axes = pl.subplots(3, 4, figsize=(25, 12))
@@ -203,7 +203,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     return fig
 
 
-def plot_sti_tx(df, start_year=2000, end_year=2020, fext=None):
+def plot_sti_tx(df, start_year=2000, end_year=2020, fext=''):
     set_font(size=24)
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))

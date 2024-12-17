@@ -31,10 +31,7 @@ def make_stis(bv_beta_m2f=0.2):
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.1,
-        p_clear=[
-            ss.bernoulli(p=0.1),
-            ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
-        ],
+        p_clear=ss.bernoulli(p=0.1),
         init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
         rel_init_prev=10
     )
@@ -133,7 +130,7 @@ if __name__ == '__main__':
     ]
 
     if 'hiv' in to_run:
-        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2030)
+        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2040)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
@@ -143,15 +140,16 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2030)
+        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2040)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
-        plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext='_alt')
-        plot_sti_tx(df, start_year=2000, fext='_alt')
+        plot_hiv_sims(df, start_year=1990, which='single')
+        plot_sti_sims(df, start_year=1990, end_year=2040, which='single')
+        plot_sti_tx(df, start_year=1990, fext='_alt')
 
     # from utils import set_font
     # import pylab as pl
