@@ -29,10 +29,11 @@ class overtreatment_stats(ss.Analyzer):
 
     def step(self):
         sim = self.sim
+        ti = self.ti
         ppl = sim.people
-        care = (ppl.ng.ti_seeks_care == sim.ti) | (ppl.ct.ti_seeks_care == sim.ti) | (ppl.tv.ti_seeks_care == sim.ti) | (ppl.bv.ti_seeks_care == sim.ti)
+        care = (ppl.ng.ti_seeks_care == ti) | (ppl.ct.ti_seeks_care == ti) | (ppl.tv.ti_seeks_care == ti) | (ppl.bv.ti_seeks_care == ti)
         for k in ['ng', 'ct', 'tv', 'bv']:
-            self.results[f'new_{k}_care_seekers'][sim.ti] = len((care & ~ppl[k].infected).uids)
+            self.results[f'new_{k}_care_seekers'][ti] = len((care & ~ppl[k].infected).uids)
         return
 
 
@@ -63,27 +64,28 @@ class coinfection_stats(ss.Analyzer):
 
     def step(self):
         sim = self.sim
+        ti = self.ti
         ppl = sim.people
-        care = (ppl.ng.ti_seeks_care == sim.ti) | (ppl.ct.ti_seeks_care == sim.ti) | (ppl.tv.ti_seeks_care == sim.ti) | (ppl.bv.ti_seeks_care == sim.ti)
+        care = (ppl.ng.ti_seeks_care == ti) | (ppl.ct.ti_seeks_care == ti) | (ppl.tv.ti_seeks_care == ti) | (ppl.bv.ti_seeks_care == ti)
 
-        self.results['ng_only'][sim.ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['ct_only'][sim.ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['tv_only'][sim.ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['bv_only'][sim.ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ng_only'][ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['ct_only'][ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['tv_only'][ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['bv_only'][ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
 
-        self.results['ng_ct'][sim.ti] = len((care & ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['ng_tv'][sim.ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['ng_bv'][sim.ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
-        self.results['ct_tv'][sim.ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['ct_bv'][sim.ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
-        self.results['tv_bv'][sim.ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ng_ct'][ti] = len((care & ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['ng_tv'][ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['ng_bv'][ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ct_tv'][ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['ct_bv'][ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['tv_bv'][ti] = len((care & ~ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
 
-        self.results['ng_ct_tv'][sim.ti] = len((care & ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
-        self.results['ng_ct_bv'][sim.ti] = len((care & ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
-        self.results['ng_tv_bv'][sim.ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
-        self.results['ct_tv_bv'][sim.ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ng_ct_tv'][ti] = len((care & ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ~ppl.bv.infected).uids)
+        self.results['ng_ct_bv'][ti] = len((care & ppl.ng.infected & ppl.ct.infected & ~ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ng_tv_bv'][ti] = len((care & ppl.ng.infected & ~ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ct_tv_bv'][ti] = len((care & ~ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
 
-        self.results['ng_ct_tv_bv'][sim.ti] = len((care & ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
+        self.results['ng_ct_tv_bv'][ti] = len((care & ppl.ng.infected & ppl.ct.infected & ppl.tv.infected & ppl.bv.infected).uids)
 
         not_infected = care & ~ppl.ng.infected & ~ppl.ct.infected & ~ppl.tv.infected & ~ppl.bv.infected
         if not_infected.any():
@@ -113,7 +115,6 @@ class total_symptomatic(ss.Analyzer):
             ss.Result('symp_prev_no_hiv_m', scale=False, label="Symptomatic prevalence HIV- M"),
             ss.Result('symp_prev_has_hiv_m', scale=False, label="Symptomatic prevalence HIV+ M"),
         )
-
         return
 
     @staticmethod
@@ -125,12 +126,13 @@ class total_symptomatic(ss.Analyzer):
 
     def step(self):
         sim = self.sim
+        ti = self.ti
         adults = (sim.people.age >= 15) & (sim.people.age <= 65)
         women = adults & sim.people.female
         men = adults & sim.people.male
         hiv = sim.diseases.hiv
 
-        new_symptoms = (sim.people.ng.ti_symptomatic == sim.ti) | (sim.people.ct.ti_symptomatic == sim.ti) | (sim.people.tv.ti_symptomatic == sim.ti) | (sim.people.bv.ti_symptomatic == sim.ti)
+        new_symptoms = (sim.people.ng.ti_symptomatic == self.ti) | (sim.people.ct.ti_symptomatic == self.ti) | (sim.people.tv.ti_symptomatic == self.ti) | (sim.people.bv.ti_symptomatic == self.ti)
         any_symptoms = sim.people.ng.symptomatic | sim.people.ct.symptomatic | sim.people.tv.symptomatic | sim.people.bv.symptomatic
         has_hiv = adults & hiv.infected  # Adults with HIV
 
@@ -143,21 +145,21 @@ class total_symptomatic(ss.Analyzer):
         no_hiv_f = no_hiv & women  # Women without HIV
         no_hiv_m = no_hiv & men  # Men without HIV
 
-        self.results['new_symptoms'][sim.ti] = np.count_nonzero(new_symptoms)
-        self.results['n_symptomatic'][sim.ti] = np.count_nonzero(any_symptoms)
-        self.results['symp_prev'][sim.ti] = np.count_nonzero(n_symp) / np.count_nonzero(adults)
-        self.results['symp_prev_f'][sim.ti] = np.count_nonzero(n_symp_f) / np.count_nonzero(women)
-        self.results['symp_prev_m'][sim.ti] = np.count_nonzero(n_symp_m) / np.count_nonzero(men)
+        self.results['new_symptoms'][ti] = np.count_nonzero(new_symptoms)
+        self.results['n_symptomatic'][ti] = np.count_nonzero(any_symptoms)
+        self.results['symp_prev'][ti] = np.count_nonzero(n_symp) / np.count_nonzero(adults)
+        self.results['symp_prev_f'][ti] = np.count_nonzero(n_symp_f) / np.count_nonzero(women)
+        self.results['symp_prev_m'][ti] = np.count_nonzero(n_symp_m) / np.count_nonzero(men)
 
-        self.results['symp_prev_no_hiv'][sim.ti] = self.cond_prob(n_symp, no_hiv)
-        self.results['symp_prev_has_hiv'][sim.ti] = self.cond_prob(n_symp, has_hiv)
-        self.results['symp_prev_no_hiv_f'][sim.ti] = self.cond_prob(n_symp_f, no_hiv_f)
-        self.results['symp_prev_has_hiv_f'][sim.ti] = self.cond_prob(n_symp_f, has_hiv_f)
-        self.results['symp_prev_no_hiv_m'][sim.ti] = self.cond_prob(n_symp_m, no_hiv_m)
-        self.results['symp_prev_has_hiv_m'][sim.ti] = self.cond_prob(n_symp_m, has_hiv_m)
+        self.results['symp_prev_no_hiv'][ti] = self.cond_prob(n_symp, no_hiv)
+        self.results['symp_prev_has_hiv'][ti] = self.cond_prob(n_symp, has_hiv)
+        self.results['symp_prev_no_hiv_f'][ti] = self.cond_prob(n_symp_f, no_hiv_f)
+        self.results['symp_prev_has_hiv_f'][ti] = self.cond_prob(n_symp_f, has_hiv_f)
+        self.results['symp_prev_no_hiv_m'][ti] = self.cond_prob(n_symp_m, no_hiv_m)
+        self.results['symp_prev_has_hiv_m'][ti] = self.cond_prob(n_symp_m, has_hiv_m)
 
         for disease in ['ng', 'ct', 'tv', 'bv']:
-            if self.results['symp_prev_f'][sim.ti] < sim.results[disease]['female_symp_adult_prevalence'][sim.ti]:
+            if self.results['symp_prev_f'][ti] < sim.results[disease]['female_symp_adult_prevalence'][ti]:
                 errormsg = f'Overall symptomatic prevalence should not be lower than for disease {disease}'
                 raise ValueError(errormsg)
 
