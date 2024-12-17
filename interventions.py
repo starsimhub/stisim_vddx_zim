@@ -128,11 +128,11 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
 
     if scenario == 'soc':
         # Testing interventions
-        def seeking_care_discharge(sim):
-            ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-            tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-            ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-            bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
+        def seeking_care_discharge(mod):
+            ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
+            tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
+            ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
+            bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
             return (ng_care | ct_care | tv_care | bv_care).uids
 
         ng_tx = sti.GonorrheaTreatment(
@@ -158,11 +158,11 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
     if scenario == 'panel':
-        def seeking_care_discharge(sim):
-            ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-            tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-            ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-            bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
+        def seeking_care_discharge(mod):
+            ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
+            tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
+            ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
+            bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
             return (ng_care | ct_care | tv_care | bv_care).uids
 
         ng_tx = sti.GonorrheaTreatment(

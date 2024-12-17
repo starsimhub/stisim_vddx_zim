@@ -55,7 +55,7 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
     fertility_data = pd.read_csv(f'data/asfr.csv')
     pregnancy = ss.Pregnancy(fertility_rate=fertility_data)
     death_data = pd.read_csv(f'data/deaths.csv')
-    death = ss.Deaths(death_rate=death_data, rate_units=1, )
+    death = ss.Deaths(death_rate=death_data, rate_units=1)
 
     ####################################################################################################################
     # People and networks
@@ -72,7 +72,7 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
         p_pair_form=0.6,  # 0.6,
         condom_data=pd.read_csv(f'data/condom_use.csv'),
     )
-    maternal = ss.MaternalNet()
+    maternal = ss.MaternalNet(unit='month')
 
     ####################################################################################################################
     # Diseases
