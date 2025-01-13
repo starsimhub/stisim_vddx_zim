@@ -21,8 +21,8 @@ def get_testing_products():
     gp_prob = np.concatenate([np.linspace(0, 0.5, n_years), np.linspace(0.5, 0.6, len(years) - n_years)])
 
     # FSW agents who haven't been diagnosed or treated yet
-    def fsw_eligibility(mod):
-        return mod.sim.networks.structuredsexual.fsw & ~mod.sim.diseases.hiv.diagnosed & ~mod.sim.diseases.hiv.on_art
+    def fsw_eligibility(sim):
+        return sim.networks.structuredsexual.fsw & ~sim.diseases.hiv.diagnosed & ~sim.diseases.hiv.on_art
 
     fsw_testing = sti.HIVTest(
         years=years,
@@ -33,8 +33,8 @@ def get_testing_products():
     )
 
     # Non-FSW agents who haven't been diagnosed or treated yet
-    def other_eligibility(mod):
-        return ~mod.sim.networks.structuredsexual.fsw & ~mod.sim.diseases.hiv.diagnosed & ~mod.sim.diseases.hiv.on_art
+    def other_eligibility(sim):
+        return ~sim.networks.structuredsexual.fsw & ~sim.diseases.hiv.diagnosed & ~sim.diseases.hiv.on_art
 
     other_testing = sti.HIVTest(
         years=years,
@@ -45,8 +45,8 @@ def get_testing_products():
     )
 
     # Agents whose CD4 count is below 200.
-    def low_cd4_eligibility(mod):
-        return (mod.sim.diseases.hiv.cd4 < 200) & ~mod.sim.diseases.hiv.diagnosed
+    def low_cd4_eligibility(sim):
+        return (sim.diseases.hiv.cd4 < 200) & ~sim.diseases.hiv.diagnosed
 
     low_cd4_testing = sti.HIVTest(
         years=years,
