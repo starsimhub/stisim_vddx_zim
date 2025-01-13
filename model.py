@@ -5,35 +5,27 @@ Used for evaluation of etiological tests compared to syndromic management.
 """
 
 # %% Imports and settings
-import sciris as sc
-import numpy as np
 import starsim as ss
 import stisim as sti
-import pandas as pd
 
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
 from plot_sims import *
-from utils import unneeded_results
-from analyzers import total_symptomatic
 
 
 def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
-        beta_m2f=0.06,
-        init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
-        rel_init_prev=0.2
+        beta_m2f=0.07,
+        p_symp_care=[0.1, 0.1],  # [0.66, 0.83]
     )
     ct = sti.Chlamydia(
         beta_m2f=0.06,
-        init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
-        rel_init_prev=1.5
+        p_symp_care=[0.1, 0.1],  # [0.42, 0.83]
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.1,
+        p_symp_care=[0.1, 0.1],  # [0.39, 0.27]
         p_clear=ss.bernoulli(p=0.1),
-        init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
-        rel_init_prev=10
     )
     bv = sti.BV()
 
@@ -130,7 +122,7 @@ if __name__ == '__main__':
     ]
 
     if 'hiv' in to_run:
-        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2040)
+        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
@@ -140,7 +132,7 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2040)
+        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)

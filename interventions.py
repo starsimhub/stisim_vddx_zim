@@ -117,7 +117,7 @@ class Panel(sti.SymptomaticTesting):
 
 # %%  Algorithms
 
-def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
+def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
 
     intv_year = 2028
 
@@ -126,72 +126,44 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
     else:
         synd_end = intv_year
 
+    # Testing interventions
+    def seeking_care_discharge(mod):
+        ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
+        tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
+        ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
+        bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
+        return (ng_care | ct_care | tv_care | bv_care).uids
+
+    ng_tx = sti.GonorrheaTreatment(
+        name='ng_tx',
+        rel_treat_unsucc=0.005,
+        rel_treat_unneed=0.0005,
+    )
+    ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
+    metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
+    treatments = [ng_tx, ct_tx, metronidazole]
+    disease_treatment_map = {
+        'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
+    }
+
+    # Different assumptions around SOC performance
+    if soc_perf == 'treat_all':
+        a = 4
+    elif soc_perf == '':
+        a = 5
+
+    syndromic = SyndromicMgmt(
+        stop=synd_end,
+        diseases=[ng, ct, tv, bv],
+        eligibility=seeking_care_discharge,
+        treatments=treatments,
+        disease_treatment_map=disease_treatment_map,
+    )
+
     if scenario == 'soc':
-        # Testing interventions
-        def seeking_care_discharge(mod):
-            ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
-            tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
-            ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
-            bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
-            return (ng_care | ct_care | tv_care | bv_care).uids
-
-        ng_tx = sti.GonorrheaTreatment(
-            name='ng_tx',
-            rel_treat_unsucc=0.005,
-            rel_treat_unneed=0.0005,
-        )
-        ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
-        metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
-        treatments = [ng_tx, ct_tx, metronidazole]
-        disease_treatment_map = {
-            'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
-        }
-
-        syndromic = SyndromicMgmt(
-            stop=synd_end,
-            diseases=[ng, ct, tv, bv],
-            eligibility=seeking_care_discharge,
-            treatments=treatments,
-            disease_treatment_map=disease_treatment_map,
-        )
-
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
     if scenario == 'panel':
-        def seeking_care_discharge(mod):
-            ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
-            tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
-            ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
-            bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
-            return (ng_care | ct_care | tv_care | bv_care).uids
-
-        ng_tx = sti.GonorrheaTreatment(
-            name='ng_tx',
-            # # Ciprofloxacin
-            # rel_treat_unsucc=0.02,
-            # rel_treat_unneed=0.01,
-            # # Azythromycin
-            # rel_treat_unsucc=0.01,
-            # rel_treat_unneed=0.005,
-            # Default
-            rel_treat_unsucc=0.005,
-            rel_treat_unneed=0.0005,
-        )
-        ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
-        metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
-        treatments = [ng_tx, ct_tx, metronidazole]
-        disease_treatment_map = {
-            'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
-        }
-
-        syndromic = SyndromicMgmt(
-            stop=synd_end,
-            diseases=[ng, ct, tv, bv],
-            eligibility=seeking_care_discharge,
-            treatments=treatments,
-            disease_treatment_map=disease_treatment_map,
-        )
-
         panel = Panel(
             start=intv_year,
             diseases=[ng, ct, tv, bv],
@@ -199,7 +171,6 @@ def make_testing(ng, ct, tv, bv, scenario='soc', stop=2040):
             treatments=treatments,
             disease_treatment_map=disease_treatment_map,
         )
-
         intvs = [syndromic, panel, ng_tx, ct_tx, metronidazole]
 
     return intvs
