@@ -127,11 +127,11 @@ def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
         synd_end = intv_year
 
     # Testing interventions
-    def seeking_care_discharge(mod):
-        ng_care = mod.sim.diseases.ng.symptomatic & (mod.sim.diseases.ng.ti_seeks_care == mod.ti)
-        tv_care = mod.sim.diseases.tv.symptomatic & (mod.sim.diseases.tv.ti_seeks_care == mod.ti)
-        ct_care = mod.sim.diseases.ct.symptomatic & (mod.sim.diseases.ct.ti_seeks_care == mod.ti)
-        bv_care = mod.sim.diseases.bv.symptomatic & (mod.sim.diseases.bv.ti_seeks_care == mod.ti)
+    def seeking_care_discharge(sim):
+        ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.diseases.ng.ti)
+        tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.diseases.tv.ti)
+        ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.diseases.ct.ti)
+        bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.diseases.bv.ti)
         return (ng_care | ct_care | tv_care | bv_care).uids
 
     ng_tx = sti.GonorrheaTreatment(
