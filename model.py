@@ -5,115 +5,103 @@ Used for evaluation of etiological tests compared to syndromic management.
 """
 
 # %% Imports and settings
-import sciris as sc
-import numpy as np
 import starsim as ss
 import stisim as sti
-import pandas as pd
 
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
-from utils import unneeded_results
-from analyzers import total_symptomatic
+from plot_sims import *
 
 
 def make_stis(bv_beta_m2f=0.2):
     ng = sti.Gonorrhea(
-        beta_m2f=0.1,
-        beta_m2c=0,
-        init_prev_data=pd.read_csv('data/init_prev_ng.csv'),
-        rel_init_prev=0.2
+        beta_m2f=0.07,
+        p_symp_care=[0.1, 0.1],  # [0.66, 0.83]
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.07,
-        beta_m2c=0,
-        init_prev_data=pd.read_csv('data/init_prev_ct.csv'),
-        rel_init_prev=1.5
+        beta_m2f=0.06,
+        p_symp_care=[0.1, 0.1],  # [0.42, 0.83]
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.15,
-        beta_m2c=0,
-        p_clear=[
-            ss.bernoulli(p=0.1),
-            ss.bernoulli(p=1),  # Men assumed to clear (https://sti.bmj.com/content/76/4/248)
-        ],
-        init_prev_data=pd.read_csv('data/init_prev_tv.csv'),
-        rel_init_prev=10
+        beta_m2f=0.1,
+        p_symp_care=[0.1, 0.1],  # [0.39, 0.27]
+        p_clear=ss.bernoulli(p=0.1),
     )
-    bv = sti.DischargingSTI(
-        beta_m2f=bv_beta_m2f,
-        beta_m2c=0,
-        init_prev_data=pd.read_csv('data/init_prev_bv.csv'),
-    )
+    bv = sti.BV()
 
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, end=2030, debug=False, verbose=0.1):
+def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True):
 
-    total_pop = {1970: 5.203e6, 1980: 7.05e6, 1990: 9980999, 2000: 11.83e6}[start]
+    total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
     if dt is None: dt = [1/12, 1][debug]
 
     ####################################################################################################################
     # Demographic modules
     ####################################################################################################################
-    fertility_rates = {'fertility_rate': pd.read_csv(f'data/asfr.csv')}
-    pregnancy = ss.Pregnancy(pars=fertility_rates)
-    death_rates = {'death_rate': pd.read_csv(f'data/deaths.csv'), 'units': 1}
-    death = ss.Deaths(death_rates)
+    fertility_data = pd.read_csv(f'data/asfr.csv')
+    pregnancy = ss.Pregnancy(fertility_rate=fertility_data)
+    death_data = pd.read_csv(f'data/deaths.csv')
+    death = ss.Deaths(death_rate=death_data, rate_units=1)
 
     ####################################################################################################################
     # People and networks
     ####################################################################################################################
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
     sexual = sti.FastStructuredSexual(
-        acts=ss.lognorm_ex(80, 30),
-        prop_f1=0.2,
+        prop_f0=0.8,
         prop_f2=0.05,
-        prop_m1=0.2,
+        prop_m0=0.65,
         f1_conc=0.05,
         f2_conc=0.25,
         m1_conc=0.15,
         m2_conc=0.3,
-        p_pair_form=0.8,  # 0.6,
+        p_pair_form=0.6,  # 0.6,
         condom_data=pd.read_csv(f'data/condom_use.csv'),
     )
-    maternal = ss.MaternalNet()
+    maternal = ss.MaternalNet(unit='month')
 
     ####################################################################################################################
     # Diseases
     ####################################################################################################################
-    ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
-    stis = [ng, ct, tv, bv]
     hiv = make_hiv()
-    diseases = stis + [hiv]
+    diseases = [hiv]
+    if add_stis:
+        ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
+        stis = [ng, ct, tv, bv]
+        diseases += stis
 
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
-    intvs = make_testing(ng, ct, tv, bv, scenario=scenario, end=end) + make_hiv_intvs()
-    analyzers = [total_symptomatic]  #, overtreatment_stats, coinfection_stats]
+    intvs = make_hiv_intvs()
+    if add_stis:
+        intvs += make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop)
+        connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
+    else:
+        connectors = []
+    # analyzers = [total_symptomatic()]  #, overtreatment_stats, coinfection_stats]
 
     sim = ss.Sim(
         dt=dt,
         rand_seed=seed,
         total_pop=total_pop,
         start=start,
-        end=end,
+        stop=stop,
         people=ppl,
         diseases=diseases,
         networks=[sexual, maternal],
         demographics=[pregnancy, death],
         interventions=intvs,
-        analyzers=analyzers,
-        connectors=[sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)],
+        # analyzers=analyzers,
+        connectors=connectors,
         verbose=verbose,
     )
 
     # Store scenario and background BV rate for grouping
     sim.scenario = scenario
-    sim.bv_beta_m2f = bv_beta_m2f
 
     return sim
 
@@ -124,15 +112,49 @@ if __name__ == '__main__':
     debug = False
     seed = 1
     do_save = True
+    do_run = True
+    scenario = 'soc'
 
-    if True:
-        sim = make_sim(scenario='panel', seed=seed, debug=debug, start=1980, end=2030)
-        sim.run(verbose=0.1)
-        df = sti.finalize_results(sim, modules_to_drop=unneeded_results)
-        # if do_save: sc.saveobj('results/sim.df', df)
-        # df['ng.rel_treat'].to_csv('results/Ciprofloxacin.csv')
+    # What to run
+    to_run = [
+        # 'hiv',
+        'stis',
+    ]
 
-        # # Save age/sex epi results
+    if 'hiv' in to_run:
+        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
+        sim.run()
+        df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
+        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+
+        # Process and plot
+        df = sc.loadobj(f'results/{scenario}_sim.df')
+        plot_hiv_sims(df, start_year=1990, which='single')
+
+    if 'stis' in to_run:
+        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
+        sim.run()
+        df = sim.to_df(resample='year', use_years=True, sep='.')
+        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+
+        # Process and plot
+        df = sc.loadobj(f'results/{scenario}_sim.df')
+        plot_hiv_sims(df, start_year=1990, which='single')
+        plot_sti_sims(df, start_year=1990, end_year=2040, which='single')
+        plot_sti_tx(df, start_year=1990)
+
+    # from utils import set_font
+    # import pylab as pl
+    # import seaborn as sns
+    #
+    # epi_df = sc.loadobj('results/epi_df.df')
+    # set_font(size=20)
+    # fig, axes = pl.subplots(1, 3, figsize=(10, 4))
+    # axes = axes.ravel()
+    # colors = ['#ee7989', '#4682b4']
+    #
+
+    # # Save age/sex epi results
         # dfs = sc.autolist()
         # for disease in ['ng', 'ct', 'tv']:
         #     for sex in ['female', 'male']:
@@ -146,24 +168,6 @@ if __name__ == '__main__':
         # epi_df = pd.concat(dfs)
         # if do_save: sc.saveobj('results/epi_df.df', epi_df)
 
-    # # Process and plot
-    # from plot_sims import *
-    # df = sc.loadobj('results/sim.df')
-    # plot_sti_sims(df, start_year=2000, which='single')
-    # plot_sti_tx(df, start_year=2000)
-    # plot_hiv_sims(df, start_year=2000, which='single')
-    # plot_ng_sim(df, start_year=1990)
-
-    # from utils import set_font
-    # import pylab as pl
-    # import seaborn as sns
-    #
-    # epi_df = sc.loadobj('results/epi_df.df')
-    # set_font(size=20)
-    # fig, axes = pl.subplots(1, 3, figsize=(10, 4))
-    # axes = axes.ravel()
-    # colors = ['#ee7989', '#4682b4']
-    #
     # for pn, disease in enumerate(['ng', 'ct', 'tv']):
     #     ax = axes[pn]
     #     thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
@@ -176,6 +180,26 @@ if __name__ == '__main__':
     # sc.figlayout()
     # sc.savefig("figures/epi.png", dpi=100)
 
+    # set_font(size=16)
+    # fig, ax = pl.subplots(1, 1, figsize=(10, 4))
+    # colors = ['#ee7989', '#ee7989', '#4682b4', '#4682b4']
+    # linestyles = ['--', '-', '--', '-']
+    # rdict = {'symp_prev_no_hiv_f': 'HIV- F', 'symp_prev_has_hiv_f': 'HIV+ F', 'symp_prev_no_hiv_m': 'HIV- M', 'symp_prev_has_hiv_m': 'HIV+ M'}
 
-
+    # cn = 0
+    # bi = 20*12
+    # for rname, rlabel in rdict.items():
+    #     x = sim.timevec[bi:]
+    #     y = pd.Series(sim.results.total_symptomatic[rname][bi:])
+    #     y = y.rolling(10, min_periods=1).mean()
+    #     ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)
+    #     ax.legend()
+    #     ax.set_ylabel('')
+    #     ax.set_xlabel('')
+    #     ax.set_title('Prevalence of discharge (%)')
+    #     cn += 1
+    #
+    # sc.figlayout()
+    # sc.savefig("figures/epi_hiv.png", dpi=100)
+    #
 

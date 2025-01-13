@@ -15,32 +15,33 @@ def count(arr): return np.count_nonzero(arr)
 class SyndromicMgmt(sti.SymptomaticTesting):
     def init_results(self):
         super().init_results()
-        npts = self.sim.npts
-        self.results += [
-            ss.Result(self.name, 'new_ng_only', npts, dtype=int, scale=True, label='Only NG'),
-            ss.Result(self.name, 'new_ct_only', npts, dtype=int, scale=True, label='Only CT'),
-            ss.Result(self.name, 'new_tv_only', npts, dtype=int, scale=True, label='Only TV'),
-            ss.Result(self.name, 'new_bv_only', npts, dtype=int, scale=True, label='Only BV'),
-            ss.Result(self.name, 'new_ng_ct', npts, dtype=int, scale=True, label='NG & CT'),
-            ss.Result(self.name, 'new_ng_tv', npts, dtype=int, scale=True, label='NG & TV'),
-            ss.Result(self.name, 'new_ng_bv', npts, dtype=int, scale=True, label='NG & BV'),
-            ss.Result(self.name, 'new_ct_tv', npts, dtype=int, scale=True, label='CT & TV'),
-            ss.Result(self.name, 'new_ct_bv', npts, dtype=int, scale=True, label='CT & BV'),
-            ss.Result(self.name, 'new_tv_bv', npts, dtype=int, scale=True, label='TV & BV'),
-            ss.Result(self.name, 'new_ng_ct_tv', npts, dtype=int, scale=True, label='NG & CT & TV'),
-            ss.Result(self.name, 'new_ng_ct_bv', npts, dtype=int, scale=True, label='NG & CT & BV'),
-            ss.Result(self.name, 'new_ng_tv_bv', npts, dtype=int, scale=True, label='NG & TV & BV'),
-            ss.Result(self.name, 'new_ct_tv_bv', npts, dtype=int, scale=True, label='CT & TV & BV'),
-            ss.Result(self.name, 'new_ng_ct_tv_bv', npts, dtype=int, scale=True, label='NG & CT & TV & BV'),
-            ss.Result(self.name, 'new_all_ng', npts, dtype=int, scale=True, label='All NG'),
-            ss.Result(self.name, 'new_all_ct', npts, dtype=int, scale=True, label='All CT'),
-            ss.Result(self.name, 'new_all_tv', npts, dtype=int, scale=True, label='All TV'),
-            ss.Result(self.name, 'new_all_bv', npts, dtype=int, scale=True, label='All BV'),
-            ss.Result(self.name, 'new_sti1', npts, dtype=int, scale=True, label='1 STI'),
-            ss.Result(self.name, 'new_sti2', npts, dtype=int, scale=True, label='2 STIs'),
-            ss.Result(self.name, 'new_sti3', npts, dtype=int, scale=True, label='3 STIs'),
-            ss.Result(self.name, 'new_sti4', npts, dtype=int, scale=True, label='4 STIs'),
-        ]
+        self.define_results(
+            ss.Result('new_ng_only', dtype=int, label='Only NG'),
+            ss.Result('new_ct_only', dtype=int, label='Only CT'),
+            ss.Result('new_tv_only', dtype=int, label='Only TV'),
+            ss.Result('new_bv_only', dtype=int, label='Only BV'),
+            ss.Result('new_ng_ct', dtype=int, label='NG & CT'),
+            ss.Result('new_ng_tv', dtype=int, label='NG & TV'),
+            ss.Result('new_ng_bv', dtype=int, label='NG & BV'),
+            ss.Result('new_ct_tv', dtype=int, label='CT & TV'),
+            ss.Result('new_ct_bv', dtype=int, label='CT & BV'),
+            ss.Result('new_tv_bv', dtype=int, label='TV & BV'),
+            ss.Result('new_ng_ct_tv', dtype=int, label='NG & CT & TV'),
+            ss.Result('new_ng_ct_bv', dtype=int, label='NG & CT & BV'),
+            ss.Result('new_ng_tv_bv', dtype=int, label='NG & TV & BV'),
+            ss.Result('new_ct_tv_bv', dtype=int, label='CT & TV & BV'),
+            ss.Result('new_ng_ct_tv_bv', dtype=int, label='NG & CT & TV & BV'),
+            ss.Result('new_all_ng', dtype=int, label='All NG'),
+            ss.Result('new_all_ct', dtype=int, label='All CT'),
+            ss.Result('new_all_tv', dtype=int, label='All TV'),
+            ss.Result('new_all_bv', dtype=int, label='All BV'),
+            ss.Result('new_sti1', dtype=int, label='1 STI'),
+            ss.Result('new_sti2', dtype=int, label='2 STIs'),
+            ss.Result('new_sti3', dtype=int, label='3 STIs'),
+            ss.Result('new_sti4', dtype=int, label='4 STIs'),
+
+        )
+
         return
 
     def update_results(self):
@@ -92,9 +93,9 @@ class SyndromicMgmt(sti.SymptomaticTesting):
 
 
 class Panel(sti.SymptomaticTesting):
-    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, years=None, start=None, end=None, eligibility=None, name=None, label=None, **kwargs):
-        super().__init__(treatments=treatments, diseases=diseases, disease_treatment_map=disease_treatment_map, years=years, start=start, end=end, eligibility=eligibility, name=name, label=label, **kwargs)
-        self.default_pars(
+    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, years=None, start=None, stop=None, eligibility=None, name=None, label=None, **kwargs):
+        super().__init__(treatments=treatments, diseases=diseases, disease_treatment_map=disease_treatment_map, years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label, **kwargs)
+        self.define_pars(
             sens=dict(
                 ng=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
                 ct=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
@@ -110,109 +111,59 @@ class Panel(sti.SymptomaticTesting):
             dt_scale=False,
         )
         self.update_pars(pars, **kwargs)
+
         return
-    #
-    # def apply(self, sim, uids=None):
-    #     """ Apply the testing intervention """
-    #     # Apply if within the start years
-    #     if (sim.year >= self.start) & (sim.year < self.end):
-    #
-    #         super().apply(sim, uids)
-    #         dismissed_uids = self.ti_dismissed == sim.ti
-    #         # Give BV treatment to anyone where nothing was detected
-    #         # Question, should this be for women only? Retain symptomatic care for men. Reduce symptoms for BV for men
-    #         self.sim.interventions.bv_tx.eligibility = dismissed_uids
-    #
-    #         # Update results
-    #         self.update_results()
-    #
-    #     return
 
 
 # %%  Algorithms
 
-def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
+def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
 
     intv_year = 2028
 
     if scenario == 'soc':
-        synd_end = end
+        synd_end = stop
     else:
         synd_end = intv_year
 
+    # Testing interventions
+    def seeking_care_discharge(sim):
+        ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.diseases.ng.ti)
+        tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.diseases.tv.ti)
+        ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.diseases.ct.ti)
+        bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.diseases.bv.ti)
+        return (ng_care | ct_care | tv_care | bv_care).uids
+
+    ng_tx = sti.GonorrheaTreatment(
+        name='ng_tx',
+        rel_treat_unsucc=0.005,
+        rel_treat_unneed=0.0005,
+    )
+    ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
+    metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
+    treatments = [ng_tx, ct_tx, metronidazole]
+    disease_treatment_map = {
+        'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
+    }
+
+    # Different assumptions around SOC performance
+    if soc_perf == 'treat_all':
+        a = 4
+    elif soc_perf == '':
+        a = 5
+
+    syndromic = SyndromicMgmt(
+        stop=synd_end,
+        diseases=[ng, ct, tv, bv],
+        eligibility=seeking_care_discharge,
+        treatments=treatments,
+        disease_treatment_map=disease_treatment_map,
+    )
+
     if scenario == 'soc':
-        # Testing interventions
-        def seeking_care_discharge(sim):
-            ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-            tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-            ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-            bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
-            return (ng_care | ct_care | tv_care | bv_care).uids
-
-        ng_tx = sti.GonorrheaTreatment(
-            name='ng_tx',
-            # # Ciprofloxacin
-            # rel_treat_unsucc=0.02,
-            # rel_treat_unneed=0.01,
-            # # Azythromycin
-            # rel_treat_unsucc=0.01,
-            # rel_treat_unneed=0.005,
-            # Default
-            rel_treat_unsucc=0.005,
-            rel_treat_unneed=0.0005,
-        )
-        ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
-        metronidazole = sti.STITreatment(disease=['tv', 'bv'], name='metronidazole', label='metronidazole')
-        treatments = [ng_tx, ct_tx, metronidazole]
-        disease_treatment_map = {
-            'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
-        }
-
-        syndromic = SyndromicMgmt(
-            end=synd_end,
-            diseases=[ng, ct, tv, bv],
-            eligibility=seeking_care_discharge,
-            treatments=treatments,
-            disease_treatment_map=disease_treatment_map,
-        )
-
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
     if scenario == 'panel':
-        def seeking_care_discharge(sim):
-            ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.ti)
-            tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.ti)
-            ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.ti)
-            bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.ti)
-            return (ng_care | ct_care | tv_care | bv_care).uids
-
-        ng_tx = sti.GonorrheaTreatment(
-            name='ng_tx',
-            # # Ciprofloxacin
-            # rel_treat_unsucc=0.02,
-            # rel_treat_unneed=0.01,
-            # # Azythromycin
-            # rel_treat_unsucc=0.01,
-            # rel_treat_unneed=0.005,
-            # Default
-            rel_treat_unsucc=0.005,
-            rel_treat_unneed=0.0005,
-        )
-        ct_tx = sti.STITreatment(disease='ct', name='ct_tx', label='ct_tx')
-        metronidazole = sti.STITreatment(disease=['tv', 'bv'], name='metronidazole', label='metronidazole')
-        treatments = [ng_tx, ct_tx, metronidazole]
-        disease_treatment_map = {
-            'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
-        }
-
-        syndromic = SyndromicMgmt(
-            end=synd_end,
-            diseases=[ng, ct, tv, bv],
-            eligibility=seeking_care_discharge,
-            treatments=treatments,
-            disease_treatment_map=disease_treatment_map,
-        )
-
         panel = Panel(
             start=intv_year,
             diseases=[ng, ct, tv, bv],
@@ -220,7 +171,6 @@ def make_testing(ng, ct, tv, bv, scenario='soc', end=2040):
             treatments=treatments,
             disease_treatment_map=disease_treatment_map,
         )
-
         intvs = [syndromic, panel, ng_tx, ct_tx, metronidazole]
 
     return intvs

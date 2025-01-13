@@ -1,5 +1,5 @@
 """
-Plot calibration
+Plot HIV calibration
 """
 
 # Import packages
@@ -13,19 +13,19 @@ from utils import set_font
 def plot_calibration(calib, start_year=2000, end_year=2025):
 
     set_font(size=30)
-    fig, axes = pl.subplots(3, 3, figsize=(20, 12))
+    fig, axes = pl.subplots(2, 2, figsize=(20, 12))
     axes = axes.ravel()
-    disease_map = {'ng': 'Gonorrhea', 'ct': 'Chlamydia', 'tv': 'Trich'}  #, 'bv': 'Other'}
     pn = 0
+    result_map = {'new_infections': 'Infections', 'new_deaths': 'Deaths', 'n_infected': 'PLHIV', 'prevalence': 'Prevalence'}  #, 'bv': 'Other'}
 
     # Incidence
-    for dname, dlabel in disease_map.items():
+    for resname, reslabel in result_map.items():
         ax = axes[pn]
 
         # Pull out model results and data
         res = calib.sim_results
-        target_data = calib.data[dname+'.new_infections']
-        resname = dname+'.new_infections'
+        target_data = calib.data['hiv_'+resname]
+        resname = 'hiv_'+resname
 
         year = []
         values = []
@@ -53,7 +53,7 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
         ydata = data_plot.values
         ax.scatter(xdata, ydata, color='k', marker='s', label='Data')
 
-        ax.set_title(dlabel+' incidence')
+        ax.set_title(reslabel)
         ax.set_ylim(bottom=0)
         sc.SIticks(ax=ax)
 
@@ -67,7 +67,8 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
 # %% Run as a script
 if __name__ == '__main__':
 
-    calib = sc.loadobj('results/calib.obj')
-    plot_calibration(calib)
+    calib = sc.loadobj('results/zim_calib.obj')
+    cal = calib.shrink()
+    plot_calibration(cal)
 
     print('Done.')

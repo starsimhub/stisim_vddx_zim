@@ -1,4 +1,4 @@
-year,ng.new_infections,ng.n_infected,ct.new_infections,ct.n_infected,tv.new_infections,tv.n_infected
+time,ng_new_infections,ng_n_infected,ct_new_infections,ct_n_infected,tv_new_infections,tv_n_infected
 2000,303948.9646,133038.1343,236837.1604,169252.6808,852516.6775,760272.2163
 2001,309130.7609,135296.6546,240714.9333,171869.2449,857369.4991,769847.7893
 2002,314495.0762,137613.2789,245864.8649,175277.9051,865533.4499,782681.5928
