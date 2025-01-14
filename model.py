@@ -13,26 +13,29 @@ from interventions import make_testing
 from plot_sims import *
 
 
-def make_stis(bv_beta_m2f=0.2):
+def make_stis(p_symp=None, p_symp_care=None):
     ng = sti.Gonorrhea(
         beta_m2f=0.07,
-        p_symp_care=[0.1, 0.1],  # [0.66, 0.83]
+        p_symp=[p_symp['ng'], 0.65],
+        p_symp_care=[p_symp_care['ng'], 0.83]
     )
     ct = sti.Chlamydia(
         beta_m2f=0.06,
-        p_symp_care=[0.1, 0.1],  # [0.42, 0.83]
+        p_symp=[p_symp['ct'], 0.54],
+        p_symp_care=[p_symp_care['ct'], 0.83]
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.1,
-        p_symp_care=[0.1, 0.1],  # [0.39, 0.27]
-        p_clear=ss.bernoulli(p=0.1),
+        p_symp=[p_symp['tv'], 0.5],
+        p_symp_care=[p_symp_care['tv'], 0.27]
     )
     bv = sti.BV()
 
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True):
+def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True,
+             scenario='treat100', p_symp=None, p_symp_care=None, prop_treat=None, poc=False):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -69,16 +72,16 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
     hiv = make_hiv()
     diseases = [hiv]
     if add_stis:
-        ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
+        ng, ct, tv, bv = make_stis(p_symp=p_symp, p_symp_care=p_symp_care)
         stis = [ng, ct, tv, bv]
-        diseases += stis
+        diseases += stis  # Add the STIs to the list of diseases
 
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
     intvs = make_hiv_intvs()
     if add_stis:
-        intvs += make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop)
+        intvs += make_testing(ng, ct, tv, bv, prop_treat=prop_treat, poc=poc, stop=stop)
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     else:
         connectors = []
@@ -113,12 +116,45 @@ if __name__ == '__main__':
     seed = 1
     do_save = True
     do_run = True
-    scenario = 'soc'
+    scenario = 'treat80poc'
+
+    # Define scenarios
+    def make_scens(scenario):
+        scendict = sc.objdict(
+            treat100=sc.objdict(
+                prop_treat=1,  # Treat all
+                p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
+                p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
+                poc=False,
+            )
+        )
+        scendict['treat90'] = scendict['treat100'].copy()
+        scendict['treat90'].prop_treat = 0.9
+        scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
+
+        scendict['treat80'] = scendict['treat100'].copy()
+        scendict['treat80'].prop_treat = 0.8
+        scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
+        scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
+
+        scendict['treat50'] = scendict['treat100'].copy()
+        scendict['treat50'].prop_treat = 0.5
+        scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
+
+        for scenario in scendict.keys():
+            scendict[scenario+'poc'] = scendict[scenario].copy()
+            scendict[scenario+'poc'].poc = True
+
+        scenpars = scendict[scenario]
+        return scenpars
+
 
     # What to run
     to_run = [
         # 'hiv',
         'stis',
+        # 'plot_epi',
+        # 'plot_hiv'
     ]
 
     if 'hiv' in to_run:
@@ -132,7 +168,8 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
+        scenpars = make_scens(scenario)
+        sim = make_sim(scenario=scenario, **scenpars, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
@@ -143,63 +180,69 @@ if __name__ == '__main__':
         plot_sti_sims(df, start_year=1990, end_year=2040, which='single')
         plot_sti_tx(df, start_year=1990)
 
-    # from utils import set_font
-    # import pylab as pl
-    # import seaborn as sns
-    #
-    # epi_df = sc.loadobj('results/epi_df.df')
-    # set_font(size=20)
-    # fig, axes = pl.subplots(1, 3, figsize=(10, 4))
-    # axes = axes.ravel()
-    # colors = ['#ee7989', '#4682b4']
-    #
+        # Save age/sex epi results
+        dfs = sc.autolist()
+        for disease in ['ng', 'ct', 'tv']:
+            for sex in ['female', 'male']:
+                dd = dict()
+                dd['age'] = sim.diseases[disease].age_bins[:-1]
+                dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:,-1]
+                dd['symp_prevalence'] = sim.diseases[disease].age_sex_results['symp_prevalence'][sex][:,-1]
+                dd['disease'] = disease
+                dd['sex'] = sex
+                dfs += pd.DataFrame(dd)
+        epi_df = pd.concat(dfs)
+        if do_save: sc.saveobj('results/epi_df.df', epi_df)
 
-    # # Save age/sex epi results
-        # dfs = sc.autolist()
-        # for disease in ['ng', 'ct', 'tv']:
-        #     for sex in ['female', 'male']:
-        #         dd = dict()
-        #         dd['age'] = sim.diseases[disease].age_bins[:-1]
-        #         dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:,-1]
-        #         dd['symp_prevalence'] = sim.diseases[disease].age_sex_results['symp_prevalence'][sex][:,-1]
-        #         dd['disease'] = disease
-        #         dd['sex'] = sex
-        #         dfs += pd.DataFrame(dd)
-        # epi_df = pd.concat(dfs)
-        # if do_save: sc.saveobj('results/epi_df.df', epi_df)
+    if 'plot_epi' in to_run:
+        from utils import set_font
+        import pylab as pl
+        import seaborn as sns
 
-    # for pn, disease in enumerate(['ng', 'ct', 'tv']):
-    #     ax = axes[pn]
-    #     thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
-    #     sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
-    #     ax.set_title(disease.upper())
-    #     ax.set_ylabel('')
-    #     ax.set_xlabel('')
-    #     # ax.legend_.remove()
-    #
-    # sc.figlayout()
-    # sc.savefig("figures/epi.png", dpi=100)
+        epi_df = sc.loadobj('results/epi_df.df')
+        set_font(size=20)
+        fig, axes = pl.subplots(1, 3, figsize=(10, 4))
+        axes = axes.ravel()
+        colors = ['#ee7989', '#4682b4']
 
-    # set_font(size=16)
-    # fig, ax = pl.subplots(1, 1, figsize=(10, 4))
-    # colors = ['#ee7989', '#ee7989', '#4682b4', '#4682b4']
-    # linestyles = ['--', '-', '--', '-']
-    # rdict = {'symp_prev_no_hiv_f': 'HIV- F', 'symp_prev_has_hiv_f': 'HIV+ F', 'symp_prev_no_hiv_m': 'HIV- M', 'symp_prev_has_hiv_m': 'HIV+ M'}
+        for pn, disease in enumerate(['ng', 'ct', 'tv']):
+            ax = axes[pn]
+            thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
+            sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
+            ax.set_title(disease.upper())
+            ax.set_ylabel('')
+            ax.set_xlabel('')
+            # ax.legend_.remove()
 
-    # cn = 0
-    # bi = 20*12
-    # for rname, rlabel in rdict.items():
-    #     x = sim.timevec[bi:]
-    #     y = pd.Series(sim.results.total_symptomatic[rname][bi:])
-    #     y = y.rolling(10, min_periods=1).mean()
-    #     ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)
-    #     ax.legend()
-    #     ax.set_ylabel('')
-    #     ax.set_xlabel('')
-    #     ax.set_title('Prevalence of discharge (%)')
-    #     cn += 1
-    #
-    # sc.figlayout()
-    # sc.savefig("figures/epi_hiv.png", dpi=100)
-    #
+        sc.figlayout()
+        sc.savefig("figures/epi.png", dpi=100)
+
+    if 'plot_hiv' in to_run:
+        from utils import set_font
+        import pylab as pl
+        import seaborn as sns
+        
+        set_font(size=16)
+        fig, ax = pl.subplots(1, 1, figsize=(10, 4))
+        colors = ['#ee7989', '#ee7989', '#4682b4', '#4682b4']
+        linestyles = ['--', '-', '--', '-']
+        rdict = {'symp_prev_no_hiv_f': 'HIV- F', 'symp_prev_has_hiv_f': 'HIV+ F', 'symp_prev_no_hiv_m': 'HIV- M', 'symp_prev_has_hiv_m': 'HIV+ M'}
+
+        cn = 0
+        bi = 20*12
+        for rname, rlabel in rdict.items():
+            x = sim.timevec[bi:]
+            y = pd.Series(sim.results.total_symptomatic[rname][bi:])
+            y = y.rolling(10, min_periods=1).mean()
+            ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)
+            ax.legend()
+            ax.set_ylabel('')
+            ax.set_xlabel('')
+            ax.set_title('Prevalence of discharge (%)')
+            cn += 1
+
+        sc.figlayout()
+        sc.savefig("figures/epi_hiv.png", dpi=100)
+
+
 

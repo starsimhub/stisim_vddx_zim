@@ -92,39 +92,27 @@ class SyndromicMgmt(sti.SymptomaticTesting):
         return
 
 
-class Panel(sti.SymptomaticTesting):
-    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, years=None, start=None, stop=None, eligibility=None, name=None, label=None, **kwargs):
-        super().__init__(treatments=treatments, diseases=diseases, disease_treatment_map=disease_treatment_map, years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label, **kwargs)
-        self.define_pars(
-            sens=dict(
-                ng=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                ct=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                tv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                bv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-            ),
-            spec=dict(
-                ng=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                ct=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                tv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-                bv=[ss.bernoulli(0.95), ss.bernoulli(0.95)],
-            ),
-            dt_scale=False,
-        )
-        self.update_pars(pars, **kwargs)
-
-        return
-
-
 # %%  Algorithms
 
-def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
+def make_testing(ng, ct, tv, bv, prop_treat=None, poc=None, stop=2040):
 
     intv_year = 2028
 
-    if scenario == 'soc':
-        synd_end = stop
-    else:
-        synd_end = intv_year
+    # Handle inputs
+    synd_end = intv_year if poc else stop
+    # Translate prop_treat into sens and spec
+    sens = dict(  # Reflective of a treat-all approach
+            ng=[prop_treat, prop_treat],
+            ct=[prop_treat, prop_treat],
+            tv=[prop_treat, prop_treat],
+            bv=[prop_treat],
+    )
+    spec = dict(
+            ng=[1-prop_treat, 1-prop_treat],
+            ct=[1-prop_treat, 1-prop_treat],
+            tv=[1-prop_treat, 1-prop_treat],
+            bv=[1-prop_treat],
+    )
 
     # Testing interventions
     def seeking_care_discharge(sim):
@@ -146,13 +134,10 @@ def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
         'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole, 'bv': metronidazole
     }
 
-    # Different assumptions around SOC performance
-    if soc_perf == 'treat_all':
-        a = 4
-    elif soc_perf == '':
-        a = 5
-
+    # Syndromic management
     syndromic = SyndromicMgmt(
+        sens=sens,
+        spec=spec,
         stop=synd_end,
         diseases=[ng, ct, tv, bv],
         eligibility=seeking_care_discharge,
@@ -160,11 +145,23 @@ def make_testing(ng, ct, tv, bv, scenario='soc', soc_perf=None, stop=2040):
         disease_treatment_map=disease_treatment_map,
     )
 
-    if scenario == 'soc':
+    if not poc:
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
-    if scenario == 'panel':
-        panel = Panel(
+    if poc:
+        panel = SyndromicMgmt(
+            sens = dict(
+                ng=[0.95, 0.95],
+                ct=[0.95, 0.95],
+                tv=[0.95, 0.95],
+                bv=[prop_treat],
+            ),
+            spec = dict(
+                ng=[0.95, 0.95],
+                ct=[0.95, 0.95],
+                tv=[0.95, 0.95],
+                bv=[1-prop_treat],
+            ),
             start=intv_year,
             diseases=[ng, ct, tv, bv],
             eligibility=seeking_care_discharge,
