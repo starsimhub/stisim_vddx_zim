@@ -13,26 +13,29 @@ from interventions import make_testing
 from plot_sims import *
 
 
-def make_stis(bv_beta_m2f=0.2):
+def make_stis(p_symp=None, p_symp_care=None):
     ng = sti.Gonorrhea(
         beta_m2f=0.07,
-        p_symp_care=[0.1, 0.1],  # [0.66, 0.83]
+        p_symp=[p_symp['ng'], 0.65],
+        p_symp_care=[p_symp_care['ng'], 0.83]
     )
     ct = sti.Chlamydia(
         beta_m2f=0.06,
-        p_symp_care=[0.1, 0.1],  # [0.42, 0.83]
+        p_symp=[p_symp['ct'], 0.54],
+        p_symp_care=[p_symp_care['ct'], 0.83]
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.1,
-        p_symp_care=[0.1, 0.1],  # [0.39, 0.27]
-        p_clear=ss.bernoulli(p=0.1),
+        p_symp=[p_symp['tv'], 0.5],
+        p_symp_care=[p_symp_care['tv'], 0.27]
     )
     bv = sti.BV()
 
     return ng, ct, tv, bv
 
 
-def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True):
+def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True,
+             scenario='treat100', p_symp=None, p_symp_care=None, prop_treat=None, poc=False):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -69,16 +72,16 @@ def make_sim(scenario='soc', seed=1, n_agents=None, bv_beta_m2f=0.15, dt=1/12, s
     hiv = make_hiv()
     diseases = [hiv]
     if add_stis:
-        ng, ct, tv, bv = make_stis(bv_beta_m2f=bv_beta_m2f)
+        ng, ct, tv, bv = make_stis(p_symp=p_symp, p_symp_care=p_symp_care)
         stis = [ng, ct, tv, bv]
-        diseases += stis
+        diseases += stis  # Add the STIs to the list of diseases
 
     ####################################################################################################################
     # Interventions and analyzers
     ####################################################################################################################
     intvs = make_hiv_intvs()
     if add_stis:
-        intvs += make_testing(ng, ct, tv, bv, scenario=scenario, stop=stop)
+        intvs += make_testing(ng, ct, tv, bv, prop_treat=prop_treat, poc=poc, stop=stop)
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     else:
         connectors = []
@@ -113,7 +116,18 @@ if __name__ == '__main__':
     seed = 1
     do_save = True
     do_run = True
-    scenario = 'soc'
+    scenario = 'treat100'
+
+    # Define scenarios
+    scendict = sc.objdict(
+        treat100=dict(prop_treat=1, p_symp=0.1, p_symp_care=0.75, poc=False),
+        treat90=dict(prop_treat=0.9, p_symp=0.1, p_symp_care=5/6, poc=False),
+        treat50=dict(prop_treat=0.5, p_symp=0.2, p_symp_care=0.75, poc=False),
+        treat100poc=dict(prop_treat=1, p_symp=0.1, p_symp_care=0.75, poc=True),
+        treat90poc=dict(prop_treat=0.9, p_symp=0.1, p_symp_care=5/6, poc=True),
+        treat50poc=dict(prop_treat=0.5, p_symp=0.2, p_symp_care=0.75, poc=True),
+    )
+    scenpars = scendict[scenario]
 
     # What to run
     to_run = [
@@ -132,7 +146,7 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        sim = make_sim(scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
+        sim = make_sim(scenario=scenario, scenpars=scenpars, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
