@@ -13,22 +13,22 @@ from interventions import make_testing
 from plot_sims import *
 
 
-def make_stis(p_symp=None, p_symp_care=None):
+def make_stis(p_symp=None, p_symp_care=None, ng=None, ct=None, tv=None):
     ng = sti.Gonorrhea(
-        beta_m2f=0.1,
-        eff_condom=0.8,
+        beta_m2f=ng['beta_m2f'],
+        eff_condom=ng['eff_condom'],
         p_symp=[p_symp['ng'], 0.65],
         p_symp_care=[p_symp_care['ng'], 0.83]
     )
     ct = sti.Chlamydia(
-        beta_m2f=0.06,
-        eff_condom=0.7,
+        beta_m2f=ct['beta_m2f'],
+        eff_condom=ct['eff_condom'],
         p_symp=[p_symp['ct'], 0.54],
         p_symp_care=[p_symp_care['ct'], 0.83]
     )
     tv = sti.Trichomoniasis(
-        beta_m2f=0.1,
-        eff_condom=0.9,
+        beta_m2f=tv['beta_m2f'],
+        eff_condom=tv['eff_condom'],
         p_symp=[p_symp['tv'], 0.5],
         p_symp_care=[p_symp_care['tv'], 0.27]
     )
@@ -38,7 +38,7 @@ def make_stis(p_symp=None, p_symp_care=None):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', p_symp=None, p_symp_care=None, prop_treat=None, poc=False):
+             scenario='treat100', p_symp=None, p_symp_care=None, prop_treat=None, poc=False, stipars=None):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -75,7 +75,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False,
     hiv = make_hiv()
     diseases = [hiv]
     if add_stis:
-        ng, ct, tv, bv = make_stis(p_symp=p_symp, p_symp_care=p_symp_care)
+        ng, ct, tv, bv = make_stis(p_symp=p_symp, p_symp_care=p_symp_care, **stipars)
         stis = [ng, ct, tv, bv]
         diseases += stis  # Add the STIs to the list of diseases
 
@@ -118,27 +118,46 @@ def make_scens():
             prop_treat=1,  # Treat all
             p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
             p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
+            stipars = dict(
+                ng=dict(beta_m2f=0.15, eff_condom=0.8),
+                ct=dict(beta_m2f=0.06, eff_condom=0.7),
+                tv=dict(beta_m2f=0.10, eff_condom=0.9),
+            ),
             poc=False,
         )
     )
-    scendict['treat90'] = sc.dcp(scendict['treat100'])
-    scendict['treat90'].prop_treat = 0.9
-    scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
+    # scendict['treat90'] = sc.dcp(scendict['treat100'])
+    # scendict['treat90'].prop_treat = 0.9
+    # scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
 
     scendict['treat80'] = sc.dcp(scendict['treat100'])
     scendict['treat80'].prop_treat = 0.8
     scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
     scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
+    scendict['treat80'].stipars = dict(
+        ng=dict(beta_m2f=0.0957, eff_condom=0.66),
+        ct=dict(beta_m2f=0.0547, eff_condom=0.73),
+        tv=dict(beta_m2f=0.1058, eff_condom=0.90),
+        # ng=dict(beta_m2f=0.19, eff_condom=0.9),
+        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
+        # tv=dict(beta_m2f=0.10, eff_condom=0.9),
+    )
 
     scendict['treat50'] = sc.dcp(scendict['treat100'])
     scendict['treat50'].prop_treat = 0.5
     scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
+    scendict['treat50'].stipars = dict(
+        ng=dict(beta_m2f=0.15, eff_condom=0.8),
+        ct=dict(beta_m2f=0.06, eff_condom=0.7),
+        tv=dict(beta_m2f=0.10, eff_condom=0.9),
+    )
 
     for scenario in scendict.keys():
         scendict[scenario+'poc'] = sc.dcp(scendict[scenario])
         scendict[scenario+'poc'].poc = True
 
     return scendict
+
 
 def make_scenpars(scenario):
     scendict = make_scens()
@@ -149,7 +168,7 @@ if __name__ == '__main__':
 
     # SETTINGS
     debug = False
-    seed = 1
+    seed = 1  # 533833
     do_save = True
     do_run = True
     scenario = 'treat80'
