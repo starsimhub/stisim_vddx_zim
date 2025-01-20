@@ -111,6 +111,39 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False,
 
     return sim
 
+# Define scenarios
+def make_scens():
+    scendict = sc.objdict(
+        treat100=sc.objdict(
+            prop_treat=1,  # Treat all
+            p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
+            p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
+            poc=False,
+        )
+    )
+    scendict['treat90'] = sc.dcp(scendict['treat100'])
+    scendict['treat90'].prop_treat = 0.9
+    scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
+
+    scendict['treat80'] = sc.dcp(scendict['treat100'])
+    scendict['treat80'].prop_treat = 0.8
+    scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
+    scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
+
+    scendict['treat50'] = sc.dcp(scendict['treat100'])
+    scendict['treat50'].prop_treat = 0.5
+    scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
+
+    for scenario in scendict.keys():
+        scendict[scenario+'poc'] = sc.dcp(scendict[scenario])
+        scendict[scenario+'poc'].poc = True
+
+    return scendict
+
+def make_scenpars(scenario):
+    scendict = make_scens()
+    return scendict[scenario]
+
 
 if __name__ == '__main__':
 
@@ -121,38 +154,6 @@ if __name__ == '__main__':
     do_run = True
     scenario = 'treat80'
 
-    # Define scenarios
-    def make_scens():
-        scendict = sc.objdict(
-            treat100=sc.objdict(
-                prop_treat=1,  # Treat all
-                p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
-                p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
-                poc=False,
-            )
-        )
-        scendict['treat90'] = sc.dcp(scendict['treat100'])
-        scendict['treat90'].prop_treat = 0.9
-        scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
-
-        scendict['treat80'] = sc.dcp(scendict['treat100'])
-        scendict['treat80'].prop_treat = 0.8
-        scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
-        scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
-
-        scendict['treat50'] = sc.dcp(scendict['treat100'])
-        scendict['treat50'].prop_treat = 0.5
-        scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
-
-        for scenario in scendict.keys():
-            scendict[scenario+'poc'] = sc.dcp(scendict[scenario])
-            scendict[scenario+'poc'].poc = True
-
-        return scendict
-
-    def make_scenpars(scenario):
-        scendict = make_scens()
-        return scendict[scenario]
 
     # What to run
     to_run = [
