@@ -119,9 +119,9 @@ def make_scens():
             p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
             p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
             stipars = dict(
-                ng=dict(beta_m2f=0.15, eff_condom=0.8),
-                ct=dict(beta_m2f=0.06, eff_condom=0.7),
-                tv=dict(beta_m2f=0.10, eff_condom=0.9),
+                ng=dict(beta_m2f=0.0957, eff_condom=0.66),
+                ct=dict(beta_m2f=0.0547, eff_condom=0.73),
+                tv=dict(beta_m2f=0.1058, eff_condom=0.90),
             ),
             poc=False,
         )
@@ -135,12 +135,9 @@ def make_scens():
     scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
     scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
     scendict['treat80'].stipars = dict(
-        ng=dict(beta_m2f=0.0957, eff_condom=0.66),
-        ct=dict(beta_m2f=0.0547, eff_condom=0.73),
-        tv=dict(beta_m2f=0.1058, eff_condom=0.90),
-        # ng=dict(beta_m2f=0.19, eff_condom=0.9),
-        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
-        # tv=dict(beta_m2f=0.10, eff_condom=0.9),
+        ng=dict(beta_m2f=0.19, eff_condom=0.9),
+        ct=dict(beta_m2f=0.07, eff_condom=0.85),
+        tv=dict(beta_m2f=0.10, eff_condom=0.9),
     )
 
     scendict['treat50'] = sc.dcp(scendict['treat100'])
@@ -168,10 +165,10 @@ if __name__ == '__main__':
 
     # SETTINGS
     debug = False
-    seed = 1  # 533833
+    seed = 533833
     do_save = True
     do_run = True
-    scenario = 'treat80'
+    scenario = 'treat100'
 
 
     # What to run

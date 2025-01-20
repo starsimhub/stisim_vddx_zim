@@ -69,7 +69,7 @@ def run_calibration(n_trials=None, n_workers=None):
 
     # Make the sim
     scenpars = make_scenpars(scenario)
-    sim = make_sim(scenario='treat100', **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1)
+    sim = make_sim(scenario='treat50', **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_calib.csv')
 
     # Make the calibration
@@ -79,7 +79,7 @@ def run_calibration(n_trials=None, n_workers=None):
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
-        die=True, reseed=True, storage=storage, save_results=True,
+        die=True, reseed=False, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
