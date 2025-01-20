@@ -162,6 +162,8 @@ def make_testing(ng, ct, tv, bv, prop_treat=None, poc=None, stop=2040):
                 tv=[0.95, 0.95],
                 bv=[1-prop_treat],
             ),
+            name='panel',
+            label='panel',
             start=intv_year,
             diseases=[ng, ct, tv, bv],
             eligibility=seeking_care_discharge,

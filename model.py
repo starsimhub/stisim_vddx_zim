@@ -15,17 +15,20 @@ from plot_sims import *
 
 def make_stis(p_symp=None, p_symp_care=None):
     ng = sti.Gonorrhea(
-        beta_m2f=0.07,
+        beta_m2f=0.1,
+        eff_condom=0.8,
         p_symp=[p_symp['ng'], 0.65],
         p_symp_care=[p_symp_care['ng'], 0.83]
     )
     ct = sti.Chlamydia(
         beta_m2f=0.06,
+        eff_condom=0.7,
         p_symp=[p_symp['ct'], 0.54],
         p_symp_care=[p_symp_care['ct'], 0.83]
     )
     tv = sti.Trichomoniasis(
         beta_m2f=0.1,
+        eff_condom=0.9,
         p_symp=[p_symp['tv'], 0.5],
         p_symp_care=[p_symp_care['tv'], 0.27]
     )
@@ -45,7 +48,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1980, stop=2030, debug=False,
     # Demographic modules
     ####################################################################################################################
     fertility_data = pd.read_csv(f'data/asfr.csv')
-    pregnancy = ss.Pregnancy(fertility_rate=fertility_data)
+    pregnancy = ss.Pregnancy(unit='month', fertility_rate=fertility_data)
     death_data = pd.read_csv(f'data/deaths.csv')
     death = ss.Deaths(death_rate=death_data, rate_units=1)
 
@@ -116,10 +119,10 @@ if __name__ == '__main__':
     seed = 1
     do_save = True
     do_run = True
-    scenario = 'treat80poc'
+    scenario = 'treat80'
 
     # Define scenarios
-    def make_scens(scenario):
+    def make_scens():
         scendict = sc.objdict(
             treat100=sc.objdict(
                 prop_treat=1,  # Treat all
@@ -128,32 +131,34 @@ if __name__ == '__main__':
                 poc=False,
             )
         )
-        scendict['treat90'] = scendict['treat100'].copy()
+        scendict['treat90'] = sc.dcp(scendict['treat100'])
         scendict['treat90'].prop_treat = 0.9
         scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
 
-        scendict['treat80'] = scendict['treat100'].copy()
+        scendict['treat80'] = sc.dcp(scendict['treat100'])
         scendict['treat80'].prop_treat = 0.8
         scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
         scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
 
-        scendict['treat50'] = scendict['treat100'].copy()
+        scendict['treat50'] = sc.dcp(scendict['treat100'])
         scendict['treat50'].prop_treat = 0.5
         scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
 
         for scenario in scendict.keys():
-            scendict[scenario+'poc'] = scendict[scenario].copy()
+            scendict[scenario+'poc'] = sc.dcp(scendict[scenario])
             scendict[scenario+'poc'].poc = True
 
-        scenpars = scendict[scenario]
-        return scenpars
+        return scendict
 
+    def make_scenpars(scenario):
+        scendict = make_scens()
+        return scendict[scenario]
 
     # What to run
     to_run = [
         # 'hiv',
         'stis',
-        # 'plot_epi',
+        'plot_epi',
         # 'plot_hiv'
     ]
 
@@ -168,7 +173,7 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        scenpars = make_scens(scenario)
+        scenpars = make_scenpars(scenario)
         sim = make_sim(scenario=scenario, **scenpars, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
@@ -177,8 +182,8 @@ if __name__ == '__main__':
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
         plot_hiv_sims(df, start_year=1990, which='single')
-        plot_sti_sims(df, start_year=1990, end_year=2040, which='single')
-        plot_sti_tx(df, start_year=1990)
+        plot_sti_sims(df, start_year=1990, end_year=2040, which='single', fext=scenario)
+        plot_sti_tx(df, start_year=1990, fext=scenario)
 
         # Save age/sex epi results
         dfs = sc.autolist()
