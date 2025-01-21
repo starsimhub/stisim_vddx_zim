@@ -14,10 +14,10 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     """
     sims = sc.autolist()
     for scen in scenarios:
-        for i in range(n_scen_runs):
-            print(f"Making sim: {scen=}, seed={seed + i}")
-            for pocstr in ['', 'poc']:
-                scenname = scen + pocstr
+        for pocstr in ['', 'poc']:
+            scenname = scen + pocstr
+            for i in range(n_scen_runs):
+                print(f"Making sim: {scenname=}, seed={seed + i}")
                 scenpars = make_scenpars(scenname)
                 sim = make_sim(seed=seed + i, **scenpars, scenario=scenname, verbose=0.01, stop=stop)
                 sim.label = scenname + str(i)
