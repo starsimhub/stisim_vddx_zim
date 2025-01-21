@@ -48,7 +48,7 @@ if __name__ == '__main__':
     debug = False
     seed = 1
     n_scen_runs = [20, 1][debug]  # Number of seeds per scenarios
-    scenarios = ['soc', 'panel']  #, 'panel']
+    scenarios  = ['soc', 'panel']  #, 'panel']
 
     # Run analyses
     sims, df = run_analyses(scenarios, bv_range=[0.12, 0.15, 0.2], parallel=True, stop=2040)
