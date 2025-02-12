@@ -12,7 +12,37 @@ import pandas as pd
 def count(arr): return np.count_nonzero(arr)
 
 
-class SyndromicMgmt(sti.SymptomaticTesting):
+class SyndromicMgmt(sti.STITest):
+    def __init__(self, pars=None, treatments=None, diseases=None, disease_treatment_map=None, treat_prob_data=None, years=None, start=None, stop=None, eligibility=None, name=None, label=None, **kwargs):
+        super().__init__(years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label)
+        self.define_pars(
+            tx_mix=dict(
+                all=[0.80, 0.05],
+                ngct=[0.05, 0.8],
+                mtz=[0.05, 0.0],
+                none=[0.1, 0.15],
+            ),
+            tx_dist=ss.bernoulli(p=0),
+            dt_scale=False,
+        )
+        self.update_pars(pars, **kwargs)
+
+        # Store treatments and diseases
+        self.treatments = sc.tolist(treatments)
+        self.diseases = diseases
+        if disease_treatment_map is None:
+            disease_treatment_map = {t.disease: t for t in self.treatments}
+        self.disease_treatment_map = disease_treatment_map
+
+        self.define_states(
+            ss.FloatArr('ti_referred'),
+            ss.FloatArr('ti_dismissed'),
+        )
+        self.treat_prob_data = treat_prob_data
+        self.treat_prob = None
+        self.treated_by_uid = None
+        return
+
     def init_results(self):
         super().init_results()
         self.define_results(
@@ -101,16 +131,16 @@ def make_testing(ng, ct, tv, bv, prop_treat=None, poc=None, stop=2040):
     # Handle inputs
     synd_end = intv_year if poc else stop
     # Translate prop_treat into sens and spec
-    sens = dict(  # Reflective of a treat-all approach
+    sens = dict(
             ng=[prop_treat, prop_treat],
             ct=[prop_treat, prop_treat],
-            tv=[prop_treat, prop_treat],
+            tv=[prop_treat, 0.1],
             bv=[prop_treat],
     )
     spec = dict(
             ng=[1-prop_treat, 1-prop_treat],
             ct=[1-prop_treat, 1-prop_treat],
-            tv=[1-prop_treat, 1-prop_treat],
+            tv=[1-prop_treat, 0.9],
             bv=[1-prop_treat],
     )
 

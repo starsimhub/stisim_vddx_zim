@@ -126,9 +126,6 @@ def make_scens():
             poc=False,
         )
     )
-    # scendict['treat90'] = sc.dcp(scendict['treat100'])
-    # scendict['treat90'].prop_treat = 0.9
-    # scendict['treat90'].p_symp_care = dict(ng=5/6, ct=5/6, tv=2/3)
 
     scendict['treat80'] = sc.dcp(scendict['treat100'])
     scendict['treat80'].prop_treat = 0.8
