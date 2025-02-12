@@ -55,7 +55,7 @@ def build_sim(sim, calib_pars):
     return sim
 
 
-def run_calibration(n_trials=None, n_workers=None):
+def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
@@ -69,7 +69,7 @@ def run_calibration(n_trials=None, n_workers=None):
 
     # Make the sim
     scenpars = make_scenpars(scenario)
-    sim = make_sim(scenario='treat50', **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
+    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_calib.csv')
 
     # Make the calibration
@@ -83,7 +83,7 @@ def run_calibration(n_trials=None, n_workers=None):
     )
 
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_sti_calib.obj', calib)
+    sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     ]
 
     if 'run_calib' in to_run:
-        sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
         calib = sc.loadobj('results/zim_sti_calib.obj')

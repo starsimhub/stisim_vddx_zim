@@ -171,7 +171,7 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat50'
+    scenario = 'treat100'
 
 
     # What to run
