@@ -1,0 +1,77 @@
+# %% Imports and settings
+import pandas as pd
+import sciris as sc
+import starsim as ss
+import stisim as sti
+
+# From this repo
+from model import make_sim, make_scenpars
+
+
+def run_syndromic_scens(scenarios, stop=2040, parallel=True):
+    """
+    Run analyses
+    """
+    sims = sc.autolist()
+    for scen in scenarios:
+        for pocstr in ['', 'poc']:
+            scenname = scen + pocstr
+            for i in range(n_scen_runs):
+                print(f"Making sim: {scenname=}, seed={seed + i}")
+                scenpars = make_scenpars(scenname)
+                sim = make_sim(seed=seed + i, **scenpars, scenario=scenname, verbose=0.01, stop=stop)
+                sim.label = scenname + str(i)
+                sims += sim
+
+    if parallel:
+        sims = ss.parallel(sims).sims
+    else:
+        for sim in sims:
+            sim.run()
+
+    print("Processing... ")
+    dfs = []
+    for s, sim in enumerate(sims):
+        sdf = sim.to_df(resample='year', use_years=True, sep='.')
+        sdf['seed'] = sim.pars.rand_seed
+        sdf['scenario'] = sim.scenario
+        sdf['poc'] = 1 if 'poc' in sim.scenario else 0
+        dfs += [sdf]
+    df = pd.concat(dfs)
+
+    return sims, df
+
+
+def process_results(df):
+    res = pd.DataFrame()
+    for scen in ['treat100', 'treat80', 'treat50']:
+        for seed in df.seed.unique():
+            thisdf = df.loc[(df.seed == seed) & (df.scenario.str.contains(scen))]
+            for dis in ['ng', 'ct', 'tv']:
+                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
+                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
+                res[dis+'_infections'] = (soc - poc)/soc
+
+    return res
+
+
+if __name__ == '__main__':
+
+    # SETTINGS
+    debug = False
+    seed = 1
+    n_scen_runs = [10, 1][debug]  # Number of seeds per scenarios
+    scenarios = ['treat100', 'treat80', 'treat50']  #, 'panel']
+    #
+    # # Run analyses
+    # sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
+    # sc.saveobj('results/synd_scens.obj', df)
+
+    # Load
+    df = sc.loadobj('results/synd_scens.obj')
+
+
+
+
+
+

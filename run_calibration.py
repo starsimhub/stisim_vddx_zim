@@ -15,7 +15,7 @@ os.environ.update(
 import sciris as sc
 import stisim as sti
 import pandas as pd
-from model import make_sim
+from model import make_sim, make_scenpars
 
 
 # Run settings
@@ -24,6 +24,7 @@ n_trials = [5000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
+scenario = 'treat80'
 
 
 def build_sim(sim, calib_pars):
@@ -54,17 +55,21 @@ def build_sim(sim, calib_pars):
     return sim
 
 
-def run_calibration(n_trials=None, n_workers=None):
+def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.055, high=0.065, guess=0.06),
-        ct_beta_m2f=dict(low=0.055, high=0.065, guess=0.06),
-        tv_beta_m2f=dict(low=0.09, high=0.11, guess=0.10),
+        ng_beta_m2f=dict(low=0.05, high=0.3, guess=0.06),
+        ct_beta_m2f=dict(low=0.02, high=0.1, guess=0.05),
+        tv_beta_m2f=dict(low=0.08, high=0.3, guess=0.10),
+        ng_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
+        ct_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
+        tv_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
     )
 
     # Make the sim
-    sim = make_sim(scenario='soc', start=1990, stop=2030, n_agents=5e3)
+    scenpars = make_scenpars(scenario)
+    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_calib.csv')
 
     # Make the calibration
@@ -74,11 +79,11 @@ def run_calibration(n_trials=None, n_workers=None):
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
-        die=True, reseed=True, storage=storage, save_results=True,
+        die=True, reseed=False, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_sti_calib.obj', calib)
+    sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
@@ -92,7 +97,7 @@ if __name__ == '__main__':
     ]
 
     if 'run_calib' in to_run:
-        sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
         calib = sc.loadobj('results/zim_sti_calib.obj')
