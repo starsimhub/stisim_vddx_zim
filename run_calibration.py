@@ -24,7 +24,7 @@ n_trials = [5000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
-scenario = 'treat80'
+scenario = 'treat100'
 
 
 def build_sim(sim, calib_pars):

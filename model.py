@@ -84,7 +84,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     ####################################################################################################################
     intvs = make_hiv_intvs()
     if add_stis:
-        intvs += make_testing(ng, ct, tv, bv, prop_treat=prop_treat, poc=poc, stop=stop)
+        intvs += make_testing(ng, ct, tv, bv, scenario=scenario, poc=poc, stop=stop)
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     else:
         connectors = []
@@ -119,9 +119,12 @@ def make_scens():
             p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
             p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
             stipars = dict(
-                ng=dict(beta_m2f=0.21, eff_condom=0.865),
-                ct=dict(beta_m2f=0.072, eff_condom=0.8),
-                tv=dict(beta_m2f=0.10, eff_condom=0.95),
+                # ng=dict(beta_m2f=0.2, eff_condom=0.9),
+                # ct=dict(beta_m2f=0.072, eff_condom=0.8),
+                # tv=dict(beta_m2f=0.10, eff_condom=0.95),
+                ng=dict(beta_m2f=0.2, eff_condom=0.8),
+                ct=dict(beta_m2f=0.2, eff_condom=0.8),
+                tv=dict(beta_m2f=0.1, eff_condom=0.8),
             ),
             poc=False,
         )
@@ -132,9 +135,12 @@ def make_scens():
     scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
     scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
     scendict['treat80'].stipars = dict(
-        ng=dict(beta_m2f=0.19, eff_condom=0.9),
-        ct=dict(beta_m2f=0.07, eff_condom=0.85),
-        tv=dict(beta_m2f=0.10, eff_condom=0.9),
+        ng=dict(beta_m2f=0.2, eff_condom=0.8),
+        ct=dict(beta_m2f=0.2, eff_condom=0.8),
+        tv=dict(beta_m2f=0.1, eff_condom=0.8),
+        # ng=dict(beta_m2f=0.19, eff_condom=0.9),
+        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
+        # tv=dict(beta_m2f=0.10, eff_condom=0.9),
     )
 
     scendict['treat50'] = sc.dcp(scendict['treat100'])
@@ -144,9 +150,12 @@ def make_scens():
         # ng=dict(beta_m2f=0.1105, eff_condom=0.75),
         # ct=dict(beta_m2f=0.0666, eff_condom=0.83),
         # tv=dict(beta_m2f=0.1021, eff_condom=0.89),
-        ng=dict(beta_m2f=0.18, eff_condom=0.91),
-        ct=dict(beta_m2f=0.07, eff_condom=0.85),
-        tv=dict(beta_m2f=0.15, eff_condom=0.95),
+        ng=dict(beta_m2f=0.2, eff_condom=0.8),
+        ct=dict(beta_m2f=0.2, eff_condom=0.8),
+        tv=dict(beta_m2f=0.1, eff_condom=0.8),
+        # ng=dict(beta_m2f=0.18, eff_condom=0.91),
+        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
+        # tv=dict(beta_m2f=0.15, eff_condom=0.95),
     )
 
     for scenario in scendict.keys():
@@ -168,7 +177,7 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat100'
+    scenario = 'treat50'
 
 
     # What to run
@@ -199,8 +208,8 @@ if __name__ == '__main__':
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
         plot_hiv_sims(df, start_year=1990, which='single')
-        plot_sti_sims(df, start_year=1990, end_year=2040, which='single', fext=scenario)
-        plot_sti_tx(df, start_year=1990, fext=scenario)
+        plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
+        plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
 
         # Save age/sex epi results
         dfs = sc.autolist()
@@ -208,7 +217,7 @@ if __name__ == '__main__':
             for sex in ['female', 'male']:
                 dd = dict()
                 dd['age'] = sim.diseases[disease].age_bins[:-1]
-                dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:,-1]
+                dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:, -1]
                 dd['symp_prevalence'] = sim.diseases[disease].age_sex_results['symp_prevalence'][sex][:,-1]
                 dd['disease'] = disease
                 dd['sex'] = sex
@@ -230,7 +239,7 @@ if __name__ == '__main__':
         for pn, disease in enumerate(['ng', 'ct', 'tv']):
             ax = axes[pn]
             thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
-            sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
+            sns.barplot(data=thisdf, x="age", y="prevalence", hue="sex", ax=ax, palette=colors)
             ax.set_title(disease.upper())
             ax.set_ylabel('')
             ax.set_xlabel('')
