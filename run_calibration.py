@@ -20,8 +20,8 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [500, 2][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]    # How many cores to use
+n_trials = [1, 2][debug]  # How many trials to run for calibration
+n_workers = [1, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 scenario = 'treat100'
@@ -29,11 +29,7 @@ scenario = 'treat100'
 
 def build_sim(sim, calib_pars):
 
-    ng = sim.diseases.ng
-    ct = sim.diseases.ct
-    tv = sim.diseases.tv
-
-    # Apply the calibration parameters
+   # Apply the calibration parameters
     for k, pars in calib_pars.items():  # Loop over the calibration parameters
         if k == 'rand_seed':
             sim.pars.rand_seed = v
@@ -42,7 +38,7 @@ def build_sim(sim, calib_pars):
         v = pars['value']
         if 'beta' in k:
             sim.diseases[k[:2]].pars[k[3:]] = v
-        elif 'p_symp' in k:
+        elif k == 'p_symp':
             sim.diseases[k[:2]].pars[k[3:]][0] = v
         elif 'p_symp_care' in k:
             for dis in ['ng', 'ct', 'tv']:
