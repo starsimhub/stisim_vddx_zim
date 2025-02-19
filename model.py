@@ -213,15 +213,17 @@ if __name__ == '__main__':
 
         # Save age/sex epi results
         dfs = sc.autolist()
+        age_bins = sim.diseases.ng.age_bins
         for disease in ['ng', 'ct', 'tv']:
-            for sex in ['female', 'male']:
+            for sex in ['f', 'm']:
                 dd = dict()
-                dd['age'] = sim.diseases[disease].age_bins[:-1]
-                dd['prevalence'] = sim.diseases[disease].age_sex_results['prevalence'][sex][:, -1]
-                dd['symp_prevalence'] = sim.diseases[disease].age_sex_results['symp_prevalence'][sex][:,-1]
-                dd['disease'] = disease
-                dd['sex'] = sex
-                dfs += pd.DataFrame(dd)
+                for ab1, ab2 in zip(age_bins[:-1], age_bins[1:]):
+                    dd['age'] = [ab1]
+                    dd['sex'] = sex
+                    dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
+                    dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
+                    dd['disease'] = disease
+                    dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
         if do_save: sc.saveobj('results/epi_df.df', epi_df)
 
@@ -239,14 +241,14 @@ if __name__ == '__main__':
         for pn, disease in enumerate(['ng', 'ct', 'tv']):
             ax = axes[pn]
             thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
-            sns.barplot(data=thisdf, x="age", y="prevalence", hue="sex", ax=ax, palette=colors)
+            sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
             ax.set_title(disease.upper())
             ax.set_ylabel('')
             ax.set_xlabel('')
             # ax.legend_.remove()
 
         sc.figlayout()
-        sc.savefig("figures/epi.png", dpi=100)
+        sc.savefig("figures/epi_symp.png", dpi=100)
 
     if 'plot_hiv' in to_run:
         from utils import set_font

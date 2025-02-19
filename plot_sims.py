@@ -180,7 +180,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     # Prevalence
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
-        resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
+        resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
         if dname == 'bv':
             resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
         for rlabel, rname in resnames.items():

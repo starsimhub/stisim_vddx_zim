@@ -20,7 +20,7 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [5000, 2][debug]  # How many trials to run for calibration
+n_trials = [500, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -40,15 +40,13 @@ def build_sim(sim, calib_pars):
             continue
 
         v = pars['value']
-        if 'ng_' in k:
-            k = k.replace('ng_', '')
-            ng.pars[k] = v
-        elif 'ct_' in k:
-            k = k.replace('ct_', '')
-            ct.pars[k] = v
-        elif 'tv_' in k:
-            k = k.replace('tv_', '')
-            tv.pars[k] = v
+        if 'beta' in k:
+            sim.diseases[k[:2]].pars[k] = v
+        elif 'p_symp' in k:
+            sim.diseases[k[:2]].pars[k][0] = v
+        elif 'p_symp_care' in k:
+            for dis in ['ng', 'ct', 'tv']:
+                sim.diseases[dis].pars[k][0] = v
         else:
             raise NotImplementedError(f'Parameter {k} not recognized')
 
@@ -62,15 +60,16 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
         ng_beta_m2f=dict(low=0.05, high=0.3, guess=0.06),
         ct_beta_m2f=dict(low=0.02, high=0.1, guess=0.05),
         tv_beta_m2f=dict(low=0.08, high=0.3, guess=0.10),
-        ng_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
-        ct_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
-        tv_eff_condom=dict(low=0.5, high=0.9, guess=0.8),
+        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
+        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
+        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
+        p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
     )
 
     # Make the sim
     scenpars = make_scenpars(scenario)
     sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
-    data = pd.read_csv('data/zimbabwe_calib.csv')
+    data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     # Make the calibration
     calib = sti.Calibration(
