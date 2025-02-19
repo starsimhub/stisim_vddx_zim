@@ -38,7 +38,7 @@ def build_sim(sim, calib_pars):
         v = pars['value']
         if 'beta' in k:
             sim.diseases[k[:2]].pars[k[3:]] = v
-        elif k == 'p_symp':
+        elif 'p_symp' in k and k != 'p_symp_care':
             sim.diseases[k[:2]].pars[k[3:]][0] = v
         elif 'p_symp_care' in k:
             for dis in ['ng', 'ct', 'tv']:
