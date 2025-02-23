@@ -20,7 +20,7 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [500, 2][debug]  # How many trials to run for calibration
+n_trials = [100, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -62,6 +62,13 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
         p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
     )
 
+    # Extra results to save
+    sres = sc.autolist()
+    for dis in ['ng', 'ct', 'tv']:
+        for res in ['prevalence', 'new_infections', 'n_infected']:
+            for sk in ['', '_f', '_m']:
+                sres += dis+'_'+res+sk
+
     # Make the sim
     scenpars = make_scenpars(scenario)
     sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
@@ -70,6 +77,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     # Make the calibration
     calib = sti.Calibration(
         calib_pars=calib_pars,
+        extra_results=sres,
         build_fn=build_sim,
         sim=sim,
         data=data,
@@ -95,9 +103,9 @@ if __name__ == '__main__':
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
-        calib = sc.loadobj('results/zim_sti_calib.obj')
+        calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
         df = calib.df
-        sc.saveobj(f'results/zim_sti_calib_df.obj', df)
+        sc.saveobj(f'results/zim_sti_calib_df_{scenario}.obj', df)
         res = calib.sim_results
-        sc.saveobj(f'results/zim_sti_calib_res.obj', res)
+        sc.saveobj(f'results/zim_sti_calib_res_{scenario}.obj', res)
 
