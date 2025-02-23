@@ -104,8 +104,9 @@ if __name__ == '__main__':
 
     if 'load_calib' in to_run:
         calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-        df = calib.df
-        sc.saveobj(f'results/zim_sti_calib_df_{scenario}.obj', df)
-        res = calib.sim_results
-        sc.saveobj(f'results/zim_sti_calib_res_{scenario}.obj', res)
+        # df = calib.df
+        # sc.saveobj(f'results/zim_sti_calib_df_{scenario}.obj', df)
+        # res = calib.sim_results
+        # sc.saveobj(f'results/zim_sti_calib_res_{scenario}.obj', res)
+
 
