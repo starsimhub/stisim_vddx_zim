@@ -75,7 +75,7 @@ def plot_calibration(calib, start_year=2000, end_year=2025, res_to_plot=100):
 # %% Run as a script
 if __name__ == '__main__':
 
-    scenario = 'treat80'
+    scenario = 'treat50'
     calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
     plot_calibration(calib)
 

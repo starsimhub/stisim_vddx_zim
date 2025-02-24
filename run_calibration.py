@@ -20,11 +20,10 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
+n_trials = [8000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
-scenario = 'treat50'
 
 
 def build_sim(sim, calib_pars):
@@ -100,7 +99,8 @@ if __name__ == '__main__':
     ]
 
     if 'run_calib' in to_run:
-        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+        for scenario in ['treat100', 'treat80', 'treat50']:
+            sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
         calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
