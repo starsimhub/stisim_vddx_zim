@@ -20,8 +20,8 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [8000, 2][debug]  # How many trials to run for calibration
-n_workers = [80, 1][debug]    # How many cores to use
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
+n_workers = [60, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     if 'run_calib' in to_run:
         # for scenario in ['treat100', 'treat80', 'treat50']:
-        scenario = 'treat80'
+        scenario = 'treat50'
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
