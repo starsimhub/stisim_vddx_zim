@@ -54,7 +54,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     # Define the calibration parameters
     calib_pars = dict(
         ng_beta_m2f=dict(low=0.05, high=0.3, guess=0.06),
-        ct_beta_m2f=dict(low=0.02, high=0.1, guess=0.05),
+        ct_beta_m2f=dict(low=0.02, high=0.3, guess=0.05),
         tv_beta_m2f=dict(low=0.08, high=0.3, guess=0.10),
         ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
         ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
