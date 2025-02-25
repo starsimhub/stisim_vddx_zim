@@ -32,7 +32,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
             for i in range(n_scen_runs):
                 print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
-                scenpars = load_calib_pars(scenario=scenario, calib=calib, i=i)
+                scenpars = load_calib_pars(scenario=scenname, calib=calib, i=i)
                 sim = make_sim(**scenpars, scenario=scenname, verbose=-1, stop=stop)
                 sim.label = scenname + str(i)
                 sim.parset = i
@@ -77,15 +77,22 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [10, 1][debug]  # Number of parameter sets to run per scenario
     scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
+    to_run = [
+        'run_syndromic_scens',
+        # 'process_results',
+    ]
 
-    # Run analyses
-    sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
-    sc.saveobj('results/synd_scens.obj', df)
+    if 'run_syndromic_scens' in to_run:
+        # Run analyses
+        sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
+        sc.saveobj('results/synd_scens.obj', df)
+
+    if 'process_results' in to_run:
+        # Load
+        df = sc.loadobj('results/synd_scens.obj')
+        res = process_results(df)
+
     print('Done!')
-
-    # Load
-    # df = sc.loadobj('results/synd_scens.obj')
-
 
 
 
