@@ -101,12 +101,12 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [10, 1][debug]  # Number of parameter sets to run per scenario
+    n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
     scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
     to_run = [
-        # 'run_syndromic_scens',
-        'process_results',
-        'plot_results',
+        'run_syndromic_scens',
+        # 'process_results',
+        # 'plot_results',
     ]
 
     if 'run_syndromic_scens' in to_run:
