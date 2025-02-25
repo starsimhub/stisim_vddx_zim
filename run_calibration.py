@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     if 'run_calib' in to_run:
         # for scenario in ['treat100', 'treat80', 'treat50']:
-        scenario = 'treat80'
+        scenario = 'treat100'
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
 
     if 'load_calib' in to_run:
