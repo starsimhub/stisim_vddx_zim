@@ -18,7 +18,7 @@ def load_calib_pars(scenario=None, calib=None, i=None):
         scenpars['p_symp'][disease] = raw_calib_pars[f'{disease}_p_symp']
         scenpars['p_symp_care'][disease] = raw_calib_pars['p_symp_care']
         scenpars['stipars'][disease]['beta_m2f'] = raw_calib_pars[f'{disease}_beta_m2f']
-    return
+    return scenpars
 
 
 def run_syndromic_scens(scenarios, stop=2040, parallel=True):
@@ -29,12 +29,13 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     for scenario in scenarios:
         for pocstr in ['', 'poc']:
             scenname = scenario + pocstr
-            calib = sc.loadobj(f'results/zim_sti_calib_{scenname}.obj')
+            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
             for i in range(n_scen_runs):
                 print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
                 scenpars = load_calib_pars(scenario=scenario, calib=calib, i=i)
                 sim = make_sim(**scenpars, scenario=scenname, verbose=-1, stop=stop)
                 sim.label = scenname + str(i)
+                sim.parset = i
                 sims += sim
 
     if parallel:
@@ -47,7 +48,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     dfs = []
     for s, sim in enumerate(sims):
         sdf = sim.to_df(resample='year', use_years=True, sep='.')
-        sdf['seed'] = sim.pars.rand_seed
+        sdf['parset'] = sim.parset
         sdf['scenario'] = sim.scenario
         sdf['poc'] = 1 if 'poc' in sim.scenario else 0
         dfs += [sdf]
@@ -59,8 +60,8 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
 def process_results(df):
     res = pd.DataFrame()
     for scen in ['treat100', 'treat80', 'treat50']:
-        for seed in df.seed.unique():
-            thisdf = df.loc[(df.seed == seed) & (df.scenario.str.contains(scen))]
+        for parset in df.parset.unique():
+            thisdf = df.loc[(df.parset == parset) & (df.scenario.str.contains(scen))]
             for dis in ['ng', 'ct', 'tv']:
                 soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
 
     # Run analyses
-    sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
+    sims, df = run_syndromic_scens(scenarios, parallel=False, stop=2040)
     sc.saveobj('results/synd_scens.obj', df)
     print('Done!')
 

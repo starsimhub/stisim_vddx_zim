@@ -38,7 +38,7 @@ def make_stis(p_symp=None, p_symp_care=None, ng=None, ct=None, tv=None):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', p_symp=None, p_symp_care=None, prop_treat=None, poc=False, stipars=None):
+             scenario='treat100', p_symp=None, p_symp_care=None, poc=False, stipars=None):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -115,13 +115,9 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
 def make_scens():
     scendict = sc.objdict(
         treat100=sc.objdict(
-            prop_treat=1,  # Treat all
             p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
             p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
             stipars = dict(
-                # ng=dict(beta_m2f=0.2, eff_condom=0.9),
-                # ct=dict(beta_m2f=0.072, eff_condom=0.8),
-                # tv=dict(beta_m2f=0.10, eff_condom=0.95),
                 ng=dict(beta_m2f=0.2, eff_condom=0.8),
                 ct=dict(beta_m2f=0.2, eff_condom=0.8),
                 tv=dict(beta_m2f=0.1, eff_condom=0.8),
@@ -131,31 +127,20 @@ def make_scens():
     )
 
     scendict['treat80'] = sc.dcp(scendict['treat100'])
-    scendict['treat80'].prop_treat = 0.8
     scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
     scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
     scendict['treat80'].stipars = dict(
         ng=dict(beta_m2f=0.2, eff_condom=0.8),
         ct=dict(beta_m2f=0.2, eff_condom=0.8),
         tv=dict(beta_m2f=0.1, eff_condom=0.8),
-        # ng=dict(beta_m2f=0.19, eff_condom=0.9),
-        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
-        # tv=dict(beta_m2f=0.10, eff_condom=0.9),
     )
 
     scendict['treat50'] = sc.dcp(scendict['treat100'])
-    scendict['treat50'].prop_treat = 0.5
     scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
     scendict['treat50'].stipars = dict(
-        # ng=dict(beta_m2f=0.1105, eff_condom=0.75),
-        # ct=dict(beta_m2f=0.0666, eff_condom=0.83),
-        # tv=dict(beta_m2f=0.1021, eff_condom=0.89),
         ng=dict(beta_m2f=0.2, eff_condom=0.8),
         ct=dict(beta_m2f=0.2, eff_condom=0.8),
         tv=dict(beta_m2f=0.1, eff_condom=0.8),
-        # ng=dict(beta_m2f=0.18, eff_condom=0.91),
-        # ct=dict(beta_m2f=0.07, eff_condom=0.85),
-        # tv=dict(beta_m2f=0.15, eff_condom=0.95),
     )
 
     for scenario in scendict.keys():
@@ -177,14 +162,13 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat50'
-
+    scenario = 'treat100poc'
 
     # What to run
     to_run = [
         # 'hiv',
         'stis',
-        'plot_epi',
+        # 'plot_epi',
         # 'plot_hiv'
     ]
 

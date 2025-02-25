@@ -226,21 +226,21 @@ class SyndromicMgmt(sti.STITest):
 
 # %%  Algorithms
 def make_tx_mix(scenario):
-    if scenario == 'treat100':
+    if 'treat100' in scenario:
         tx_mix = dict(
             all3=[1.00, 0.00],
             ngct=[0.00, 1.00],
             mtnz=[0.00, 0.00],
             none=[0.00, 0.00],
         )
-    elif scenario == 'treat80':
+    elif 'treat80' in scenario:
         tx_mix = dict(
             all3=[0.80, 0.00],
             ngct=[0.05, 0.80],
             mtnz=[0.05, 0.00],
             none=[0.10, 0.20],
         )
-    elif scenario == 'treat50':
+    elif 'treat50' in scenario:
         tx_mix = dict(
             all3=[0.500, 0.00],
             ngct=[0.125, 0.50],
@@ -248,6 +248,16 @@ def make_tx_mix(scenario):
             none=[0.250, 0.50],
         )
     return tx_mix
+
+
+def neg_panel_mix(scenario):
+    if 'treat100' in scenario:
+        p_mtnz = 1.0
+    elif 'treat80' in scenario:
+        p_mtnz = 0.8
+    elif 'treat50' in scenario:
+        p_mtnz = 0.5
+    return p_mtnz
 
 
 def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
@@ -295,26 +305,20 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
     if poc:
-        panel = SyndromicMgmt(
-            sens = dict(
-                ng=[0.95, 0.95],
-                ct=[0.95, 0.95],
-                tv=[0.95, 0.95],
-                bv=[prop_treat],
-            ),
-            spec = dict(
-                ng=[0.95, 0.95],
-                ct=[0.95, 0.95],
-                tv=[0.95, 0.95],
-                bv=[1-prop_treat],
-            ),
+
+        disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
+        p_mtnz = neg_panel_mix(scenario)
+
+        panel = sti.SymptomaticTesting(
             name='panel',
             label='panel',
             start=intv_year,
-            diseases=[ng, ct, tv, bv],
+            diseases=[ng, ct, tv],
             eligibility=seeking_care_discharge,
             treatments=treatments,
             disease_treatment_map=disease_treatment_map,
+            p_mtnz=p_mtnz,
+            negative_treatments=[metronidazole],
         )
         intvs = [syndromic, panel, ng_tx, ct_tx, metronidazole]
 
