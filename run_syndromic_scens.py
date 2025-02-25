@@ -79,7 +79,7 @@ if __name__ == '__main__':
     scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
 
     # Run analyses
-    sims, df = run_syndromic_scens(scenarios, parallel=False, stop=2040)
+    sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
     sc.saveobj('results/synd_scens.obj', df)
     print('Done!')
 
