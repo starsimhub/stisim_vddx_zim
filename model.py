@@ -38,7 +38,7 @@ def make_stis(p_symp=None, p_symp_care=None, ng=None, ct=None, tv=None):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', p_symp=None, p_symp_care=None, poc=False, stipars=None):
+             scenario='treat100', p_symp=None, p_symp_care=None, poc=False, stipars=None, analyzers=None):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
@@ -101,7 +101,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         networks=[sexual, maternal],
         demographics=[pregnancy, death],
         interventions=intvs,
-        # analyzers=analyzers,
+        analyzers=analyzers,
         connectors=connectors,
         verbose=verbose,
     )
@@ -155,6 +155,19 @@ def make_scenpars(scenario):
     return scendict[scenario]
 
 
+def load_calib_pars(scenario=None, calib=None, i=0):
+    scenpars = make_scenpars(scenario)
+    raw_calib_pars = calib.df.iloc[i].to_dict()
+
+    # Overwrite
+    diseases = ['ng', 'ct', 'tv']
+    for disease in diseases:
+        scenpars['p_symp'][disease] = raw_calib_pars[f'{disease}_p_symp']
+        scenpars['p_symp_care'][disease] = raw_calib_pars['p_symp_care']
+        scenpars['stipars'][disease]['beta_m2f'] = raw_calib_pars[f'{disease}_beta_m2f']
+    return scenpars
+
+
 if __name__ == '__main__':
 
     # SETTINGS
@@ -162,13 +175,13 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat100poc'
+    scenario = 'treat80'
+    use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
     to_run = [
         # 'hiv',
         'stis',
-        # 'plot_epi',
         # 'plot_hiv'
     ]
 
@@ -183,8 +196,15 @@ if __name__ == '__main__':
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
-        scenpars = make_scenpars(scenario)
-        sim = make_sim(scenario=scenario, **scenpars, seed=seed, debug=debug, start=1990, stop=2041)
+        if use_calib:
+            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
+            scenpars = load_calib_pars(scenario=scenario, calib=calib, i=0)
+        else:
+            scenpars = make_scenpars(scenario)
+
+        # Add analyzer
+        analyzers = [sti.sw_stats()]
+        sim = make_sim(scenario=scenario, **scenpars, analyzers=analyzers, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
@@ -210,29 +230,6 @@ if __name__ == '__main__':
                     dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
         if do_save: sc.saveobj('results/epi_df.df', epi_df)
-
-    if 'plot_epi' in to_run:
-        from utils import set_font
-        import pylab as pl
-        import seaborn as sns
-
-        epi_df = sc.loadobj('results/epi_df.df')
-        set_font(size=20)
-        fig, axes = pl.subplots(1, 3, figsize=(10, 4))
-        axes = axes.ravel()
-        colors = ['#ee7989', '#4682b4']
-
-        for pn, disease in enumerate(['ng', 'ct', 'tv']):
-            ax = axes[pn]
-            thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age > 1)]
-            sns.barplot(data=thisdf, x="age", y="symp_prevalence", hue="sex", ax=ax, palette=colors)
-            ax.set_title(disease.upper())
-            ax.set_ylabel('')
-            ax.set_xlabel('')
-            # ax.legend_.remove()
-
-        sc.figlayout()
-        sc.savefig("figures/epi_symp.png", dpi=100)
 
     if 'plot_hiv' in to_run:
         from utils import set_font

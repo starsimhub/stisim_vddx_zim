@@ -76,64 +76,8 @@ def plot_calibration(calib, start_year=2000, end_year=2025, res_to_plot=100):
 if __name__ == '__main__':
 
     scenario = 'treat50'
-    to_run = [
-        # 'plot_single'
-        'load_all',
-        'plot_pars',
-    ]
+    calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
+    plot_calibration(calib)
 
-    if 'plot_single' in to_run:
-        calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-        plot_calibration(calib)
-
-    # Make big dataframe
-    if 'load_all' in to_run:
-        dfs = sc.autolist()
-        results = sc.objdict()
-        for scenario in ['treat50', 'treat80', 'treat100']:
-            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-            df = calib.df[:500]
-            df['scenario'] = scenario
-            df['ng_p_symp_care'] = df['p_symp_care']
-            df['ct_p_symp_care'] = df['p_symp_care']
-            df['tv_p_symp_care'] = df['p_symp_care']
-            dfs += df
-
-            # Save results
-            results[scenario] = calib.sim_results[:50]
-
-        df = pd.concat(dfs)
-
-        # Melt dataframe to long form
-        vars = ['ng_p_symp', 'ct_p_symp', 'tv_p_symp', 'ng_p_symp_care', 'ct_p_symp_care', 'tv_p_symp_care']
-        dfm = df.melt(id_vars=['index', 'mismatch', 'scenario'], value_vars=vars, var_name='variable', value_name='value')
-
-        # Add column for disease
-        dfm['disease'] = dfm['variable'].apply(lambda x: x.split('_')[0])
-        dfm['par'] = dfm['variable'].apply(lambda x: x[3:])
-
-        # Save
-        sc.saveobj('results/zim_sti_calib_df.obj', dfm)
-        sc.saveobj('results/zim_sti_calib_res.obj', results)
-
-    if 'plot_pars' in to_run:
-        # Load dataframe
-        df = sc.loadobj('results/zim_sti_calib_df.obj')
-        results = sc.loadobj('results/zim_sti_calib_res.obj')
-        import seaborn as sns
-        set_font(size=20)
-        fig, axes = pl.subplots(1, 3, figsize=(20, 8))
-        axes = axes.ravel()
-        diseases = ['ng', 'ct', 'tv']
-        for i, disease in enumerate(diseases):
-            ax = axes[i]
-            thisdf = df.loc[df['disease'] == disease]
-            # sns.stripplot(data=thisdf, x="par", y="value", hue="scenario", ax=ax, jitter=True)
-            sns.boxplot(data=thisdf, x="par", y="value", hue="scenario", palette='viridis', ax=ax)
-            ax.set_title(disease.upper())
-            ax.set_ylim(0, 1)
-
-        fig.tight_layout()
-        pl.savefig(f"figures/par_comp.png", dpi=100)
 
     print('Done.')

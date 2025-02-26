@@ -2,26 +2,9 @@
 import pandas as pd
 import sciris as sc
 import starsim as ss
-import stisim as sti
-import matplotlib.pyplot as pl
-import seaborn as sns
 
 # From this repo
-from model import make_sim, make_scenpars
-from utils import set_font
-
-
-def load_calib_pars(scenario=None, calib=None, i=None):
-    scenpars = make_scenpars(scenario)
-    raw_calib_pars = calib.df.iloc[i].to_dict()
-
-    # Overwrite
-    diseases = ['ng', 'ct', 'tv']
-    for disease in diseases:
-        scenpars['p_symp'][disease] = raw_calib_pars[f'{disease}_p_symp']
-        scenpars['p_symp_care'][disease] = raw_calib_pars['p_symp_care']
-        scenpars['stipars'][disease]['beta_m2f'] = raw_calib_pars[f'{disease}_beta_m2f']
-    return scenpars
+from model import make_sim, load_calib_pars
 
 
 def run_syndromic_scens(scenarios, stop=2040, parallel=True):
@@ -121,27 +104,6 @@ if __name__ == '__main__':
         sc.saveobj('results/synd_health.obj', healthdf)
         sc.saveobj('results/synd_treat.obj', treatdf)
 
-    if 'plot_results' in to_run:
-        hdf = sc.loadobj('results/synd_health.obj')
-        tdf = sc.loadobj('results/synd_treat.obj')
-        set_font(size=20)
-        fig, axes = pl.subplots(1, 2, figsize=(20, 8))
-        axes = axes.ravel()
-
-        # Plot 1: Health
-        ax = axes[0]
-        sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette='viridis', ax=ax)
-        ax.set_title('% reduction in infections, 2027-2040')
-        ax.set_ylim(-10, 100)
-
-        # Plot 2: Treatment
-        ax = axes[1]
-        sns.boxplot(data=tdf, x="treatment", y="overtreatments", hue="scenario", palette='viridis', ax=ax)
-        ax.set_title('% reduction in overtreatment, 2027-2040')
-        ax.set_ylim(0, 100)
-
-        fig.tight_layout()
-        pl.savefig(f"figures/fig5_impact.png", dpi=100)
 
     print('Done!')
 
