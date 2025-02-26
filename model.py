@@ -175,7 +175,7 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat80'
+    scenario = 'treat100poc'
     use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
@@ -197,7 +197,8 @@ if __name__ == '__main__':
 
     if 'stis' in to_run:
         if use_calib:
-            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
+            calibname = scenario.strip('poc')
+            calib = sc.loadobj(f'results/zim_sti_calib_{calibname}.obj')
             scenpars = load_calib_pars(scenario=scenario, calib=calib, i=0)
         else:
             scenpars = make_scenpars(scenario)
@@ -229,13 +230,12 @@ if __name__ == '__main__':
                     dd['disease'] = disease
                     dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
-        if do_save: sc.saveobj('results/epi_df.df', epi_df)
+        if do_save: sc.saveobj(f'results/epi_df_{scenario}.df', epi_df)
 
         # Save SW stats
         sw_res = sim.results['sw_stats']
         sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
-        if do_save: sc.saveobj(f'results/{scenario}_sw.df', sw_df)
-
+        if do_save: sc.saveobj(f'results/sw_df_{scenario}.df', sw_df)
 
     if 'plot_hiv' in to_run:
         from utils import set_font

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     set_font(size=20)
     fig, axes = pl.subplots(1, 2, figsize=(20, 8))
     axes = axes.ravel()
-    clist = sc.vectocolor([.5, .8, 1])
+    clist = sc.gridcolors(3)  # sc.vectocolor([.5, .8, 1])
     clist = [clist[0], clist[1], clist[2]]
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
@@ -27,6 +27,8 @@ if __name__ == '__main__':
     ax.legend(frameon=False)
     ax.set_title('% reduction in infections, 2027-2040')
     ax.set_ylim(-20, 100)
+    ax.set_xlabel('')
+    ax.set_ylabel('')
 
     # Plot 2: Treatment
     ax = axes[1]
@@ -34,6 +36,8 @@ if __name__ == '__main__':
     ax.set_title('% reduction in overtreatment, 2027-2040')
     ax.set_ylim(0, 100)
     ax.get_legend().set_visible(False)
+    ax.set_xlabel('')
+    ax.set_ylabel('')
 
     fig.tight_layout()
     pl.savefig(f"figures/fig5_impact.png", dpi=100)

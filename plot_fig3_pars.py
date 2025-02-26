@@ -65,7 +65,8 @@ if __name__ == '__main__':
         # Load dataframes
         df = sc.loadobj('results/zim_sti_calib_df.obj')
         results = sc.loadobj('results/zim_sti_calib_res.obj')
-        clist = sc.vectocolor([.5, .8, 1])
+        # clist = sc.vectocolor([.5, .8, 1])
+        clist = sc.gridcolors(3)
         clist = [clist[0], clist[1], clist[2]]
         colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
         ax.set_ylabel('')
         ax.set_ylim(0, 100)
         # Turn off frame around legend
-        ax.legend(frameon=False)
+        ax.legend(frameon=False, prop={'size': 12})
         ai += 1
 
         # Plot symptomatic proportion
