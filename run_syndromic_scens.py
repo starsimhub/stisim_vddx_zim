@@ -48,6 +48,7 @@ def process_results(df):
     treatdfs = sc.autolist()
 
     tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
+    scen_labels = {'treat50':'Poor', 'treat80':'Imperfect', 'treat100':'Perfect'}
 
     for scen in ['treat50', 'treat80', 'treat100']:
         for parset in df.parset.unique():
@@ -55,7 +56,7 @@ def process_results(df):
 
             for dis in ['ng', 'ct', 'tv']:
                 hres = pd.DataFrame()
-                hres['scenario'] = [scen]
+                hres['scenario'] = [scen_labels[scen]]
                 hres['parset'] = [parset]
                 soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
@@ -65,7 +66,7 @@ def process_results(df):
 
             for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
                 tres = pd.DataFrame()
-                tres['scenario'] = [scen]
+                tres['scenario'] = [scen_labels[scen]]
                 tres['parset'] = [parset]
                 soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][tx+'.new_treated_unnecessary_f'].sum()
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][tx+'.new_treated_unnecessary_f'].sum()
@@ -87,8 +88,8 @@ if __name__ == '__main__':
     n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
     scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
     to_run = [
-        'run_syndromic_scens',
-        # 'process_results',
+        # 'run_syndromic_scens',
+        'process_results',
         # 'plot_results',
     ]
 

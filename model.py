@@ -203,7 +203,7 @@ if __name__ == '__main__':
             scenpars = make_scenpars(scenario)
 
         # Add analyzer
-        analyzers = [sti.sw_stats()]
+        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv'])]
         sim = make_sim(scenario=scenario, **scenpars, analyzers=analyzers, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
@@ -230,6 +230,12 @@ if __name__ == '__main__':
                     dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
         if do_save: sc.saveobj('results/epi_df.df', epi_df)
+
+        # Save SW stats
+        sw_res = sim.results['sw_stats']
+        sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
+        if do_save: sc.saveobj(f'results/{scenario}_sw.df', sw_df)
+
 
     if 'plot_hiv' in to_run:
         from utils import set_font

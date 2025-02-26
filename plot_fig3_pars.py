@@ -1,5 +1,8 @@
 """
 Plot parameter estimates of care seeking alongside prevalence
+Requires running run_calibration first to generate the files
+'results/zim_sti_calib_{scenario}.obj' for each scenario.
+'make_df' creates a big dataframe from the results, and 'plot_pars' plots it.
 """
 
 # Import packages
@@ -20,6 +23,7 @@ if __name__ == '__main__':
     ]
 
     # Make big dataframe
+    scenlabels = {'treat50': 'Poor', 'treat80':'Imperfect', 'treat100':'Perfect'}
     if 'make_df' in to_run:
         dfs = sc.autolist()
         cs_dfs = sc.autolist()  # care seeking for VDS - not by disease
@@ -27,7 +31,7 @@ if __name__ == '__main__':
         for scenario in ['treat50', 'treat80', 'treat100']:
             calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
             df = calib.df[:500]
-            df['scenario'] = scenario
+            df['scenario'] = scenlabels[scenario]
             df['ng_p_treat'] = df['ng_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
             df['ct_p_treat'] = df['ct_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
             df['tv_p_treat'] = df['tv_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
@@ -73,29 +77,34 @@ if __name__ == '__main__':
         # Plot symptomatic proportion
         ax = axes[ai]
         thisdf = df.loc[df['par'] == 'p_symp']
+        thisdf['value'] = thisdf['value']*100
         sns.boxplot(data=thisdf, x="disease", y="value", hue="scenario", palette=clist, ax=ax)
-        ax.set_title('Proportion of cases\nin women that lead to VDS')
+        ax.set_title('Symptomatic share (F):\n% cases in women accompanied by VDS')
         ax.set_xlabel('')
         ax.set_ylabel('')
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0, 100)
+        # Turn off frame around legend
+        ax.legend(frameon=False)
         ai += 1
 
         # Plot symptomatic proportion
         ax = axes[ai]
         cs_df = sc.loadobj('results/zim_sti_care_seeking.obj')
+        cs_df['p_symp_care'] = cs_df['p_symp_care']*100
         ax = sns.boxplot(data=cs_df, hue="scenario", y="p_symp_care", palette=clist, ax=ax)
-        ax.set_title('Proportion of women\nwith VDS who seek care')
+        ax.set_title('Care-seeking share (F):\n% women with VDS who seek care')
         ax.set_xlabel('')
         ax.set_ylabel('')
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0, 100)
         ax.get_legend().set_visible(False)
         ai += 1
 
         # Plot overall proportion treated
         ax = axes[ai]
         thisdf = df.loc[df['par'] == 'p_treat']
+        thisdf['value'] = thisdf['value']*100
         ax = sns.boxplot(data=thisdf, x="disease", y="value", hue="scenario", palette=clist, ax=ax)
-        ax.set_title('Proportion of cases\nin women that are treated')
+        ax.set_title('treated share (F):\n% cases in women that are treated')
         ax.set_xlabel('')
         ax.set_ylabel('')
         ax.set_ylim(bottom=0)

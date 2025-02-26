@@ -1,5 +1,5 @@
 """
-Run calibration for the HIV model
+Run calibration for the STI model
 """
 
 # Additions to handle numpy multithreading
@@ -93,21 +93,8 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    to_run = [
-        'run_calib',
-        # 'load_calib'
-    ]
-
-    if 'run_calib' in to_run:
-        # for scenario in ['treat100', 'treat80', 'treat50']:
-        scenario = 'treat100'
-        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
-
-    if 'load_calib' in to_run:
-        calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-        # df = calib.df
-        # sc.saveobj(f'results/zim_sti_calib_df_{scenario}.obj', df)
-        # res = calib.sim_results
-        # sc.saveobj(f'results/zim_sti_calib_res_{scenario}.obj', res)
+    scenario = 'treat100'
+    sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+    print('Done!')
 
 
