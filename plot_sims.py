@@ -180,7 +180,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     # Prevalence
     for dname, dlabel in disease_map.items():
         ax = axes[pn]
-        resnames = {'Total': dname+'.adult_prevalence', 'Symptomatic': dname+'.symp_adult_prevalence'}
+        resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
         if dname == 'bv':
             resnames = {'Total': dname+'.prevalence', 'Symptomatic': dname+'.symp_prevalence'}
         for rlabel, rname in resnames.items():
@@ -203,13 +203,19 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
     return fig
 
 
-def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
+def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
     set_font(size=24)
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))
     axes = axes.ravel()
     dfplot = df.loc[(df.timevec >= start_year) & (df.timevec <= end_year)]
     dfplot = dfplot.set_index('timevec')
+    if sex is not None:
+        sex = '_' + sex
+        sexlabel = ' - ' + sex.upper()
+    else:
+        sex = ''
+        sexlabel = ''
 
     pn = 0
 
@@ -217,14 +223,14 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt.new_sti1'],
-        dfplot['syndromicmgmt.new_sti2'],
-        dfplot['syndromicmgmt.new_sti3'],
-        dfplot['syndromicmgmt.new_sti4'],
+        dfplot['syndromicmgmt.new_sti1'+sex],
+        dfplot['syndromicmgmt.new_sti2'+sex],
+        dfplot['syndromicmgmt.new_sti3'+sex],
+        dfplot['syndromicmgmt.new_sti4'+sex],
     ]
     labels = ["1 infection", "2 infections", "3 infections", "4 infections"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
-    ax.set_title('Coinfection among care seekers')
+    ax.set_title('Coinfection among care seekers'+sexlabel)
     ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
     ax.set_ylim(bottom=0)
     sc.SIticks(ax=ax)
@@ -234,14 +240,14 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt.new_tx0'],
-        dfplot['syndromicmgmt.new_tx1'],
-        dfplot['syndromicmgmt.new_tx2'],
-        dfplot['syndromicmgmt.new_tx3'],
+        dfplot['syndromicmgmt.new_tx0'+sex],
+        dfplot['syndromicmgmt.new_tx1'+sex],
+        dfplot['syndromicmgmt.new_tx2'+sex],
+        dfplot['syndromicmgmt.new_tx3'+sex],
     ]
     labels = ["0", "1", "2", "3"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
-    ax.set_title('Treatments prescribed')
+    ax.set_title('Treatments prescribed'+sexlabel)
     ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
     ax.set_ylim(bottom=0)
     sc.SIticks(ax=ax)
@@ -251,9 +257,9 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['ng_tx.new_treated_unnecessary'],
-        dfplot['ct_tx.new_treated_unnecessary'],
-        dfplot['metronidazole.new_treated_unnecessary'],
+        dfplot['ng_tx.new_treated_unnecessary'+sex],
+        dfplot['ct_tx.new_treated_unnecessary'+sex],
+        dfplot['metronidazole.new_treated_unnecessary'+sex],
     ]
     labels = ["Ceftriaxone", "Doxycycline", "Metronidazole"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
@@ -268,12 +274,11 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext=''):
         ax = axes[pn]
         x = dfplot.index
         Y = [
-            dfplot[disease+'.new_treated_success_symp'],
-            dfplot[disease+'.new_treated_success_asymp'],
-            dfplot[disease+'.new_treated_failure'],
-            dfplot[disease+'.new_treated_unnecessary'],
+            dfplot[disease+'.new_treated_success'+sex],
+            dfplot[disease+'.new_treated_failure'+sex],
+            dfplot[disease+'.new_treated_unnecessary'+sex],
         ]
-        labels = ["Treatment success (symp)", "Treatment success (asymp)", "Treatment failure", "Overtreatment"]
+        labels = ["Treatment success", "Treatment failure", "Overtreatment"]
         ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
         ax.set_title('Care seekers treated for ' + disease.upper())
         if pn == 5: ax.legend(frameon=True, prop={'size': legend_font}, loc='lower left')
