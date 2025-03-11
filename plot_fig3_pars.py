@@ -23,7 +23,7 @@ if __name__ == '__main__':
     ]
 
     # Make big dataframe
-    scenlabels = {'treat50': 'Poor', 'treat80':'Imperfect', 'treat100':'Perfect'}
+    scenlabels = {'treat50': 'Treat-half', 'treat80':'Treat-most', 'treat100':'Treat-all'}
     if 'make_df' in to_run:
         dfs = sc.autolist()
         cs_dfs = sc.autolist()  # care seeking for VDS - not by disease
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         ax.set_ylabel('')
         ax.set_ylim(0, 100)
         # Turn off frame around legend
-        ax.legend(frameon=False, prop={'size': 12})
+        ax.legend(frameon=False, prop={'size': 16})
         ai += 1
 
         # Plot symptomatic proportion
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         thisdf = df.loc[df['par'] == 'p_treat']
         thisdf['value'] = thisdf['value']*100
         ax = sns.boxplot(data=thisdf, x="disease", y="value", hue="scenario", palette=clist, ax=ax)
-        ax.set_title('treated share (F):\n% cases in women that are treated')
+        ax.set_title('Treated share (F):\n% cases in women that are treated')
         ax.set_xlabel('')
         ax.set_ylabel('')
         ax.set_ylim(bottom=0)

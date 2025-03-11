@@ -175,14 +175,13 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat100poc'
+    scenario = 'treat80'
     use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
     to_run = [
         # 'hiv',
         'stis',
-        # 'plot_hiv'
     ]
 
     if 'hiv' in to_run:
@@ -203,8 +202,9 @@ if __name__ == '__main__':
         else:
             scenpars = make_scenpars(scenario)
 
-        # Add analyzer
-        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv'])]
+        # Add analyzers
+        from analyzers import total_symptomatic as ts
+        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
         sim = make_sim(scenario=scenario, **scenpars, analyzers=analyzers, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
@@ -223,7 +223,10 @@ if __name__ == '__main__':
             for sex in ['f', 'm']:
                 dd = dict()
                 for ab1, ab2 in zip(age_bins[:-1], age_bins[1:]):
-                    dd['age'] = [ab1]
+                    age = str(ab1) + '-' + str(ab2)
+                    if ab1 == 30:
+                        age = '30+'  # Combine the last two age groups
+                    dd['age'] = [age]
                     dd['sex'] = sex
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
@@ -237,32 +240,10 @@ if __name__ == '__main__':
         sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
         if do_save: sc.saveobj(f'results/sw_df_{scenario}.df', sw_df)
 
-    if 'plot_hiv' in to_run:
-        from utils import set_font
-        import pylab as pl
-        import seaborn as sns
-        
-        set_font(size=16)
-        fig, ax = pl.subplots(1, 1, figsize=(10, 4))
-        colors = ['#ee7989', '#ee7989', '#4682b4', '#4682b4']
-        linestyles = ['--', '-', '--', '-']
-        rdict = {'symp_prev_no_hiv_f': 'HIV- F', 'symp_prev_has_hiv_f': 'HIV+ F', 'symp_prev_no_hiv_m': 'HIV- M', 'symp_prev_has_hiv_m': 'HIV+ M'}
-
-        cn = 0
-        bi = 20*12
-        for rname, rlabel in rdict.items():
-            x = sim.timevec[bi:]
-            y = pd.Series(sim.results.total_symptomatic[rname][bi:])
-            y = y.rolling(10, min_periods=1).mean()
-            ax.plot(x, y*100, color=colors[cn], ls=linestyles[cn], label=rlabel)
-            ax.legend()
-            ax.set_ylabel('')
-            ax.set_xlabel('')
-            ax.set_title('Prevalence of discharge (%)')
-            cn += 1
-
-        sc.figlayout()
-        sc.savefig("figures/epi_hiv.png", dpi=100)
-
+        # Save HIV results
+        hiv_res = sim.results['total_symptomatic']
+        hiv_df = hiv_res.to_df(resample='year', use_years=True, sep='.')
+        hiv_df['timevec'] = df.timevec
+        if do_save: sc.saveobj(f'results/hiv_df_{scenario}.df', hiv_df)
 
 

@@ -17,19 +17,29 @@ class SyndromicMgmt(sti.STITest):
     def __init__(self, pars=None, treatments=None, diseases=None, outcome_treatment_map=None, treat_prob_data=None, years=None, start=None, stop=None, eligibility=None, name=None, label=None, **kwargs):
         super().__init__(years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label)
         self.define_pars(
-            tx_mix=dict(
-                all3=[0.80, 0.05],
-                ngct=[0.05, 0.80],
-                mtnz=[0.05, 0.00],
+            tx_mix_cerv=dict(
+                all3=[0.50, 0.05], # Women with cervical infection: 70% treated for NG/CT, aligns to IPM sens assumption
+                ngct=[0.20, 0.80],
+                mtnz=[0.20, 0.00],
                 none=[0.10, 0.15],
             ),
-            tx_dist_f=ss.choice(a=4),
-            tx_dist_m=ss.choice(a=4),
+            tx_mix_noncerv=dict(
+                all3=[0.40, 0.05], # Women w/o cervical infection: 50% treated for NG/CT, aligns to IPM spec assumption
+                ngct=[0.10, 0.80],
+                mtnz=[0.20, 0.00], # Women w/o cervical infection: 60% treated for TV, aligns to IPM sens assumption
+                none=[0.30, 0.15], # Women w/o cervical infection: 30% not treated for TV, aligns to IPM spec assumption
+            ),
+            tx_cerv_f=ss.choice(a=4),
+            tx_cerv_m=ss.choice(a=4),
+            tx_noncerv_f=ss.choice(a=4),
+            tx_noncerv_m=ss.choice(a=4),
             dt_scale=False,
         )
         self.update_pars(pars, **kwargs)
-        self.fvals = [v[0] for v in self.pars.tx_mix.values()]
-        self.mvals = [v[1] for v in self.pars.tx_mix.values()]
+        self.fvals_cerv = [v[0] for v in self.pars.tx_mix_cerv.values()]
+        self.mvals_cerv = [v[1] for v in self.pars.tx_mix_cerv.values()]
+        self.fvals_noncerv = [v[0] for v in self.pars.tx_mix_noncerv.values()]
+        self.mvals_noncerv = [v[1] for v in self.pars.tx_mix_noncerv.values()]
 
         # Store treatments and diseases
         self.treatments = sc.tolist(treatments)
@@ -81,8 +91,10 @@ class SyndromicMgmt(sti.STITest):
 
     def init_pre(self, sim):
         super().init_pre(sim)
-        self.pars.tx_dist_f.set(p=self.fvals)
-        self.pars.tx_dist_m.set(p=self.mvals)
+        self.pars.tx_cerv_f.set(p=self.fvals_cerv)
+        self.pars.tx_cerv_m.set(p=self.mvals_cerv)
+        self.pars.tx_noncerv_f.set(p=self.fvals_noncerv)
+        self.pars.tx_noncerv_m.set(p=self.mvals_noncerv)
         return
 
     def init_results(self):
@@ -126,16 +138,23 @@ class SyndromicMgmt(sti.STITest):
                 f_uids = uids[sim.people.female[uids]]
                 m_uids = uids[sim.people.male[uids]]
 
+                # Determine who has symptomatic cervical infection
+                is_cerv = sim.people.ng.symptomatic | sim.people.ct.symptomatic
+
                 # Determine treatment outcome for each agent
-                outcomes_f = self.pars.tx_dist_f.rvs(f_uids)
-                outcomes_m = self.pars.tx_dist_m.rvs(m_uids)
+                f_cerv_uids = f_uids[is_cerv[f_uids]]  # UIDs of women with cervical infection
+                f_noncerv_uids = f_uids[~is_cerv[f_uids]]  # UIDs of women without cervical infection
+
+                ofc = self.pars.tx_cerv_f.rvs(f_cerv_uids)
+                ofnc = self.pars.tx_noncerv_f.rvs(f_noncerv_uids)
+                om = self.pars.tx_cerv_m.rvs(m_uids)
 
                 # Treatment outcomes
                 outcomes = dict(
-                    all3=f_uids[outcomes_f == 0] | m_uids[outcomes_m == 0],
-                    ngct=f_uids[outcomes_f == 1] | m_uids[outcomes_m == 1],
-                    mtnz=f_uids[outcomes_f == 2] | m_uids[outcomes_m == 2],
-                    none=f_uids[outcomes_f == 3] | m_uids[outcomes_m == 3],
+                    all3=f_cerv_uids[ofc == 0] | f_noncerv_uids[ofnc == 0] | m_uids[om == 0],
+                    ngct=f_cerv_uids[ofc == 1] | f_noncerv_uids[ofnc == 1] | m_uids[om == 1],
+                    mtnz=f_cerv_uids[ofc == 2] | f_noncerv_uids[ofnc == 2] | m_uids[om == 2],
+                    none=f_cerv_uids[ofc == 3] | f_noncerv_uids[ofnc == 3] | m_uids[om == 3],
                 )
 
                 # Update treatment eligibility
@@ -227,27 +246,35 @@ class SyndromicMgmt(sti.STITest):
 # %%  Algorithms
 def make_tx_mix(scenario):
     if 'treat100' in scenario:
-        tx_mix = dict(
+        tx_mix_cerv = dict(
             all3=[1.00, 0.00],
             ngct=[0.00, 1.00],
             mtnz=[0.00, 0.00],
             none=[0.00, 0.00],
         )
+        tx_mix_noncerv = sc.dcp(tx_mix_cerv)
     elif 'treat80' in scenario:
-        tx_mix = dict(
-            all3=[0.80, 0.00],
-            ngct=[0.05, 0.80],
-            mtnz=[0.05, 0.00],
-            none=[0.10, 0.20],
+        tx_mix_cerv = dict(
+            all3=[0.50, 0.00],
+            ngct=[0.20, 0.80],
+            mtnz=[0.15, 0.00],
+            none=[0.15, 0.20],
+        )
+        tx_mix_noncerv = dict(
+            all3=[0.40, 0.00],
+            ngct=[0.10, 0.80],
+            mtnz=[0.25, 0.00],
+            none=[0.25, 0.20],
         )
     elif 'treat50' in scenario:
-        tx_mix = dict(
-            all3=[0.500, 0.00],
-            ngct=[0.125, 0.50],
-            mtnz=[0.125, 0.00],
-            none=[0.250, 0.50],
+        tx_mix_cerv = dict(
+            all3=[0.25, 0.00],
+            ngct=[0.25, 0.50],
+            mtnz=[0.25, 0.00],
+            none=[0.25, 0.50],
         )
-    return tx_mix
+        tx_mix_noncerv = sc.dcp(tx_mix_cerv)
+    return tx_mix_cerv, tx_mix_noncerv
 
 
 def neg_panel_mix(scenario):
@@ -289,11 +316,12 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
         mtnz=[metronidazole],
         none=[],
     )
-    tx_mix = make_tx_mix(scenario)
+    tx_mix_cerv, tx_mix_noncerv = make_tx_mix(scenario)
 
     # Syndromic management
     syndromic = SyndromicMgmt(
-        tx_mix=tx_mix,
+        tx_mix_cerv=tx_mix_cerv,
+        tx_mix_noncerv=tx_mix_noncerv,
         stop=synd_end,
         diseases=[ng, ct, tv, bv],
         eligibility=seeking_care_discharge,
@@ -305,7 +333,6 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
         intvs = [syndromic, ng_tx, ct_tx, metronidazole]
 
     if poc:
-
         disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
         p_mtnz = neg_panel_mix(scenario)
 

@@ -18,7 +18,7 @@ if __name__ == '__main__':
     ]
 
     scenarios = ['treat50', 'treat80', 'treat100', 'treat50poc', 'treat80poc', 'treat100poc']
-    scen_labels = {'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100': 'Treat-all', 'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'}
+    scen_labels = {'treat50': 'Poor', 'treat80': 'Imperfect', 'treat100': 'Perfect', 'treat50poc': 'Poor (POC)', 'treat80poc': 'Imperfect (POC)', 'treat100poc': 'Perfect (POC)'}
     treatments = ['ng_tx', 'ct_tx', 'metronidazole']
     tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
     results = [tx+'.new_treated_unnecessary_f' for tx in treatments]
@@ -40,17 +40,34 @@ if __name__ == '__main__':
         dfm['treatment'] = dfm['variable'].apply(lambda x: x.split('.')[0])
         sc.saveobj(f'results/overtx.obj', dfm)
 
-    if 'make_plot' in to_run:
-        set_font(size=30)
-        fig = pl.figure(figsize=(20, 16))
-        legendfont = 25
-
-        gs1 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.55, top=0.95, wspace=0.3)
-        gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
-
+    if 'make_plot' in to_run: 
+        set_font(size=20)
+        fig, axes = pl.subplots(2, 3, figsize=(20, 8))
+        axes = axes.ravel()
+        # clist = sc.vectocolor([0, .5, .8, 1], cmap='plasma_r')
         clist = sc.gridcolors(3)
         clist = [clist[0], clist[1], clist[2]]  #, clist[3]][1:]
         colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
+
+        # Care seeker management
+        for pn, scenario in enumerate(['treat50', 'treat80', 'treat100']):
+            ax = axes[pn]
+            df = sc.loadobj(f'results/{scenario}_sim.df')
+            dfplot = df.loc[(df.timevec >= 2010) & (df.timevec <= 2040)]
+            x = dfplot.timevec
+            sex = '_f'
+            Y = [
+                dfplot['syndromicmgmt.new_tx0'+sex],
+                dfplot['syndromicmgmt.new_tx1'+sex],
+                dfplot['syndromicmgmt.new_tx2'+sex],
+                dfplot['syndromicmgmt.new_tx3'+sex],
+            ]
+            labels = ["0", "1", "2", "3"]
+            ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
+            ax.set_title('Number of women presribed\nmultiple antibiotics')
+            if pn==0: ax.legend(frameon=False, prop={'size': 12}, loc='upper left')
+            ax.set_ylim(bottom=0)
+            sc.SIticks(ax=ax)
 
         # Effect of POC
         df = sc.loadobj(f'results/overtx.obj')
@@ -59,55 +76,32 @@ if __name__ == '__main__':
         ei = sc.findfirst(t, 2040)
 
         for pn, (txname, txlabel) in enumerate(tx_labels.items()):
-            ax = fig.add_subplot(gs1[pn])
+            ax = axes[pn+3]
             for scenario in ['treat50', 'treat80', 'treat100']:
                 socdf = df.loc[(df.scenario == scen_labels[scenario]) & (df.treatment == txname) & (df.variable == txname+'.new_treated_unnecessary_f')]
                 socy = socdf['value'][si:ei]
-                socy = socy.rolling(3, min_periods=1).mean()
+                socy = socy.rolling(10, min_periods=1).mean()
                 ax.plot(t[si:ei], socy, label=scen_labels[scenario], color=colors[scenario])
             for scenario in ['treat50', 'treat80', 'treat100']:
                 pocdf = df.loc[(df.scenario == scen_labels[scenario+'poc']) & (df.treatment == txname) & (df.variable == txname+'.new_treated_unnecessary_f')]
                 pocy = pocdf['value'][si:ei]
-                pocy = pocy.rolling(3, min_periods=1).mean()
+                pocy = pocy.rolling(10, min_periods=1).mean()
                 ax.plot(t[si:ei], pocy, label=scen_labels[scenario], color=colors[scenario], ls='--')
 
             if pn == 0:
                 h,l = ax.get_legend_handles_labels()  # #Get the legend handles and lables
-                l1 = ax.legend(h[:3], l[:3], loc='upper left', frameon=False, prop={'size': legendfont})
+                l1 = ax.legend(h[:3], l[:3], loc='upper left', frameon=False, prop={'size': 12})
                 from matplotlib.lines import Line2D
                 myHandle = [Line2D([], [], ls='-', color='k'), Line2D([], [], ls='--', color='k')]
-                l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='upper left', bbox_to_anchor=(0, .7), frameon=False, prop={'size': legendfont})
+                l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='upper left', bbox_to_anchor=(0.3, 1), frameon=False, prop={'size': 12})
                 ax.add_artist(l1)
 
             ax.set_title(f'{txlabel} overtreatment')
             ax.set_ylim(bottom=0)
             sc.SIticks(ax)
 
-        hdf = sc.loadobj('results/synd_health.obj')
-        tdf = sc.loadobj('results/synd_treat.obj')
-
-        # Plot 1: Treatment
-        ax = fig.add_subplot(gs2[0])
-        sns.boxplot(data=tdf, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
-        ax.set_title('% reduction in overtreatment, 2027-2040')
-        ax.set_ylim(0, 100)
-        ax.get_legend().set_visible(False)
-        ax.set_xlabel('')
-        ax.set_ylabel('')
-
-        # Plot 1: Health
-        ax = fig.add_subplot(gs2[1])
-        sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
-        ax.legend(frameon=False, prop={'size': legendfont})
-        ax.set_title('% reduction in infections, 2027-2040')
-        ax.set_ylim(-20, 100)
-        ax.set_xlabel('')
-        ax.set_ylabel('')
-
-
-
         fig.tight_layout()
-        pl.savefig(f"figures/fig4_poctx.png", dpi=100)
+        pl.savefig(f"figures/fig4_overtx.png", dpi=100)
  
     print('Done!')
 
