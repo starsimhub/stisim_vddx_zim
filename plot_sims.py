@@ -18,13 +18,12 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
     hiv_data = pd.read_csv(f'data/{location}_hiv_data.csv')
     hiv_data = hiv_data.loc[(hiv_data.year >= start_year) & (hiv_data.year <= end_year)]
 
-    dfplot = df.loc[(df.timevec >= start_year) & (df.timevec <= end_year)]
-    dfplot = dfplot.set_index('timevec')
+    dfplot = df.loc[(df.index >= start_year) & (df.index <= end_year)]
 
     # Infections
     pn = 0
     ax = axes[pn]
-    resname = 'hiv.new_infections'
+    resname = 'hiv_new_infections'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
     x = dfplot.index
     y = get_y(dfplot, which, resname)
@@ -41,7 +40,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     # HIV deaths
     ax = axes[pn]
-    resname = 'hiv.new_deaths'
+    resname = 'hiv_new_deaths'
     ax.scatter(hiv_data.year, hiv_data[resname], label='UNAIDS', color='k')
     x = dfplot.index
     y = get_y(dfplot, which, resname)
@@ -58,8 +57,8 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     # PLHIV
     ax = axes[pn]
-    ax.scatter(hiv_data.year, hiv_data['hiv.n_infected'], color='k')  # label='UNAIDS',
-    resnames = {'Total': 'hiv.n_infected', 'Dx': 'hiv.n_diagnosed', 'Treated': 'hiv.n_on_art'}
+    ax.scatter(hiv_data.year, hiv_data['hiv_n_infected'], color='k')  # label='UNAIDS',
+    resnames = {'Total': 'hiv_n_infected', 'Dx': 'hiv_n_diagnosed', 'Treated': 'hiv_n_on_art'}
     for rlabel, rname in resnames.items():
         x = dfplot.index
         y = get_y(dfplot, which, rname)
@@ -77,7 +76,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     # HIV prevalence
     ax = axes[pn]
-    resname = 'hiv.prevalence'
+    resname = 'hiv_prevalence'
     ax.scatter(hiv_data.year, hiv_data[resname] * 100, label='Data', color='k')
     x = dfplot.index
     y = get_y(dfplot, which, resname)

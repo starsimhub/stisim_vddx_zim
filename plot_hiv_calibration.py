@@ -69,15 +69,21 @@ if __name__ == '__main__':
 
     n_results = 100
 
-    cal = sc.loadobj('results/zim_hiv_calib.obj')
-    dfs = sc.autolist()
-    for i in range(n_results):
-        md = sc.mergedicts(cal.sim_results[i], cal.extra_results[i])
-        df = pd.DataFrame(md)
-        df['index'] = i
-        dfs += df
-    cal.resdf = pd.concat(dfs)
+    percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
+    percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
 
-    # plot_calibration(calib)
+    make_stats = False
+    do_plot = True
+
+    if make_stats:
+        cal = sc.loadobj('results/zim_hiv_calib.obj')
+        df = cal.resdf
+        df_stats = df.groupby(df.time).describe(percentiles=percentiles)
+        sc.saveobj(f'results/zim_hiv_calib_stats.df', df_stats)
+
+    if do_plot:
+        from plot_sims import plot_hiv_sims
+        df_stats = sc.loadobj('results/zim_hiv_calib_stats.df')
+        plot_hiv_sims(df_stats, start_year=2000, end_year=2025, which='multi', percentile_pairs=percentile_pairs, title='hiv_calib')
 
     print('Done.')

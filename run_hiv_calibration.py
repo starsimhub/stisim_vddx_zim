@@ -70,12 +70,14 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     scenpars = make_scenpars(scenario='treat80')
     sim = make_sim(scenario='treat80', **scenpars, start=1990, stop=2030, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_hiv_calib.csv')
+    extra_results = ['hiv_n_diagnosed', 'hiv_n_on_art', 'n_alive']
 
     # Make the calibration
     calib = sti.Calibration(
         calib_pars=calib_pars,
         build_fn = build_sim,
         sim=sim,
+        extra_results=extra_results,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
         die=True, reseed=False, storage=storage, save_results=True,
