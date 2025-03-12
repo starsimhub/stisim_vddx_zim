@@ -15,7 +15,7 @@ os.environ.update(
 import sciris as sc
 import stisim as sti
 import pandas as pd
-from model import make_sim
+from model import make_sim, make_scenpars
 
 
 # Run settings
@@ -67,7 +67,8 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     )
 
     # Make the sim
-    sim = make_sim(scenario='treat80', start=1990, stop=2030, n_agents=5e3, verbose=-1, seed=1)
+    scenpars = make_scenpars(scenario='treat80')
+    sim = make_sim(scenario='treat80', **scenpars, start=1990, stop=2030, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_hiv_calib.csv')
 
     # Make the calibration
