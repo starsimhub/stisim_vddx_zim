@@ -20,8 +20,8 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]    # How many cores to use
+n_trials = [1, 2][debug]  # How many trials to run for calibration
+n_workers = [1, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -84,12 +84,6 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     )
 
     calib.calibrate(load=True)
-    if do_shrink:
-        cal = calib.shrink(n_results=500)
-        sc.saveobj(f'results/zim_hiv_calib.obj', cal)
-    else:
-        sc.saveobj(f'results/zim_hiv_calib.obj', calib)
-    print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
 
@@ -97,4 +91,10 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
 if __name__ == '__main__':
 
     sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+    if do_shrink:
+        cal = calib.shrink(n_results=500)
+        sc.saveobj(f'results/zim_hiv_calib.obj', cal)
+    else:
+        sc.saveobj(f'results/zim_hiv_calib.obj', calib)
+    print(f'Best pars are {calib.best_pars}')
 
