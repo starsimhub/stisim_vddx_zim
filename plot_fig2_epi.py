@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     scenario = 'treat80'
     epi_df = sc.loadobj(f'results/epi_df_{scenario}.df')
-    sw_df = sc.loadobj(f'results/{scenario}_sw.df')
+    sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
     hiv_df = sc.loadobj(f'results/hiv_df_{scenario}.df')
 
     # Initialize plot

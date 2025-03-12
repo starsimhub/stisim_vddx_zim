@@ -60,7 +60,7 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
         pn += 1
 
     fig.tight_layout()
-    pl.savefig(f"figures/sti_calib.png", dpi=100)
+    pl.savefig(f"figures/hiv_calib.png", dpi=100)
     return
 
 

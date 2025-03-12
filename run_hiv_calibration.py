@@ -20,10 +20,11 @@ from model import make_sim
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [5000, 2][debug]  # How many trials to run for calibration
-n_workers = [40, 1][debug]    # How many cores to use
+n_trials = [500, 2][debug]  # How many trials to run for calibration
+n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
+do_shrink = True  # Whether to shrink the calibration results
 
 
 def build_sim(sim, calib_pars):
@@ -66,7 +67,7 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     )
 
     # Make the sim
-    sim = make_sim(scenario='soc', start=1990, stop=2030, n_agents=5e3)
+    sim = make_sim(scenario='treat80', start=1990, stop=2030, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_hiv_calib.csv')
 
     # Make the calibration
@@ -76,11 +77,15 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
-        die=True, reseed=True, storage=storage, save_results=True,
+        die=True, reseed=False, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_calib.obj', calib)
+    if do_shrink:
+        cal = calib.shrink(n_results=500)
+        sc.saveobj(f'results/zim_hiv_calib.obj', cal)
+    else:
+        sc.saveobj(f'results/zim_hiv_calib.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
@@ -88,18 +93,5 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
 
 if __name__ == '__main__':
 
-    to_run = [
-        'run_calib',
-        # 'load_calib'
-    ]
-
-    if 'run_calib' in to_run:
-        sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
-
-    if 'load_calib' in to_run:
-        calib = sc.loadobj('results/zim_calib.obj')
-        df = calib.df
-        sc.saveobj(f'results/zim_calib_df.obj', df)
-        res = calib.sim_results
-        sc.saveobj(f'results/zim_calib_res.obj', res)
+    sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
 
