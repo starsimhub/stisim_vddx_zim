@@ -67,8 +67,17 @@ def plot_calibration(calib, start_year=2000, end_year=2025):
 # %% Run as a script
 if __name__ == '__main__':
 
-    calib = sc.loadobj('results/zim_calib.obj')
-    cal = calib.shrink()
-    plot_calibration(cal)
+    n_results = 100
+
+    cal = sc.loadobj('results/zim_hiv_calib.obj')
+    dfs = sc.autolist()
+    for i in range(n_results):
+        md = sc.mergedicts(cal.sim_results[i], cal.extra_results[i])
+        df = pd.DataFrame(md)
+        df['index'] = i
+        dfs += df
+    cal.resdf = pd.concat(dfs)
+
+    # plot_calibration(calib)
 
     print('Done.')
