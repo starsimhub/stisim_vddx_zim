@@ -93,7 +93,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    scenario = 'treat100'
+    scenario = 'treat50'
     sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
     print('Done!')
 
