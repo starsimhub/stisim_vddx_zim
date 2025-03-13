@@ -39,7 +39,7 @@ def build_sim(sim, calib_pars):
         v = pars['value']
         if 'beta' in k :
             sim.diseases[k[:2]].pars[k[3:]] = v
-        elif  'dur' in k:
+        elif 'dur' in k:
             # sim.diseases[k[:2]].pars[k[3:]][0][0] = ss.dur(v, 'month')
             sim.diseases[k[:2]].pars['dur_symp2clear'][0][0] = ss.dur(v, 'month')
             sim.diseases[k[:2]].pars['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
@@ -64,8 +64,8 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
         ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
         ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
         tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
-        ng_dur=dict(low=6, high=10, guess=8, step=0.5),
-        ct_dur=dict(low=13, high=21, guess=15, step=0.5),
+        # ng_dur=dict(low=6, high=10, guess=8, step=0.5),
+        # ct_dur=dict(low=13, high=21, guess=15, step=0.5),
         # ng_dur_asymp2clear=dict(low=6, high=12, guess=8, step=0.5),
         # ct_dur_asymp2clear=dict(low=13, high=20, guess=15, step=0.5),
         p_symp_care=dict(low=0.25, high=0.75, guess=0.5, step=0.01),
