@@ -20,7 +20,7 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -53,13 +53,13 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.06),
-        ct_beta_m2f=dict(low=0.02, high=0.5, guess=0.05),
-        tv_beta_m2f=dict(low=0.08, high=0.5, guess=0.10),
-        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
-        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
-        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
-        p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
+        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.06, step=0.01),
+        ct_beta_m2f=dict(low=0.02, high=0.5, guess=0.05, step=0.01),
+        tv_beta_m2f=dict(low=0.08, high=0.5, guess=0.10, step=0.01),
+        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15, step=0.01),
+        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25, step=0.01),
+        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45, step=0.01),
+        p_symp_care=dict(low=0.25, high=0.75, guess=0.5, step=0.01),
     )
 
     # Extra results to save
