@@ -56,7 +56,7 @@ def plot_calibration(calib, scenario=None, start_year=2000, end_year=2025, res_t
 
             # Plot data
             # if 'prevalence_f_15_25' in resname:
-            if 'n_infected_f_15_25' in resname:
+            if 'n_infected_f_15_25' in resname or 'new_infections' in resname:
                 target_data = calib.data[resname]
                 data_plot = target_data.iloc[(target_data.index >= start_year) & (target_data.index <= end_year)]
                 xdata = data_plot.index

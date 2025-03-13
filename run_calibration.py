@@ -58,9 +58,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
-        ct_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
-        tv_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
+        ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
         ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
         tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
@@ -84,8 +84,8 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     data = pd.read_csv('data/zimbabwe_sti_data2.csv')
 
     weights = dict(
-        ng_new_infections=2,
-        ct_new_infections=2,
+        ng_new_infections=5,
+        ct_new_infections=5,
         tv_new_infections=0.5,
     )
 
