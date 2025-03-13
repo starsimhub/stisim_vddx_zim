@@ -10,7 +10,7 @@ from utils import set_font
 
 
 # %% Plotting functions
-def plot_calibration(calib, start_year=2000, end_year=2025, res_to_plot=100):
+def plot_calibration(calib, scenario=None, start_year=2000, end_year=2025, res_to_plot=100):
 
     set_font(size=30)
     fig, axes = pl.subplots(3, 4, figsize=(20, 12))
@@ -68,16 +68,16 @@ def plot_calibration(calib, start_year=2000, end_year=2025, res_to_plot=100):
             pn += 1
 
     fig.tight_layout()
-    pl.savefig(f"figures/sti_calib.png", dpi=100)
+    pl.savefig(f"figures/sti_calib_{scenario}.png", dpi=100)
     return
 
 
 # %% Run as a script
 if __name__ == '__main__':
 
-    scenario = 'treat80'
+    scenario = 'treat50'
     calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-    plot_calibration(calib)
+    plot_calibration(calib, scenario=scenario)
 
 
     print('Done.')
