@@ -69,10 +69,10 @@ if __name__ == '__main__':
 
     n_results = 100
 
-    percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
+    percentile_pairs = [[.025, .975], [.05, .95], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
     percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
 
-    make_stats = False
+    make_stats = True
     do_plot = True
 
     if make_stats:
@@ -85,5 +85,13 @@ if __name__ == '__main__':
         from plot_sims import plot_hiv_sims
         df_stats = sc.loadobj('results/zim_hiv_calib_stats.df')
         plot_hiv_sims(df_stats, start_year=2000, end_year=2025, which='multi', percentile_pairs=percentile_pairs, title='hiv_calib')
+
+    best_pars = cal.df.iloc[0].to_dict()
+
+    # Get posteriors
+    par_stats = cal.df.describe(percentiles=[0.05, 0.95])
+    pars = [p for p in par_stats.columns if p not in ['index', 'mismatch']]
+    for p in pars:
+        print(f'{p}: {par_stats[p]["mean"]:.3f} ({par_stats[p]["5%"]:.3f}–{par_stats[p]["95%"]:.3f})')
 
     print('Done.')

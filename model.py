@@ -57,14 +57,11 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     ####################################################################################################################
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
     sexual = sti.FastStructuredSexual(
-        prop_f0=0.8,
-        prop_f2=0.05,
-        prop_m0=0.65,
-        f1_conc=0.05,
-        f2_conc=0.25,
-        m1_conc=0.15,
-        m2_conc=0.3,
-        p_pair_form=0.6,  # 0.6,
+        prop_f0=0.79,
+        prop_m0=0.83,
+        f1_conc=0.16,
+        m1_conc=0.11,
+        p_pair_form=0.58,
         condom_data=pd.read_csv(f'data/condom_use.csv'),
     )
     maternal = ss.MaternalNet(unit='month')

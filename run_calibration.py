@@ -20,10 +20,11 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [5000, 2][debug]  # How many trials to run for calibration
-n_workers = [60, 1][debug]    # How many cores to use
+n_trials = [1000, 2][debug]  # How many trials to run for calibration
+n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
+do_shrink = True  # Whether to shrink the calibration results
 
 
 def build_sim(sim, calib_pars):
@@ -52,9 +53,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.05, high=0.3, guess=0.06),
-        ct_beta_m2f=dict(low=0.02, high=0.3, guess=0.05),
-        tv_beta_m2f=dict(low=0.08, high=0.3, guess=0.10),
+        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.06),
+        ct_beta_m2f=dict(low=0.02, high=0.5, guess=0.05),
+        tv_beta_m2f=dict(low=0.08, high=0.5, guess=0.10),
         ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
         ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
         tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
@@ -93,8 +94,14 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    scenario = 'treat50'
+    scenario = 'treat80'
     sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+    if do_shrink:
+        cal = calib.shrink(n_results=500)
+        sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', cal)
+    else:
+        sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+    print(f'Best pars are {calib.best_pars}')
     print('Done!')
 
 
