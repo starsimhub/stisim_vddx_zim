@@ -81,5 +81,9 @@ if __name__ == '__main__':
     calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
     plot_calibration(calib, scenario=scenario)
 
+    par_stats = calib.df.describe(percentiles=[0.05, 0.95])
+    pars = [p for p in par_stats.columns if p not in ['index', 'mismatch']]
+    for p in pars:
+        print(f'{p}: {par_stats[p]["mean"]:.3f} ({par_stats[p]["5%"]:.3f}–{par_stats[p]["95%"]:.3f})')
 
     print('Done.')

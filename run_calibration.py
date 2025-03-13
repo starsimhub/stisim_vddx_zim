@@ -83,7 +83,11 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data2.csv')
 
-    weights = {'tv_new_infections': 0.2}
+    weights = dict(
+        ng_new_infections=2,
+        ct_new_infections=2,
+        tv_new_infections=0.5,
+    )
 
     # Make the calibration
     calib = sti.Calibration(
