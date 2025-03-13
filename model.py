@@ -209,7 +209,7 @@ if __name__ == '__main__':
 
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
-        plot_hiv_sims(df, start_year=1990, which='single')
+        # plot_hiv_sims(df, start_year=1990, which='single')
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
         plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
 
