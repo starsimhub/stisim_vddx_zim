@@ -17,7 +17,8 @@ def plot_calibration(calib, scenario=None, start_year=2000, end_year=2025, res_t
     axes = axes.ravel()
     disease_map = {'ng': 'NG', 'ct': 'CT', 'tv': 'TV'}  #, 'bv': 'Other'}
     result_map = {
-        'prevalence_f_15_25': 'Prevalence F 15-25',
+        # 'prevalence_f_15_25': 'Prevalence F 15-25',
+        'n_infected_f_15_25': 'Burden F 15-25',
         'prevalence': 'Prevalence',
         'new_infections': 'Infections',
         'n_infected': 'Burden',
@@ -54,7 +55,8 @@ def plot_calibration(calib, scenario=None, start_year=2000, end_year=2025, res_t
             ax.fill_between(x, quartiles1, quartiles3, alpha=0.3)
 
             # Plot data
-            if 'prevalence_f_15_25' in resname:
+            # if 'prevalence_f_15_25' in resname:
+            if 'n_infected_f_15_25' in resname:
                 target_data = calib.data[resname]
                 data_plot = target_data.iloc[(target_data.index >= start_year) & (target_data.index <= end_year)]
                 xdata = data_plot.index
@@ -75,7 +77,7 @@ def plot_calibration(calib, scenario=None, start_year=2000, end_year=2025, res_t
 # %% Run as a script
 if __name__ == '__main__':
 
-    scenario = 'treat50'
+    scenario = 'treat80'
     calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
     plot_calibration(calib, scenario=scenario)
 
