@@ -40,7 +40,9 @@ def build_sim(sim, calib_pars):
         if 'beta' in k :
             sim.diseases[k[:2]].pars[k[3:]] = v
         elif  'dur' in k:
-            sim.diseases[k[:2]].pars[k[3:]][0][0] = ss.dur(v, 'month')
+            # sim.diseases[k[:2]].pars[k[3:]][0][0] = ss.dur(v, 'month')
+            sim.diseases[k[:2]].pars['dur_symp2clear'][0][0] = ss.dur(v, 'month')
+            sim.diseases[k[:2]].pars['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
         elif 'p_symp' in k and k != 'p_symp_care':
             sim.diseases[k[:2]].pars[k[3:]][0] = v
         elif 'p_symp_care' in k:
@@ -56,16 +58,16 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.1, step=0.01),
-        ct_beta_m2f=dict(low=0.05, high=0.5, guess=0.1, step=0.01),
-        tv_beta_m2f=dict(low=0.05, high=0.5, guess=0.1, step=0.01),
-        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15, step=0.01),
-        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25, step=0.01),
-        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45, step=0.01),
-        ng_dur_symp2clear=dict(low=6, high=10, guess=8, step=0.5),
-        ct_dur_symp2clear=dict(low=13, high=18, guess=15, step=0.5),
-        ng_dur_asymp2clear=dict(low=6, high=12, guess=8, step=0.5),
-        ct_dur_asymp2clear=dict(low=13, high=20, guess=15, step=0.5),
+        ng_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
+        ct_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
+        tv_beta_m2f=dict(low=0.05, high=0.5, guess=0.1),
+        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
+        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
+        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
+        ng_dur=dict(low=6, high=10, guess=8, step=0.5),
+        ct_dur=dict(low=13, high=18, guess=15, step=0.5),
+        # ng_dur_asymp2clear=dict(low=6, high=12, guess=8, step=0.5),
+        # ct_dur_asymp2clear=dict(low=13, high=20, guess=15, step=0.5),
         p_symp_care=dict(low=0.25, high=0.75, guess=0.5, step=0.01),
     )
 
