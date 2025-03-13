@@ -21,7 +21,7 @@ from model import make_sim, make_scenpars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1500, 2][debug]  # How many trials to run for calibration
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -64,6 +64,8 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
         tv_p_symp=dict(low=0.15, high=0.75, guess=0.45, step=0.01),
         ng_dur_symp2clear=dict(low=6, high=10, guess=8, step=0.5),
         ct_dur_symp2clear=dict(low=13, high=18, guess=15, step=0.5),
+        ng_dur_asymp2clear=dict(low=6, high=12, guess=8, step=0.5),
+        ct_dur_asymp2clear=dict(low=13, high=20, guess=15, step=0.5),
         p_symp_care=dict(low=0.25, high=0.75, guess=0.5, step=0.01),
     )
 
@@ -79,11 +81,14 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
+    weights = {'tv_new_infections': 0.2}
+
     # Make the calibration
     calib = sti.Calibration(
         calib_pars=calib_pars,
         extra_results=sres,
         build_fn=build_sim,
+        weights=weights,
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
@@ -99,14 +104,14 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    scenario = 'treat80'
-    sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
-    if do_shrink:
-        cal = calib.shrink(n_results=500)
-        sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', cal)
-    else:
-        sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
-    print(f'Best pars are {calib.best_pars}')
+    for scenario in ['treat50', 'treat80', 'treat100']:
+        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+        if do_shrink:
+            cal = calib.shrink(n_results=500)
+            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', cal)
+        else:
+            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+        print(f'Best pars are {calib.best_pars}')
     print('Done!')
 
 
