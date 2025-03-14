@@ -84,8 +84,8 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     data = pd.read_csv('data/zimbabwe_sti_data2.csv')
 
     weights = dict(
-        ng_new_infections=4,
-        ct_new_infections=4,
+        ng_new_infections=2,
+        ct_new_infections=2,
         tv_new_infections=0.5,
     )
 
@@ -110,7 +110,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    for scenario in ['treat80']:  #, 'treat100']:  # 'treat50'
+    for scenario in ['treat50', 'treat80', 'treat100']:  
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
         if do_shrink:
             cal = calib.shrink(n_results=500)
