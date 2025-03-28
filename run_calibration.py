@@ -73,7 +73,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     # Make the sim
     scenpars = make_scenpars(scenario)
     sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
-    data = pd.read_csv('data/zimbabwe_sti_data2.csv')
+    data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     weights = dict(
         ng_new_infections=2,
