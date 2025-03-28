@@ -72,7 +72,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
     # Make the sim
     scenpars = make_scenpars(scenario)
-    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
+    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=10e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     weights = dict(
@@ -102,7 +102,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    for scenario in ['treat50', 'treat80', 'treat100']:
+    for scenario in ['treat80']:  #, 'treat80', 'treat100']:
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
         if do_shrink:
             cal = calib.shrink(n_results=500)
