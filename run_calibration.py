@@ -26,6 +26,7 @@ n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
+make_stats = True  # Whether to make stats
 
 
 def build_sim(sim, calib_pars):
@@ -105,11 +106,21 @@ if __name__ == '__main__':
     for scenario in ['treat80']:  #, 'treat80', 'treat100']:
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
         if do_shrink:
-            cal = calib.shrink(n_results=500)
-            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', cal)
+            calib = calib.shrink(n_results=500)
+            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
-        print(f'Best pars are {calib.best_pars}')
+
+        if make_stats:
+            from utils import percentiles
+            df = calib.resdf
+            df_stats = df.groupby(df.time).describe(percentiles=percentiles)
+            sc.saveobj(f'results/zim_sti_calib_stats_{scenario}.df', df_stats)
+            par_stats = calib.df.describe(percentiles=[0.05, 0.95])
+            sc.saveobj(f'results/zim_sti_par_stats_{scenario}.df', par_stats)
+
+    print(f'Best pars are {calib.best_pars}')
+
     print('Done!')
 
 
