@@ -92,13 +92,19 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
 if __name__ == '__main__':
 
     sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+    print(f'Best pars are {calib.best_pars}')
+
+    # Save the results
+    print('Shrinking and saving...')
     if do_shrink:
         calib = calib.shrink(n_results=500)
         sc.saveobj(f'results/zim_hiv_calib.obj', calib)
     else:
         sc.saveobj(f'results/zim_hiv_calib.obj', calib)
 
+    # Make stats
     if make_stats:
+        print('Making stats...')
         from utils import percentiles
         df = calib.resdf
         df_stats = df.groupby(df.time).describe(percentiles=percentiles)
@@ -106,5 +112,4 @@ if __name__ == '__main__':
         par_stats = calib.df.describe(percentiles=[0.05, 0.95])
         sc.saveobj(f'results/zim_hiv_par_stats.df', par_stats)
 
-    print(f'Best pars are {calib.best_pars}')
-
+    print('Done!')

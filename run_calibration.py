@@ -103,8 +103,20 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    for scenario in ['treat50', 'treat80', 'treat100']:
+    # Settings
+    sc.heading('Running STI calibration')
+    sc.tic()
+    scenarios = ['treat50', 'treat80', 'treat100']
+    if len(scenarios) == 3:
+        run_all = True
+
+    # Run the calibration
+    for scenario in scenarios:
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+        print(f'Best pars are {calib.best_pars}')
+
+        # Save the results
+        print('Shrinking and saving...')
         if do_shrink:
             calib = calib.shrink(n_results=500)
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
@@ -112,6 +124,7 @@ if __name__ == '__main__':
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
 
         if make_stats:
+            print('Making stats...')
             from utils import percentiles
             df = calib.resdf
             df_stats = df.groupby(df.time).describe(percentiles=percentiles)
@@ -119,7 +132,44 @@ if __name__ == '__main__':
             par_stats = calib.df.describe(percentiles=[0.05, 0.95])
             sc.saveobj(f'results/zim_sti_par_stats_{scenario}.df', par_stats)
 
-    print(f'Best pars are {calib.best_pars}')
+    # Make big dataframe
+    if run_all:
+        scenlabels = {'treat50': 'Treat-half', 'treat80':'Treat-most', 'treat100':'Treat-all'}
+        dfs = sc.autolist()
+        cs_dfs = sc.autolist()  # care seeking for VDS - not by disease
+        results = sc.objdict()
+        for scenario in scenarios:
+            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
+            df = calib.df[:500]
+            df['scenario'] = scenlabels[scenario]
+            df['ng_p_treat'] = df['ng_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
+            df['ct_p_treat'] = df['ct_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
+            df['tv_p_treat'] = df['tv_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
+
+            df = df.loc[:, df.columns != 'p_symp_care']
+            cs_df = calib.df[:500].loc[:, calib.df.columns.isin(['index', 'p_symp_care'])]
+            cs_df['scenario'] = scenario
+            dfs += df
+            cs_dfs += cs_df
+
+            # Save results
+            results[scenario] = calib.sim_results[:50]
+
+        df = pd.concat(dfs)
+        cs_df = pd.concat(cs_dfs)
+
+        # Melt dataframe to long form
+        vars = ['ng_p_symp', 'ct_p_symp', 'tv_p_symp', 'ng_p_treat', 'ct_p_treat', 'tv_p_treat']
+        dfm = df.melt(id_vars=['index', 'mismatch', 'scenario'], value_vars=vars, var_name='variable', value_name='value')
+
+        # Add column for disease
+        dfm['disease'] = dfm['variable'].apply(lambda x: x.split('_')[0].upper())
+        dfm['par'] = dfm['variable'].apply(lambda x: x[3:])
+
+        # Save results for figure 3
+        sc.saveobj('results/zim_sti_calib_df.obj', dfm)  # TOO BIG TO ADD TO REPO
+        sc.saveobj('results/zim_sti_care_seeking.obj', cs_df)
+        sc.saveobj('results/zim_sti_calib_res.obj', results)
 
     print('Done!')
 

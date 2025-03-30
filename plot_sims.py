@@ -177,7 +177,7 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
             pn += 1
 
     sc.figlayout()
-    sc.savefig("figures/" + title + str(start_year) + "_" + which + fext + ".png", dpi=100)
+    sc.savefig("figures/" + title + "_" + fext + ".png", dpi=100)
 
     return fig
 
