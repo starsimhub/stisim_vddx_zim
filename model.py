@@ -8,6 +8,7 @@ Used for evaluation of etiological tests compared to syndromic management.
 import starsim as ss
 import stisim as sti
 
+from analyzers import total_symptomatic as ts
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
 from plot_sims import *
@@ -85,7 +86,9 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     else:
         connectors = []
-    # analyzers = [total_symptomatic()]  #, overtreatment_stats, coinfection_stats]
+
+    if analyzers is None:
+        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
 
     sim = ss.Sim(
         dt=dt,
@@ -103,7 +106,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         verbose=verbose,
     )
 
-    # Store scenario and background BV rate for grouping
+    # Store scenario
     sim.scenario = scenario
 
     return sim
@@ -165,53 +168,43 @@ def load_calib_pars(scenario=None, calib=None, i=0):
     return scenpars
 
 
-if __name__ == '__main__':
+def make_pars(use_calib=True, scenario='treat80'):
+    if use_calib:
+        calibname = scenario.strip('poc')
+        calib = sc.loadobj(f'results/zim_sti_calib_{calibname}.obj')
+        pars = load_calib_pars(scenario=scenario, calib=calib, i=0)
+    else:
+        pars = make_scenpars(scenario)
+    return pars
 
-    # SETTINGS
-    debug = False
-    seed = 1  # 533833
-    do_save = True
-    do_run = True
-    scenario = 'treat80'
-    use_calib = True  # Whether to use the calibrated parameters
 
-    # What to run
-    to_run = [
-        # 'hiv',
-        'stis',
-    ]
+def run_msim(scenarios=None, use_calib=True, seed=1, debug=False, do_save=True):
 
-    if 'hiv' in to_run:
-        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
-        sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
-        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+    # Mave individual sims
+    sims = sc.autolist()
 
-        # Process and plot
-        df = sc.loadobj(f'results/{scenario}_sim.df')
-        plot_hiv_sims(df, start_year=1990, which='single')
+    if scenarios is None:
+        scenarios = make_scens().keys()
 
-    if 'stis' in to_run:
-        if use_calib:
-            calibname = scenario.strip('poc')
-            calib = sc.loadobj(f'results/zim_sti_calib_{calibname}.obj')
-            scenpars = load_calib_pars(scenario=scenario, calib=calib, i=0)
-        else:
-            scenpars = make_scenpars(scenario)
+    for scenario in scenarios:
+        pars = make_pars(use_calib=use_calib, scenario=scenario)
+        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2041)
+        sims += sim
 
-        # Add analyzers
-        from analyzers import total_symptomatic as ts
-        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
-        sim = make_sim(scenario=scenario, **scenpars, analyzers=analyzers, seed=seed, debug=debug, start=1990, stop=2041)
-        sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='.')
-        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+    sims = ss.parallel(sims).sims
 
-        # Process and plot
-        df = sc.loadobj(f'results/{scenario}_sim.df')
-        # plot_hiv_sims(df, start_year=1990, which='single')
-        plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
-        plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
+    if do_save:
+        for sim in sims:
+            scenario = sim.scenario
+            df = sim.to_df(resample='year', use_years=True, sep='.')
+            sc.saveobj(f'results/{scenario}_sim.df', df)
+
+    return sims
+
+
+def save_stats(sims):
+
+    for sim in sims:
 
         # Save age/sex epi results
         dfs = sc.autolist()
@@ -243,4 +236,42 @@ if __name__ == '__main__':
         hiv_df['timevec'] = df.timevec
         if do_save: sc.saveobj(f'results/hiv_df_{scenario}.df', hiv_df)
 
+    return
+
+
+if __name__ == '__main__':
+
+    # SETTINGS
+    debug = False
+    seed = 1  # 533833
+    do_save = True
+    do_run = True
+    scenario = 'treat80'
+    use_calib = True  # Whether to use the calibrated parameters
+
+    # What to run
+    to_run = [
+        # 'hiv',
+        'stis',
+    ]
+
+    if 'hiv' in to_run:
+        sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
+        sim.run()
+        df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
+        if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
+
+        # Process and plot
+        df = sc.loadobj(f'results/{scenario}_sim.df')
+        plot_hiv_sims(df, start_year=1990, which='single')
+
+    if 'stis' in to_run:
+
+        # Add analyzers
+        pars = make_pars(use_calib=use_calib, scenario=scenario)
+        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2041)
+        sim.run()
+        df = sim.to_df(resample='year', use_years=True, sep='.')
+        plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
+        plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
 

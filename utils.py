@@ -13,6 +13,9 @@ def set_font(size=None, font='Libertinus Sans'):
 percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
 percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
 
+scenarios = ['treat50', 'treat80', 'treat100']
+scenlabels = {'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100':'Treat-all'}
+
 
 unneeded_results = [
     'pregnancy', 'deaths', 'structuredsexual', 'maternalnet', 'new_deaths', 'cum_deaths',
