@@ -1,5 +1,6 @@
 """
 Plot degree of overtreatment by scenario
+Generate files by running run_syndromic_scens.py on VMs -- takes about 10min
 """
 import pandas as pd
 
