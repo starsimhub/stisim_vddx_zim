@@ -1,5 +1,11 @@
 """
-Plot HIV calibration
+Plot calibrations
+
+Toggle "which" on line 16 to plot HIV calibrations (Fig S4) or STI calibrations (Fig S5).
+
+Running this file will print a table which shows the mean and 90% credible interval of the calibrated parameters.
+This table can be copied and pasted into the manuscript: Table S10 for HIV and S11 for STIs.
+
 """
 
 # Import packages
@@ -14,7 +20,7 @@ if __name__ == '__main__':
     which = ['hiv', 'sti'][1]
     scenario = 'treat80'
 
-    # Load files - should all be committed to the repository
+    # Load files - these should all be committed to the repository
     df_filename = f'results/zim_{which}_calib_stats' + (f'_{scenario}' if which == 'sti' else '') + '.df'
     par_filename = f'results/zim_{which}_par_stats' + (f'_{scenario}' if which == 'sti' else '') + '.df'
     df_stats = sc.loadobj(df_filename)
@@ -36,7 +42,7 @@ if __name__ == '__main__':
     elif which == 'sti':
         plot_sti_sims(df_stats, **plot_kwargs)
 
-    # Print posteriors
+    # Print posterior
     pars = [p for p in par_stats.columns if p not in ['index', 'mismatch']]
     for p in pars:
         print(f'{p}: {par_stats[p]["mean"]:.3f} ({par_stats[p]["5%"]:.3f}–{par_stats[p]["95%"]:.3f})')
