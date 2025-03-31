@@ -188,7 +188,7 @@ def run_msim(scenarios=None, use_calib=True, seed=1, debug=False, do_save=True):
 
     for scenario in scenarios:
         pars = make_pars(use_calib=use_calib, scenario=scenario)
-        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2041)
+        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2026)
         sims += sim
 
     sims = ss.parallel(sims).sims

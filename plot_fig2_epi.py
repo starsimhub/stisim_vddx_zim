@@ -29,33 +29,36 @@ def plot_infections_by_sw(df, disease=None, ax=None, start_year=2000, end_year=2
     colors = ['#d46e9c', '#2f734a', '#d46e9c', '#2f734a']
     alphas = [0.9, 0.9, 0.3, 0.3]
 
+    si = sc.findfirst(df.index, start_year)
+    ei = sc.findfirst(df.index, end_year)
+
     # New infections acquired by sex and sex work status
     bottom = np.zeros(2)
     x = np.array([0.5, 1.5])
     g = 0
     for group, glabel in groups.items():
         vals = np.array([
-            df[f'new_infections_{group}_{disease}'][10:30].mean(),
-            df[f'new_transmissions_{group}_{disease}'][10:30].mean(),
+            df[f'new_infections_{group}_{disease}'][si:ei].mean(),
+            df[f'new_transmissions_{group}_{disease}'][si:ei].mean(),
         ])
         p = ax.barh(x, vals, width, label=glabel, left=bottom, color=colors[g], alpha=alphas[g])
         ax.bar_label(p, labels=[glabel, glabel], label_type='center')
         bottom += vals
         g += 1
 
-    ax.set_title(disease.upper()+" infections\n2000-2020 average")
+    ax.set_title(disease.upper()+f" infections\n{start_year}-{end_year} average")
     sc.SIticks(ax, axis='x')
     ax.set_xlim(left=0)
     ax.set_yticks(x, ['Acquired', 'Transmitted'])
     ax.set_xlabel('')
     ax.set_ylabel('')
 
-    total_trans_ng = sw_df[f'new_transmissions_fsw_ng'][10:30].mean()+sw_df[f'new_transmissions_client_ng'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ng'][10:30].mean()+sw_df[f'new_transmissions_non_client_ng'][10:30].mean()
-    total_trans_ct = sw_df[f'new_transmissions_fsw_ct'][10:30].mean()+sw_df[f'new_transmissions_client_ct'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ct'][10:30].mean()+sw_df[f'new_transmissions_non_client_ct'][10:30].mean()
-    total_trans_tv = sw_df[f'new_transmissions_fsw_tv'][10:30].mean()+sw_df[f'new_transmissions_client_tv'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_tv'][10:30].mean()+sw_df[f'new_transmissions_non_client_tv'][10:30].mean()
-    print(f'NG SW share: {(sw_df[f"new_transmissions_fsw_ng"][10:30].mean()+sw_df[f"new_transmissions_client_ng"][10:30].mean())/total_trans_ng}')
-    print(f'CT SW share: {(sw_df[f"new_transmissions_fsw_ct"][10:30].mean()+sw_df[f"new_transmissions_client_ct"][10:30].mean())/total_trans_ct}')
-    print(f'TV SW share: {(sw_df[f"new_transmissions_fsw_tv"][10:30].mean()+sw_df[f"new_transmissions_client_tv"][10:30].mean())/total_trans_tv}')
+    total_trans_ng = sw_df[f'new_transmissions_fsw_ng'][si:ei].mean()+sw_df[f'new_transmissions_client_ng'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ng'][10:30].mean()+sw_df[f'new_transmissions_non_client_ng'][10:30].mean()
+    total_trans_ct = sw_df[f'new_transmissions_fsw_ct'][si:ei].mean()+sw_df[f'new_transmissions_client_ct'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ct'][10:30].mean()+sw_df[f'new_transmissions_non_client_ct'][10:30].mean()
+    total_trans_tv = sw_df[f'new_transmissions_fsw_tv'][si:ei].mean()+sw_df[f'new_transmissions_client_tv'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_tv'][10:30].mean()+sw_df[f'new_transmissions_non_client_tv'][10:30].mean()
+    print(f'NG SW share: {(sw_df[f"new_transmissions_fsw_ng"][si:ei].mean()+sw_df[f"new_transmissions_client_ng"][10:30].mean())/total_trans_ng}')
+    print(f'CT SW share: {(sw_df[f"new_transmissions_fsw_ct"][si:ei].mean()+sw_df[f"new_transmissions_client_ct"][10:30].mean())/total_trans_ct}')
+    print(f'TV SW share: {(sw_df[f"new_transmissions_fsw_tv"][si:ei].mean()+sw_df[f"new_transmissions_client_tv"][10:30].mean())/total_trans_tv}')
     # ax.set_ylim(bottom=0)
     return ax
 
