@@ -19,7 +19,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             for i in range(n_scen_runs):
                 print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
                 scenpars = load_calib_pars(scenario=scenname, calib=calib, i=i)
-                sim = make_sim(**scenpars, scenario=scenname, verbose=-1, stop=stop)
+                sim = make_sim(**scenpars, scenario=scenname, verbose=1/120, stop=stop)
                 sim.label = scenname + str(i)
                 sim.parset = i
                 sims += sim
@@ -100,8 +100,8 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        'run_syndromic_scens',
-        # 'process_results',
+        # 'run_syndromic_scens',
+        'process_results',
     ]
 
     # Imports
