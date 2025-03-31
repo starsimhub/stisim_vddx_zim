@@ -100,8 +100,8 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        # 'run_syndromic_scens',
-        'process_results',
+        'run_syndromic_scens',
+        # 'process_results',
     ]
 
     # Imports
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     if 'run_syndromic_scens' in to_run:
         # Run analyses
-        sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
+        sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2041)
         sc.saveobj('results/synd_scens.obj', df)  # Don't commit to repo
 
     if 'process_results' in to_run:
