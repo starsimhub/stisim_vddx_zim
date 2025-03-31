@@ -207,6 +207,7 @@ def save_stats(sims):
     for sim in sims:
 
         scenario = sim.scenario
+        df = sim.to_df(resample='year', use_years=True, sep='.')
 
         # Save age/sex epi results
         dfs = sc.autolist()
