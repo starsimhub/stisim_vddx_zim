@@ -42,12 +42,15 @@ if __name__ == '__main__':
     for pn, (txname, txlabel) in enumerate(tx_labels.items()):
         ax = fig.add_subplot(gs1[pn])
         for scenario in scenarios:
-            socdf = odf.loc[(odf.scenario == scen_labels[scenario]) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
+            socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
-            ax.plot(t[si:ei], socy, label=scen_labels[scenario], color=colors[scenario])
+            try:
+                ax.plot(t[si:ei], socy, label=scen_labels[scenario], color=colors[scenario])
+            except:
+                print(f'Error plotting {scenario} for {txname}')
         for scenario in scenarios:
-            pocdf = odf.loc[(odf.scenario == scen_labels[scenario+'poc']) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
+            pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], pocy, label=scen_labels[scenario], color=colors[scenario], ls='--')
@@ -66,6 +69,7 @@ if __name__ == '__main__':
 
     # Second row, plot 1: Cumulative reduction in overtreatment
     ax = fig.add_subplot(gs2[0])
+    tdf.reset_index(inplace=True)
     sns.boxplot(data=tdf, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
     ax.set_title('% reduction in overtreatment, 2027-2040')
     ax.set_ylim(0, 100)
@@ -75,6 +79,7 @@ if __name__ == '__main__':
 
     # Second row, plot 2: Cumulative reduction in infections
     ax = fig.add_subplot(gs2[1])
+    hdf.reset_index(inplace=True)
     sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
     ax.legend(frameon=False, prop={'size': legendfont})
     ax.set_title('% reduction in infections, 2027-2040')
