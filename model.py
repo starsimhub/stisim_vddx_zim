@@ -217,8 +217,8 @@ def save_stats(sims):
                 dd = dict()
                 for ab1, ab2 in zip(age_bins[:-1], age_bins[1:]):
                     age = str(ab1) + '-' + str(ab2)
-                    if ab1 == 30:
-                        age = '30+'  # Combine the last two age groups
+                    if ab1 == 65:
+                        age = '65+'  # Combine the last two age groups
                     dd['age'] = [age]
                     dd['sex'] = sex
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
