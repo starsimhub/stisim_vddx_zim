@@ -223,18 +223,18 @@ def save_stats(sims):
                     dd['disease'] = disease
                     dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
-        if do_save: sc.saveobj(f'results/epi_df_{scenario}.df', epi_df)
+        sc.saveobj(f'results/epi_df_{scenario}.df', epi_df)
 
         # Save SW stats
         sw_res = sim.results['sw_stats']
         sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
-        if do_save: sc.saveobj(f'results/sw_df_{scenario}.df', sw_df)
+        sc.saveobj(f'results/sw_df_{scenario}.df', sw_df)
 
         # Save HIV results
         hiv_res = sim.results['total_symptomatic']
         hiv_df = hiv_res.to_df(resample='year', use_years=True, sep='.')
         hiv_df['timevec'] = df.timevec
-        if do_save: sc.saveobj(f'results/hiv_df_{scenario}.df', hiv_df)
+        sc.saveobj(f'results/hiv_df_{scenario}.df', hiv_df)
 
     return
 
