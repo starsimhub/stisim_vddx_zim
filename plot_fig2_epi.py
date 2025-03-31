@@ -3,7 +3,7 @@ Plot parameter estimates of care seeking alongside prevalence
 Requires running model.py first with calibrated parameters.
 Steps:
     1. Run run_calibration to generate the files 'results/zim_sti_calib_treat80.obj'
-    2. Run get_plot_data.py to generate the epi result files:
+    2. Run run_plot_data.py to generate the epi result files:
             epi_df = 'results/epi_df_{scenario}.df'
             sw_df = 'results/sw_df_{scenario}.df'
             hiv_df = 'results/hiv_df_{scenario}.df'
