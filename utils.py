@@ -13,7 +13,9 @@ def set_font(size=None, font='Libertinus Sans'):
 percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
 percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
 
-scenarios = ['treat50', 'treat80', 'treat100']
+def get_scenarios():
+    return ['treat50', 'treat80', 'treat100']
+
 scenlabels = {'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100':'Treat-all'}
 txscenarios = ['treat50poc', 'treat80poc', 'treat100poc']
 txscenlabels = sc.mergedicts(scenlabels, {'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'})

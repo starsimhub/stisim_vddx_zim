@@ -12,6 +12,7 @@ from analyzers import total_symptomatic as ts
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
 from plot_sims import *
+from utils import get_scenarios
 
 
 def make_stis(p_symp=None, p_symp_care=None, ng=None, ct=None, tv=None):
@@ -184,7 +185,7 @@ def run_msim(scenarios=None, use_calib=True, seed=1, debug=False, do_save=True):
     sims = sc.autolist()
 
     if scenarios is None:
-        scenarios = make_scens().keys()
+        scenarios = get_scenarios()
 
     for scenario in scenarios:
         pars = make_pars(use_calib=use_calib, scenario=scenario)

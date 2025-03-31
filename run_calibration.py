@@ -14,10 +14,9 @@ os.environ.update(
 # %% Imports and settings
 import sciris as sc
 import stisim as sti
-import starsim as ss
 import pandas as pd
 from model import make_sim, make_scenpars
-from utils import scenarios
+from utils import get_scenarios
 
 
 # Run settings
@@ -106,7 +105,9 @@ if __name__ == '__main__':
 
     # Settings
     sc.heading('Running STI calibration')
-    sc.tic()
+
+    scenarios = get_scenarios()
+    scenarios = ['treat80']
 
     # Run the calibration
     for scenario in scenarios:
