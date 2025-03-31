@@ -126,7 +126,7 @@ if __name__ == '__main__':
         # Save the results
         print('Shrinking and saving...')
         if do_shrink:
-            calib = calib.shrink(n_results=500)
+            calib = calib.shrink(n_results=300)
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
