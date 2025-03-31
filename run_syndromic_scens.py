@@ -1,3 +1,9 @@
+"""
+Run syndromic scenarios
+
+Run on VMs - should take approx 10 min
+"""
+
 # %% Imports and settings
 import pandas as pd
 import sciris as sc
@@ -11,6 +17,8 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     """
     Run analyses
     """
+    sc.heading("Making sims... ")
+
     sims = sc.autolist()
     for scenario in scenarios:
         for pocstr in ['', 'poc']:
@@ -24,13 +32,15 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
                 sim.parset = i
                 sims += sim
 
+    sc.heading(f"Running {n_scen_runs} sims... ")
     if parallel:
         sims = ss.parallel(sims).sims
     else:
         for sim in sims:
             sim.run()
 
-    print("Processing... ")
+    sc.heading(f"Processing sims... ")
+    print("WARNING, this will take a while...")
     dfs = []
     for s, sim in enumerate(sims):
         sdf = sim.to_df(resample='year', use_years=True, sep='.')
@@ -39,11 +49,14 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
         sdf['poc'] = 1 if 'poc' in sim.scenario else 0
         dfs += [sdf]
     df = pd.concat(dfs)
+    print("Finished processing sims.")
 
     return sims, df
 
 
 def process_results(df):
+
+    sc.heading(f"Processing results... ")
     healthdfs = sc.autolist()
     treatdfs = sc.autolist()
 
@@ -98,9 +111,9 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
+    n_scen_runs = [50, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        # 'run_syndromic_scens',
+        'run_syndromic_scens',
         'process_results',
     ]
 
@@ -116,9 +129,9 @@ if __name__ == '__main__':
         # Load
         df = sc.loadobj('results/synd_scens.obj')
         healthdf, treatdf, overdf = process_results(df)
-        sc.saveobj('results/synd_health.obj', healthdf)
-        sc.saveobj('results/synd_treat.obj', treatdf)
-        sc.saveobj(f'results/overtx.obj', overdf)
+        sc.saveobj('results/synd_health.obj', healthdf)  # In repo
+        sc.saveobj('results/synd_treat.obj', treatdf)  # In repo
+        sc.saveobj(f'results/overtx.obj', overdf)  # In repo
 
     print('Done!')
 

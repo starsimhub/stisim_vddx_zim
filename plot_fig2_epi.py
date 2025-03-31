@@ -1,12 +1,14 @@
 """
-Plot parameter estimates of care seeking alongside prevalence
-Requires running model.py first with calibrated parameters.
-Steps:
-    1. Run run_calibration to generate the files 'results/zim_sti_calib_treat80.obj'
-    2. Run run_plot_data.py to generate the epi result files:
+Plot prevalence by age and infections by sex work: Fig 2 in manuscript.
+
+If updates are needed:
+    1. Make required updates to the model (model.py) or data folder
+    2. Run run_calibration to generate the files 'results/zim_sti_calib_stats_treat*.obj'
+    3. Run run_plot_data.py to generate the epi result files:
             epi_df = 'results/epi_df_{scenario}.df'
             sw_df = 'results/sw_df_{scenario}.df'
             hiv_df = 'results/hiv_df_{scenario}.df'
+    4. Run this script to generate the figure
 
 """
 

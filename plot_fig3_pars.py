@@ -1,8 +1,15 @@
 """
-Plot parameter estimates of care seeking alongside prevalence
-Requires running run_calibration first to generate the files
-'results/zim_sti_calib_{scenario}.obj' for each scenario.
-'make_df' creates a big dataframe from the results, and 'plot_pars' plots it.
+Plot parameter estimates of care seeking alongside prevalence: Fig 3 in manuscript
+
+If updates are needed:
+    1. Make required updates to the model (model.py) or data folder
+    2. Run run_calibration to generate the files 'results/zim_sti_calib_stats_treat*.obj'
+    3. Run run_plot_data.py to generate the epi result files:
+        results/zim_sti_calib_df.obj
+        results/zim_sti_calib_res.obj
+        results/zim_sti_care_seeking.obj
+    4. Run this script to generate the figure
+
 """
 
 # Import packages
