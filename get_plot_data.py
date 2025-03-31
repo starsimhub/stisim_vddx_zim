@@ -50,6 +50,7 @@ if __name__ == '__main__':
             for i in range(50):
                 thisdict = {k: calib.sim_results[i][k] for k in reskeys}
                 results[scenario].append(thisdict)
+            results['time'].append(calib.sim_results[0]['time'])
 
         df = pd.concat(dfs)
         cs_df = pd.concat(cs_dfs)

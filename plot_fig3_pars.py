@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     # Plot prevalence
     diseases = ['ng', 'ct', 'tv']
-    t = results['treat50'][0]['time']
+    t = results['time']
     si = sc.findfirst(t, 2010)
     ei = sc.findfirst(t, 2025)
 
