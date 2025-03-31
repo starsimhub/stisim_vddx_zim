@@ -115,8 +115,8 @@ if __name__ == '__main__':
     # Settings
     sc.heading('Running STI calibration')
 
-    scenarios = get_scenarios()
-    # scenarios = ['treat80']
+    # scenarios = get_scenarios()
+    scenarios = ['treat80']
 
     # Run the calibration
     for scenario in scenarios:
