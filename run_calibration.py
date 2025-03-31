@@ -22,7 +22,7 @@ from utils import get_scenarios
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [3000, 2][debug]  # How many trials to run for calibration
+n_trials = [1000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -86,9 +86,15 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     weights = dict(
-        ng_new_infections=0.5,
-        ct_new_infections=0.5,
-        tv_new_infections=0.5,
+        ng_new_infections=0,
+        ct_new_infections=0,
+        tv_new_infections=0,
+        ng_prevalence=0,
+        ct_prevalence=0,
+        tv_prevalence=0,
+        ng_n_infected=0.5,
+        ct_n_infected=0.5,
+        tv_n_infected=0.5,
     )
 
     # Make the calibration
@@ -115,8 +121,8 @@ if __name__ == '__main__':
     # Settings
     sc.heading('Running STI calibration')
 
-    # scenarios = get_scenarios()
-    scenarios = ['treat80']
+    scenarios = get_scenarios()
+    # scenarios = ['treat80']
 
     # Run the calibration
     for scenario in scenarios:
@@ -126,7 +132,7 @@ if __name__ == '__main__':
         # Save the results
         print('Shrinking and saving...')
         if do_shrink:
-            calib = calib.shrink(n_results=300)
+            calib = calib.shrink(n_results=int(n_trials//20))  # Save 5% best results
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
