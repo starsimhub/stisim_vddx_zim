@@ -206,6 +206,8 @@ def save_stats(sims):
 
     for sim in sims:
 
+        scenario = sim.scenario
+
         # Save age/sex epi results
         dfs = sc.autolist()
         age_bins = sim.diseases.ng.age_bins

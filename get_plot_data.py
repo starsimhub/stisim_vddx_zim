@@ -32,14 +32,14 @@ if __name__ == '__main__':
         results = sc.objdict()
         for scenario in scenarios:
             calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
-            df = calib.odf[:500]
+            df = calib.df[:500]
             df['scenario'] = scenlabels[scenario]
             df['ng_p_treat'] = df['ng_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
             df['ct_p_treat'] = df['ct_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
             df['tv_p_treat'] = df['tv_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
 
             df = df.loc[:, df.columns != 'p_symp_care']
-            cs_df = calib.odf[:500].loc[:, calib.odf.columns.isin(['index', 'p_symp_care'])]
+            cs_df = calib.df[:500].loc[:, calib.df.columns.isin(['index', 'p_symp_care'])]
             cs_df['scenario'] = scenario
             dfs += df
             cs_dfs += cs_df
