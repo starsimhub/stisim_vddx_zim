@@ -157,7 +157,7 @@ def make_scenpars(scenario):
 
 def load_calib_pars(scenario=None, calib=None, i=0):
     scenpars = make_scenpars(scenario)
-    raw_calib_pars = calib.df.iloc[i].to_dict()
+    raw_calib_pars = calib.odf.iloc[i].to_dict()
 
     # Overwrite
     diseases = ['ng', 'ct', 'tv']

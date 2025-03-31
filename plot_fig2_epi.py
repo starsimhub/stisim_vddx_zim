@@ -3,7 +3,7 @@ Plot parameter estimates of care seeking alongside prevalence
 Requires running model.py first with calibrated parameters.
 Steps:
     1. Run run_calibration to generate the files 'results/zim_sti_calib_treat80.obj'
-    2. Run get_plot_data.py to generate the files 'results/epi_df.df' and 'results/treat80_sw.df'
+    2. Run get_plot_data.py to generate the files 'results/epi_df.odf' and 'results/treat80_sw.odf'
 """
 
 # Import packages
@@ -85,9 +85,9 @@ def plot_hiv(hiv_df, ax=None):
 if __name__ == '__main__':
 
     scenario = 'treat80'
-    epi_df = sc.loadobj(f'results/epi_df_{scenario}.df')
-    sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
-    hiv_df = sc.loadobj(f'results/hiv_df_{scenario}.df')
+    epi_df = sc.loadobj(f'results/epi_df_{scenario}.odf')
+    sw_df = sc.loadobj(f'results/sw_df_{scenario}.odf')
+    hiv_df = sc.loadobj(f'results/hiv_df_{scenario}.odf')
 
     # Initialize plot
     set_font(size=20)

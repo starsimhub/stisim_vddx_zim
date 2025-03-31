@@ -474,11 +474,11 @@ if __name__ == '__main__':
     plot_multi = True
 
     if plot_multi:
-        df_stats = sc.loadobj('results/multi_res_stats.df')
+        df_stats = sc.loadobj('results/multi_res_stats.odf')
         percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
         plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
         plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, which='multi')
 
     if plot_single:
-        df = sc.loadobj('results/sim.df')
+        df = sc.loadobj('results/sim.odf')
         plot_sti_sims(df, start_year=2000, which='single')

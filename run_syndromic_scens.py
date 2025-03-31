@@ -47,8 +47,8 @@ def process_results(df):
     healthdfs = sc.autolist()
     treatdfs = sc.autolist()
 
-    tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
-    scen_labels = {'treat50':'Poor', 'treat80':'Imperfect', 'treat100':'Perfect'}
+    from utils import treatments, tx_labels
+    from utils import txscenlabels as scen_labels
 
     for scen in ['treat50', 'treat80', 'treat100']:
         for parset in df.parset.unique():
@@ -77,7 +77,20 @@ def process_results(df):
     healthdf = pd.concat(healthdfs)
     treatdf = pd.concat(treatdfs)
 
-    return healthdf, treatdf
+    # Overtreatment stats - proportion reduction
+    results = [tx+'.new_treated_unnecessary_f' for tx in treatments]
+    results += [tx+'.new_treated_f' for tx in treatments]
+    results += ['parset', 'scenario', 'timevec', 'poc']
+
+    odf = df.loc[:, df.columns.isin(['timevec']+results)]
+    for tx in treatments:
+        odf[tx+'.overtx'] = odf[tx+'.new_treated_unnecessary_f']/df[tx+'.new_treated_f']
+
+    # Melt dataframe to long form
+    dfm = odf.melt(id_vars=['timevec', 'scenario'], var_name='variable', value_name='value')
+    dfm['treatment'] = dfm['variable'].apply(lambda x: x.split('.')[0])
+
+    return healthdf, treatdf, dfm
 
 
 if __name__ == '__main__':
@@ -86,29 +99,27 @@ if __name__ == '__main__':
     debug = False
     seed = 1
     n_scen_runs = [100, 1][debug]  # Number of parameter sets to run per scenario
-    scenarios = ['treat50', 'treat80', 'treat100']  #, 'panel']
     to_run = [
         # 'run_syndromic_scens',
         'process_results',
-        # 'plot_results',
     ]
+
+    # Imports
+    from utils import scenarios
 
     if 'run_syndromic_scens' in to_run:
         # Run analyses
         sims, df = run_syndromic_scens(scenarios, parallel=True, stop=2040)
-        sc.saveobj('results/synd_scens.obj', df)
+        sc.saveobj('results/synd_scens.obj', df)  # Don't commit to repo
 
     if 'process_results' in to_run:
         # Load
         df = sc.loadobj('results/synd_scens.obj')
-        healthdf, treatdf = process_results(df)
+        healthdf, treatdf, overdf = process_results(df)
         sc.saveobj('results/synd_health.obj', healthdf)
         sc.saveobj('results/synd_treat.obj', treatdf)
-
+        sc.saveobj(f'results/overtx.obj', overdf)
 
     print('Done!')
-
-
-
 
 

@@ -76,6 +76,6 @@ if __name__ == '__main__':
 
     # percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow (for alpha shading in plots)
     # percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
-    # df_stats = df.groupby(df.index).describe(percentiles=percentiles)
-    # sc.saveobj(f'results/multi_res_stats.df', df_stats)
+    # df_stats = odf.groupby(odf.index).describe(percentiles=percentiles)
+    # sc.saveobj(f'results/multi_res_stats.odf', df_stats)
 

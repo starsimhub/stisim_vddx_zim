@@ -15,8 +15,8 @@ if __name__ == '__main__':
     scenario = 'treat100'
 
     # Load files - should all be committed to the repository
-    df_filename = f'results/zim_{which}_calib_stats' + (f'_{scenario}' if which == 'sti' else '') + '.df'
-    par_filename = f'results/zim_{which}_par_stats' + (f'_{scenario}' if which == 'sti' else '') + '.df'
+    df_filename = f'results/zim_{which}_calib_stats' + (f'_{scenario}' if which == 'sti' else '') + '.odf'
+    par_filename = f'results/zim_{which}_par_stats' + (f'_{scenario}' if which == 'sti' else '') + '.odf'
     df_stats = sc.loadobj(df_filename)
     par_stats = sc.loadobj(par_filename)
 
