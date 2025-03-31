@@ -22,7 +22,7 @@ from utils import get_scenarios
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
+n_trials = [3000, 2][debug]  # How many trials to run for calibration
 n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     sc.heading('Running STI calibration')
 
     scenarios = get_scenarios()
-    scenarios = ['treat80']
+    # scenarios = ['treat80']
 
     # Run the calibration
     for scenario in scenarios:
