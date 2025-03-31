@@ -45,12 +45,11 @@ if __name__ == '__main__':
             cs_dfs += cs_df
 
             # Save results
-            results[scenario] = []  #calib.sim_results[:50]
+            results[scenario] = []  # calib.sim_results[:50]
+            reskeys = [f'{dis}_prevalence' for dis in ['ng', 'ct', 'tv']]
             for i in range(50):
-                for dis in ['ng', 'ct', 'tv']:
-                    label = f'{dis}_prevalence'
-                    resdict = {label: calib.sim_results[i][label]}
-                    results[scenario].append(resdict)
+                thisdict = {k: calib.sim_results[i][k] for k in reskeys}
+                results[scenario].append(thisdict)
 
         df = pd.concat(dfs)
         cs_df = pd.concat(cs_dfs)
