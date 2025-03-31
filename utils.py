@@ -16,7 +16,7 @@ percentiles = [percentile for percentile_pair in percentile_pairs for percentile
 scenarios = ['treat50', 'treat80', 'treat100']
 scenlabels = {'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100':'Treat-all'}
 txscenarios = ['treat50poc', 'treat80poc', 'treat100poc']
-txscenlabels = {'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'}
+txscenlabels = sc.mergedicts(scenlabels, {'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'})
 treatments = ['ng_tx', 'ct_tx', 'metronidazole']
 tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
 
