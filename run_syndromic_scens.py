@@ -23,11 +23,9 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     for scenario in scenarios:
         for pocstr in ['', 'poc']:
             scenname = scenario + pocstr
-            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
             for i in range(n_scen_runs):
                 print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
-                scenpars = load_calib_pars(scenario=scenname, calib=calib, i=i)
-                sim = make_sim(**scenpars, scenario=scenname, verbose=1/120, stop=stop)
+                sim = make_sim(use_calib=True, scenario=scenname, verbose=1/120, stop=stop)
                 sim.label = scenname + str(i)
                 sim.parset = i
                 sims += sim
