@@ -150,6 +150,10 @@ def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_
 
     for scenario in scenarios:
         sim = make_sim(scenario=scenario, use_calib=use_calib, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
+        if use_calib:
+            print('Using calibration parameters:')
+            print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
+            print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
         sims += sim
 
     sims = ss.parallel(sims).sims
