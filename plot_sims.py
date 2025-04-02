@@ -133,7 +133,7 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
 def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext=''):
     """ Create quantile or individual sim plots of STIs """
     set_font(size=30)
-    fig, axes = pl.subplots(3, 5, figsize=(25, 12))
+    fig, axes = pl.subplots(3, 3, figsize=(25, 12))
     axes = axes.ravel()
     if which == 'multi': alphas = np.linspace(0.2, 0.5, len(percentile_pairs))
 
@@ -143,8 +143,8 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     disease_map = {'ng': 'NG', 'ct': 'CT', 'tv': 'TV'}  #, 'bv': 'Other'}
     result_map = {
-        'prevalence_f_15_25': 'Prevalence F 15-25',
-        'n_infected_f_15_25': 'Burden F 15-25',
+        # 'prevalence_f_15_25': 'Prevalence F 15-25',
+        # 'n_infected_f_15_25': 'Burden F 15-25',
         'prevalence': 'Prevalence',
         'new_infections': 'Infections',
         'n_infected': 'Burden',

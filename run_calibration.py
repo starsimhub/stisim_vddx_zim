@@ -30,7 +30,7 @@ do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
 
 
-def run_calibration(scenario, n_trials=None, n_workers=None):
+def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 
     # Define the calibration parameters
     calib_pars = dict(
@@ -84,7 +84,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     )
 
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+    if do_save: sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
