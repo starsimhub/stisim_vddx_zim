@@ -243,7 +243,7 @@ if __name__ == '__main__':
             print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
 
         sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='.')
+        df = sim.to_df(resample='year', use_years=True, sep='_')
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
         plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
 
