@@ -69,12 +69,6 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
         ng_prevalence=2,
         ct_prevalence=2,
         tv_prevalence=1,
-        ng_prevalence_f_15_25=0,
-        ct_prevalence_f_15_25=0,
-        tv_prevalence_f_15_25=0,
-        ng_n_infected_f_15_25=0,
-        ct_n_infected_f_15_25=0,
-        tv_n_infected_f_15_25=0,
     )
 
     # Make the calibration
