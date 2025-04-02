@@ -15,35 +15,53 @@ from plot_sims import *
 from utils import get_scenarios
 
 
-def make_stis(p_symp=None, p_symp_care=None, ng=None, ct=None, tv=None):
-    ng = sti.Gonorrhea(
-        beta_m2f=ng['beta_m2f'],
-        eff_condom=ng['eff_condom'],
-        p_symp=[p_symp['ng'], 0.65],
-        p_symp_care=[p_symp_care['ng'], 0.83]
-    )
-    ct = sti.Chlamydia(
-        beta_m2f=ct['beta_m2f'],
-        eff_condom=ct['eff_condom'],
-        p_symp=[p_symp['ct'], 0.54],
-        p_symp_care=[p_symp_care['ct'], 0.83]
-    )
-    tv = sti.Trichomoniasis(
-        beta_m2f=tv['beta_m2f'],
-        eff_condom=tv['eff_condom'],
-        p_symp=[p_symp['tv'], 0.5],
-        p_symp_care=[p_symp_care['tv'], 0.27]
-    )
+def make_stis():
+    ng = sti.Gonorrhea(eff_condom=0.7)
+    ct = sti.Chlamydia(eff_condom=0.8)
+    tv = sti.Trichomoniasis(eff_condom=0.8)
     bv = sti.BV()
-
     return ng, ct, tv, bv
 
 
+def make_sim_pars(sim, calib_pars):
+    """
+    Update the simulation parameters with the calibration parameters
+    """
+    for k, pars in calib_pars.items():  # Loop over the calibration parameters
+        if k == 'rand_seed':
+            sim.pars.rand_seed = v
+            continue
+
+        if isinstance(pars, dict):
+            v = pars['value']
+        elif sc.isnumber(pars):
+            v = pars
+        else:
+            raise NotImplementedError(f'Parameter {k} not recognized')
+
+        if 'beta_m2f' in k:
+            sim.diseases[k[:2]].pars[k[3:]] = v
+        elif 'dur' in k:
+            sim.diseases[k[:2]].pars['dur_symp2clear'][0][0] = ss.dur(v, 'month')
+            sim.diseases[k[:2]].pars['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
+        elif 'p_symp' in k and k != 'p_symp_care':
+            sim.diseases[k[:2]].pars[k[3:]][0] = v
+        elif 'p_symp_care' in k:
+            for dis in ['ng', 'ct', 'tv']:
+                sim.diseases[dis].pars[k][0] = v
+        elif k in ['index', 'mismatch']:
+            continue
+        else:
+            raise NotImplementedError(f'Parameter {k} not recognized')
+
+    return sim
+
+
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', p_symp=None, p_symp_care=None, poc=False, stipars=None, analyzers=None):
+             scenario='treat100', use_calib=False, par_idx=0, poc=False, analyzers=None):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
-    if n_agents is None: n_agents = [int(5e3), int(5e2)][debug]
+    if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
     if dt is None: dt = [1/12, 1][debug]
 
     ####################################################################################################################
@@ -74,7 +92,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     hiv = make_hiv()
     diseases = [hiv]
     if add_stis:
-        ng, ct, tv, bv = make_stis(p_symp=p_symp, p_symp_care=p_symp_care, **stipars)
+        ng, ct, tv, bv = make_stis()
         stis = [ng, ct, tv, bv]
         diseases += stis  # Add the STIs to the list of diseases
 
@@ -110,76 +128,19 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     # Store scenario
     sim.scenario = scenario
 
-    return sim
-
-# Define scenarios
-def make_scens():
-    scendict = sc.objdict(
-        treat100=sc.objdict(
-            p_symp=dict(ng=0.1, ct=0.2, tv=0.3),
-            p_symp_care=dict(ng=0.75, ct=0.75, tv=0.6),
-            stipars = dict(
-                ng=dict(beta_m2f=0.2, eff_condom=0.8),
-                ct=dict(beta_m2f=0.2, eff_condom=0.8),
-                tv=dict(beta_m2f=0.1, eff_condom=0.8),
-            ),
-            poc=False,
-        )
-    )
-
-    scendict['treat80'] = sc.dcp(scendict['treat100'])
-    scendict['treat80'].p_symp = dict(ng=0.15, ct=0.3, tv=0.45)
-    scendict['treat80'].p_symp_care = dict(ng=0.625, ct=0.625, tv=0.5)
-    scendict['treat80'].stipars = dict(
-        ng=dict(beta_m2f=0.2, eff_condom=0.8),
-        ct=dict(beta_m2f=0.2, eff_condom=0.8),
-        tv=dict(beta_m2f=0.1, eff_condom=0.8),
-    )
-
-    scendict['treat50'] = sc.dcp(scendict['treat100'])
-    scendict['treat50'].p_symp = dict(ng=0.2, ct=0.4, tv=0.6)
-    scendict['treat50'].stipars = dict(
-        ng=dict(beta_m2f=0.2, eff_condom=0.8),
-        ct=dict(beta_m2f=0.2, eff_condom=0.8),
-        tv=dict(beta_m2f=0.1, eff_condom=0.8),
-    )
-
-    for scenario in scendict.keys():
-        scendict[scenario+'poc'] = sc.dcp(scendict[scenario])
-        scendict[scenario+'poc'].poc = True
-
-    return scendict
-
-
-def make_scenpars(scenario):
-    scendict = make_scens()
-    return scendict[scenario]
-
-
-def load_calib_pars(scenario=None, calib=None, i=0):
-    scenpars = make_scenpars(scenario)
-    raw_calib_pars = calib.df.iloc[i].to_dict()
-
-    # Overwrite
-    diseases = ['ng', 'ct', 'tv']
-    for disease in diseases:
-        scenpars['p_symp'][disease] = raw_calib_pars[f'{disease}_p_symp']
-        scenpars['p_symp_care'][disease] = raw_calib_pars['p_symp_care']
-        scenpars['stipars'][disease]['beta_m2f'] = raw_calib_pars[f'{disease}_beta_m2f']
-    return scenpars
-
-
-def make_pars(use_calib=True, scenario='treat80'):
+    # If using calibration parameters, update the simulation
     if use_calib:
         calibname = scenario.strip('poc')
-        calib = sc.loadobj(f'results/zim_sti_calib_{calibname}.obj')
-        pars = load_calib_pars(scenario=scenario, calib=calib, i=0)
-    else:
-        pars = make_scenpars(scenario)
-    return pars
+        pars_df = sc.loadobj(f'results/zim_sti_pars_{calibname}.df')
+        calib_pars = pars_df.iloc[par_idx].to_dict()
+        sim.init()
+        sim = make_sim_pars(sim, calib_pars)
+        print(f'Using calibration parameters for scenario {scenario} and index {par_idx}')
+
+    return sim
 
 
-def run_msim(scenarios=None, use_calib=True, seed=1, debug=False, do_save=True):
+def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_save=True):
 
     # Mave individual sims
     sims = sc.autolist()
@@ -188,8 +149,7 @@ def run_msim(scenarios=None, use_calib=True, seed=1, debug=False, do_save=True):
         scenarios = get_scenarios()
 
     for scenario in scenarios:
-        pars = make_pars(use_calib=use_calib, scenario=scenario)
-        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2026)
+        sim = make_sim(scenario=scenario, use_calib=use_calib, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
         sims += sim
 
     sims = ss.parallel(sims).sims
@@ -271,9 +231,13 @@ if __name__ == '__main__':
 
     if 'stis' in to_run:
 
-        # Add analyzers
-        pars = make_pars(use_calib=use_calib, scenario=scenario)
-        sim = make_sim(scenario=scenario, **pars, seed=seed, debug=debug, start=1990, stop=2041)
+        sim = make_sim(scenario=scenario, use_calib=True, seed=seed, debug=debug, start=1990, stop=2041)
+
+        if use_calib:
+            print('Using calibration parameters:')
+            print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
+            print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+
         sim.run()
         df = sim.to_df(resample='year', use_years=True, sep='.')
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)

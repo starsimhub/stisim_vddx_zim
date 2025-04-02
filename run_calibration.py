@@ -16,43 +16,18 @@ import sciris as sc
 import starsim as ss
 import stisim as sti
 import pandas as pd
-from model import make_sim, make_scenpars
+from model import make_sim, make_sim_pars
 from utils import get_scenarios
 
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]    # How many cores to use
+n_trials = [1, 2][debug]  # How many trials to run for calibration
+n_workers = [1, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
-
-
-def build_sim(sim, calib_pars):
-
-   # Apply the calibration parameters
-    for k, pars in calib_pars.items():  # Loop over the calibration parameters
-        if k == 'rand_seed':
-            sim.pars.rand_seed = v
-            continue
-
-        v = pars['value']
-        if 'beta_m2f' in k:
-            sim.diseases[k[:2]].pars[k[3:]] = v
-        elif 'dur' in k:
-            sim.diseases[k[:2]].pars['dur_symp2clear'][0][0] = ss.dur(v, 'month')
-            sim.diseases[k[:2]].pars['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
-        elif 'p_symp' in k and k != 'p_symp_care':
-            sim.diseases[k[:2]].pars[k[3:]][0] = v
-        elif 'p_symp_care' in k:
-            for dis in ['ng', 'ct', 'tv']:
-                sim.diseases[dis].pars[k][0] = v
-        else:
-            raise NotImplementedError(f'Parameter {k} not recognized')
-
-    return sim
 
 
 def run_calibration(scenario, n_trials=None, n_workers=None):
@@ -81,11 +56,12 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
                 sres += dis+'_'+res+sk
 
     # Make the sim
-    scenpars = make_scenpars(scenario)
-    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=10e3, verbose=-1, seed=1)
+    sim = make_sim(scenario=scenario, use_calib=False, start=1990, stop=2040, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     weights = dict(
+        ng_n_infected=10,
+        ct_n_infected=10,
         ng_new_infections=1,
         ct_new_infections=1,
         tv_new_infections=0.5,
@@ -104,7 +80,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     calib = sti.Calibration(
         calib_pars=calib_pars,
         extra_results=sres,
-        build_fn=build_sim,
+        build_fn=make_sim_pars,
         weights=weights,
         sim=sim,
         data=data,
@@ -139,6 +115,8 @@ if __name__ == '__main__':
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+        # Save the parameter dataframe
+        sc.saveobj(f'results/zim_sti_pars_{scenario}.df', calib.df)
 
         if make_stats:
             print('Making stats...')
