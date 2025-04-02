@@ -60,14 +60,15 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
     weights = dict(
-        ng_n_infected=10,
-        ct_n_infected=10,
-        ng_new_infections=1,
-        ct_new_infections=1,
-        tv_new_infections=0.5,
-        ng_prevalence=0,
-        ct_prevalence=0,
-        tv_prevalence=0,
+        ng_n_infected=0,
+        ct_n_infected=0,
+        tv_n_infected=0,
+        ng_new_infections=0,
+        ct_new_infections=0,
+        tv_new_infections=0,
+        ng_prevalence=2,
+        ct_prevalence=2,
+        tv_prevalence=1,
         ng_prevalence_f_15_25=0,
         ct_prevalence_f_15_25=0,
         tv_prevalence_f_15_25=0,
