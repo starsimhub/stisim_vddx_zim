@@ -59,17 +59,17 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
     sim = make_sim(scenario=scenario, use_calib=False, start=1990, stop=2040, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
 
-    weights = dict(
-        ng_n_infected=0,
-        ct_n_infected=0,
-        tv_n_infected=0,
-        ng_new_infections=0,
-        ct_new_infections=0,
-        tv_new_infections=0,
-        ng_prevalence=2,
-        ct_prevalence=2,
-        tv_prevalence=1,
-    )
+    # weights = dict(
+    #     ng_n_infected=0,
+    #     ct_n_infected=0,
+    #     tv_n_infected=0,
+    #     ng_new_infections=0,
+    #     ct_new_infections=0,
+    #     tv_new_infections=0,
+    #     ng_prevalence=2,
+    #     ct_prevalence=2,
+    #     tv_prevalence=1,
+    # )
 
     # Make the calibration
     calib = sti.Calibration(

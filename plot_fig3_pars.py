@@ -78,8 +78,12 @@ if __name__ == '__main__':
     # Plot prevalence
     diseases = ['ng', 'ct', 'tv']
     t = results['time']
-    si = sc.findfirst(t, 2010)
-    ei = sc.findfirst(t, 2025)
+    start_year = 2010
+    end_year = 2025
+    si = sc.findfirst(t, start_year)
+    ei = sc.findfirst(t, end_year)
+    sti_data = pd.read_csv(f'data/zimbabwe_sti_data.csv')
+    sti_data = sti_data.loc[(sti_data.time >= start_year) & (sti_data.time <= end_year)]
 
     for i, disease in enumerate(diseases):
         ax = axes[i+3]
@@ -88,6 +92,7 @@ if __name__ == '__main__':
             res = results[scenario]
             prevalence = np.array([r[disease+'_prevalence'] for r in res])
             ax.plot(t[si:ei], prevalence.transpose()[si:ei, :]*100, alpha=0.6, lw=0.5, label=scenario, color=colors[scenario])
+            ax.scatter(sti_data.time, sti_data[disease+'_prevalence']*100, color='k', label='Data')
 
         ax.set_title(disease.upper()+' prevalence (%)')
         ax.set_ylim(bottom=0)
