@@ -46,7 +46,7 @@ if __name__ == '__main__':
             # Save results
             results[scenario] = []  # calib.sim_results[:50]
             reskeys = [f'{dis}_prevalence' for dis in ['ng', 'ct', 'tv']]
-            reskeys += [f'{dis}_incidence' for dis in ['ng', 'ct', 'tv']]
+            # reskeys += [f'{dis}_incidence' for dis in ['ng', 'ct', 'tv']]
             for i in range(50):
                 thisdict = {k: calib.sim_results[i][k] for k in reskeys}
                 results[scenario].append(thisdict)
