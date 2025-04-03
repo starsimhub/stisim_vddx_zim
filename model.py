@@ -16,9 +16,9 @@ from utils import get_scenarios
 
 
 def make_stis():
-    ng = sti.Gonorrhea(eff_condom=0.7)
-    ct = sti.Chlamydia(eff_condom=0.8)
-    tv = sti.Trichomoniasis(eff_condom=0.8)
+    ng = sti.Gonorrhea(beta_m2f=0.1, eff_condom=0.7)
+    ct = sti.Chlamydia(beta_m2f=0.07, eff_condom=0.8)
+    tv = sti.Trichomoniasis(beta_m2f=0.07, eff_condom=0.8)
     bv = sti.BV()
     return ng, ct, tv, bv
 

@@ -34,9 +34,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 
     # Define the calibration parameters
     calib_pars = dict(
-        ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-        ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-        tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        # ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        # ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        # tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         # ng_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
         # ct_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
         # tv_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
@@ -66,9 +66,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         # ng_new_infections=0,
         # ct_new_infections=0,
         # tv_new_infections=0,
-        # ng_prevalence=2,
-        # ct_prevalence=2,
-        # tv_prevalence=1,
+        ng_prevalence=2,
+        ct_prevalence=2,
+        tv_prevalence=1,
     )
 
     # Make the calibration
