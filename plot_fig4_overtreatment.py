@@ -28,7 +28,6 @@ if __name__ == '__main__':
     gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
 
     clist = sc.gridcolors(3)
-    clist = [clist[0], clist[1], clist[2]]  #, clist[3]][1:]
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
     # First row: reduction in overtreatment over time, by treatment type
