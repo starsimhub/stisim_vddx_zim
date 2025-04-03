@@ -1,14 +1,15 @@
 # %% Imports and settings
-import sciris as sc
-import pylab as pl
 import numpy as np
 import pandas as pd
+import sciris as sc
+import matplotlib.pyplot as pl
 from utils import set_font, get_y
 
 location = 'zimbabwe'
+show = False # Whether to show the plots by default (else just save)
 
 
-def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='hiv_plots'):
+def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='hiv_plots', show=show):
     """ Create quantile or individual plots of HIV epi dynamics """
     set_font(size=20)
     fig, axes = pl.subplots(2, 3, figsize=(18, 7))
@@ -126,11 +127,13 @@ def plot_hiv_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     sc.figlayout()
     sc.savefig("figures/" + title + str(start_year) + "_" + which + ".png", dpi=100)
+    if show:
+        pl.show()
 
     return fig
 
 
-def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext=''):
+def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile_pairs=[[.1, .99]], title='sti_plots', fext='', show=show):
     """ Create quantile or individual sim plots of STIs """
     set_font(size=30)
     fig, axes = pl.subplots(3, 3, figsize=(25, 12))
@@ -178,11 +181,13 @@ def plot_sti_sims(df, start_year=2000, end_year=2025, which='single', percentile
 
     sc.figlayout()
     sc.savefig("figures/" + title + "_" + fext + ".png", dpi=100)
+    if show:
+        pl.show()
 
     return fig
 
 
-def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
+def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None, show=show):
     set_font(size=24)
     legend_font = 20
     fig, axes = pl.subplots(2, 3, figsize=(20, 8))
@@ -267,6 +272,9 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
 
     sc.figlayout()
     sc.savefig(f"figures/sti_tx{fext}.png", dpi=100)
+    if show:
+        pl.show()
+
     return
 
 
@@ -365,7 +373,7 @@ def print_results(df):
     return
 
 
-def plot_ng_sim(df, start_year=2000, end_year=2025, which='single', title='ng_plots'):
+def plot_ng_sim(df, start_year=2000, end_year=2025, which='single', title='ng_plots', show=show):
     """ Create quantile or individual sim plots of NG """
     set_font(size=20)
     fig, axes = pl.subplots(2, 3, figsize=(15, 8))
@@ -464,21 +472,24 @@ def plot_ng_sim(df, start_year=2000, end_year=2025, which='single', title='ng_pl
 
     sc.figlayout()
     sc.savefig("figures/" + title + str(start_year) + "_" + which + ".png", dpi=100)
+    if show:
+        pl.show()
 
     return fig
 
 
 if __name__ == '__main__':
 
+    show = True
     plot_single = False
     plot_multi = True
 
     if plot_multi:
         df_stats = sc.loadobj('results/multi_res_stats.df')
         percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]
-        plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs)
-        plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, which='multi')
+        plot_hiv_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, show=show)
+        plot_sti_sims(df_stats, start_year=2000, percentile_pairs=percentile_pairs, which='multi', show=show)
 
     if plot_single:
         df = sc.loadobj('results/sim.df')
-        plot_sti_sims(df, start_year=2000, which='single')
+        plot_sti_sims(df, start_year=2000, which='single', show=show)
