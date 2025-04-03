@@ -58,7 +58,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-    ),
+    )
     calib_pars = sc.mergedicts(calib_pars, beta_pars)
     # calib_pars = dict(
     #     # ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
