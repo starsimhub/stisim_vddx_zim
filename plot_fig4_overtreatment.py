@@ -38,12 +38,12 @@ if __name__ == '__main__':
 
     for pn, (txname, txlabel) in enumerate(ut.tx_labels.items()):
         ax = fig.add_subplot(gs1[pn])
-        for scenario in ut.txscenarios:
+        for scenario in ut.scenarios:
             socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
-        for scenario in ut.txscenarios:
+        for scenario in ut.scenarios:
             pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
