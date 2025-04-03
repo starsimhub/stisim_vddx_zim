@@ -53,6 +53,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
             p_symp_care=dict(low=0.25, high=0.75, guess=0.4),
         ),
     )
+    calib_pars = calib_par_dict[scenario]
     # calib_pars = dict(
     #     # ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
     #     # ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
