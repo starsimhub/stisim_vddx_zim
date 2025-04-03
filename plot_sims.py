@@ -202,10 +202,10 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt.new_sti1'+sex],
-        dfplot['syndromicmgmt.new_sti2'+sex],
-        dfplot['syndromicmgmt.new_sti3'+sex],
-        dfplot['syndromicmgmt.new_sti4'+sex],
+        dfplot['syndromicmgmt_new_sti1'+sex],
+        dfplot['syndromicmgmt_new_sti2'+sex],
+        dfplot['syndromicmgmt_new_sti3'+sex],
+        dfplot['syndromicmgmt_new_sti4'+sex],
     ]
     labels = ["1 infection", "2 infections", "3 infections", "4 infections"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
@@ -219,10 +219,10 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt.new_tx0'+sex],
-        dfplot['syndromicmgmt.new_tx1'+sex],
-        dfplot['syndromicmgmt.new_tx2'+sex],
-        dfplot['syndromicmgmt.new_tx3'+sex],
+        dfplot['syndromicmgmt_new_tx0'+sex],
+        dfplot['syndromicmgmt_new_tx1'+sex],
+        dfplot['syndromicmgmt_new_tx2'+sex],
+        dfplot['syndromicmgmt_new_tx3'+sex],
     ]
     labels = ["0", "1", "2", "3"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
@@ -236,9 +236,9 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['ng_tx.new_treated_unnecessary'+sex],
-        dfplot['ct_tx.new_treated_unnecessary'+sex],
-        dfplot['metronidazole.new_treated_unnecessary'+sex],
+        dfplot['ng_tx_new_treated_unnecessary'+sex],
+        dfplot['ct_tx_new_treated_unnecessary'+sex],
+        dfplot['metronidazole_new_treated_unnecessary'+sex],
     ]
     labels = ["Ceftriaxone", "Doxycycline", "Metronidazole"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
@@ -253,9 +253,9 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None):
         ax = axes[pn]
         x = dfplot.index
         Y = [
-            dfplot[disease+'.new_treated_success'+sex],
-            dfplot[disease+'.new_treated_failure'+sex],
-            dfplot[disease+'.new_treated_unnecessary'+sex],
+            dfplot[disease+'_new_treated_success'+sex],
+            dfplot[disease+'_new_treated_failure'+sex],
+            dfplot[disease+'_new_treated_unnecessary'+sex],
         ]
         labels = ["Treatment success", "Treatment failure", "Overtreatment"]
         ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.gridcolors(4))
