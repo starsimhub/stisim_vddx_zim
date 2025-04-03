@@ -2,20 +2,17 @@
 Plot degree of overtreatment by scenario
 Generate files by running run_syndromic_scens.py on VMs -- takes about 10min
 """
-import pandas as pd
 
 # %% Imports and settings
+import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 import seaborn as sns
-from utils import set_font
-
+import utils as ut
 
 if __name__ == '__main__':
 
-    # Labels
-    from utils import tx_labels, scenarios
-    from utils import txscenlabels as scen_labels
+    show = True
 
     # Load data
     odf = sc.loadobj(f'results/overtx.obj')
@@ -23,7 +20,7 @@ if __name__ == '__main__':
     tdf = sc.loadobj('results/synd_treat.obj')
 
     # Plot settings
-    set_font(size=30)
+    ut.set_font(size=30)
     fig = pl.figure(figsize=(20, 16))
     legendfont = 25
 
@@ -31,7 +28,6 @@ if __name__ == '__main__':
     gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
 
     clist = sc.gridcolors(3)
-    clist = [clist[0], clist[1], clist[2]]  #, clist[3]][1:]
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
     # First row: reduction in overtreatment over time, by treatment type
@@ -39,24 +35,21 @@ if __name__ == '__main__':
     si = sc.findfirst(t, 2010)
     ei = sc.findfirst(t, 2040)
 
-    for pn, (txname, txlabel) in enumerate(tx_labels.items()):
+    for pn, (txname, txlabel) in enumerate(ut.tx_labels.items()):
         ax = fig.add_subplot(gs1[pn])
-        for scenario in scenarios:
+        for scenario in ut.scenarios:
             socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
-            try:
-                ax.plot(t[si:ei], socy, label=scen_labels[scenario], color=colors[scenario])
-            except:
-                print(f'Error plotting {scenario} for {txname}')
-        for scenario in scenarios:
+            ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
+        for scenario in ut.scenarios:
             pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
-            ax.plot(t[si:ei], pocy, label=scen_labels[scenario], color=colors[scenario], ls='--')
+            ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--')
 
         if pn == 0:
-            h,l = ax.get_legend_handles_labels()  # #Get the legend handles and lables
+            h,l = ax.get_legend_handles_labels()  # #Get the legend handles and labels
             l1 = ax.legend(h[:3], l[:3], loc='upper left', frameon=False, prop={'size': legendfont})
             from matplotlib.lines import Line2D
             myHandle = [Line2D([], [], ls='-', color='k'), Line2D([], [], ls='--', color='k')]
@@ -89,6 +82,8 @@ if __name__ == '__main__':
 
     fig.tight_layout()
     pl.savefig(f"figures/fig4_poctx.png", dpi=100)
+    if show:
+        pl.show()
 
     print('Done!')
 

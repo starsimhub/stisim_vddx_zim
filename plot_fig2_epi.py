@@ -14,12 +14,12 @@ If updates are needed:
 
 # Import packages
 import sciris as sc
-import pylab as pl
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from utils import set_font
+import matplotlib.pyplot as pl
 from matplotlib.gridspec import GridSpec
+from utils import set_font
 
 
 # %% Plotting functions
@@ -93,6 +93,7 @@ def plot_hiv(hiv_df, ax=None):
 # %% Run as a script
 if __name__ == '__main__':
 
+    show = True
     scenario = 'treat80'
     epi_df = sc.loadobj(f'results/epi_df_{scenario}.df')
     sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
@@ -117,8 +118,8 @@ if __name__ == '__main__':
     for ai, disease in enumerate(['ng', 'ct', 'tv']):
         # ax = fig.add_subplot(gs1[1, ai])
         ax = axes[ai+3]
-        thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')]
-        thisdf['prevalence'] = thisdf['prevalence']*100
+        thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')].copy()
+        thisdf['prevalence'] *= 100
         sns.barplot(data=thisdf, x="age", y="prevalence", hue="sex", ax=ax, palette=scolors)
         ax.set_title(disease.upper())
         ax.set_ylabel('')
@@ -133,5 +134,8 @@ if __name__ == '__main__':
 
     fig.tight_layout()
     pl.savefig(f"figures/fig2_epi.png", dpi=100)
+    if show:
+        pl.show()
+
 
     print('Done.')

@@ -4,7 +4,6 @@ Create HIV model and interventions
 
 # %% Imports and settings
 import numpy as np
-import starsim as ss
 import pandas as pd
 import stisim as sti
 
