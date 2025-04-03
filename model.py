@@ -16,9 +16,9 @@ import utils as ut
 
 
 def make_stis():
-    ng = sti.Gonorrhea(beta_m2f=0.08, eff_condom=0.7)
-    ct = sti.Chlamydia(beta_m2f=0.06, eff_condom=0.8)
-    tv = sti.Trichomoniasis(beta_m2f=0.075, eff_condom=0.8)
+    ng = sti.Gonorrhea(eff_condom=0.6)
+    ct = sti.Chlamydia(eff_condom=0.8)
+    tv = sti.Trichomoniasis(eff_condom=0.8)
     bv = sti.BV()
     return ng, ct, tv, bv
 

@@ -93,7 +93,7 @@ def plot_hiv(hiv_df, ax=None):
 # %% Run as a script
 if __name__ == '__main__':
 
-    show = True
+    show = False
     scenario = 'treat80'
     epi_df = sc.loadobj(f'results/epi_df_{scenario}.df')
     sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
