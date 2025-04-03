@@ -41,13 +41,13 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
             p_symp_care=dict(low=0.35, high=0.75, guess=0.55),
         ),
         treat80=dict(
-            ng_p_symp=dict(low=0.12, high=0.8, guess=0.15),
+            ng_p_symp=dict(low=0.12, high=0.18, guess=0.15),
             ct_p_symp=dict(low=0.22, high=0.27, guess=0.25),
             tv_p_symp=dict(low=0.3, high=0.6, guess=0.45),
             p_symp_care=dict(low=0.25, high=0.65, guess=0.45),
         ),
         treat100=dict(
-            ng_p_symp=dict(low=0.1, high=0.5, guess=0.12),
+            ng_p_symp=dict(low=0.1, high=0.15, guess=0.12),
             ct_p_symp=dict(low=0.2, high=0.25, guess=0.22),
             tv_p_symp=dict(low=0.15, high=0.5, guess=0.3),
             p_symp_care=dict(low=0.15, high=0.55, guess=0.35),
