@@ -121,10 +121,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 
 if __name__ == '__main__':
 
-    # Settings
-    sc.heading('Running STI calibration')
-
-    # Run the calibration
+    # Loop over scenarios and run calibrations for each
     for scenario in ['treat80', 'treat100']:  #ut.scenarios[1:]:
 
         sc.heading(f'Running calibration: {scenario}')
