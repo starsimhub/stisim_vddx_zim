@@ -125,7 +125,7 @@ if __name__ == '__main__':
     sc.heading('Running STI calibration')
 
     # Run the calibration
-    for scenario in ut.scenarios:
+    for scenario in ut.scenarios[1:]:
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
         print(f'Best pars are {calib.best_pars}')
 
