@@ -12,7 +12,7 @@ from analyzers import total_symptomatic as ts
 from hiv_model import make_hiv, make_hiv_intvs
 from interventions import make_testing
 from plot_sims import *
-from utils import get_scenarios
+import utils as ut
 
 
 def make_stis():
@@ -146,7 +146,7 @@ def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_
     sims = sc.autolist()
 
     if scenarios is None:
-        scenarios = get_scenarios()
+        scenarios = ut.scenarios
 
     for scenario in scenarios:
         sim = make_sim(scenario=scenario, use_calib=use_calib, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)

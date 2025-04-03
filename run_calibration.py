@@ -16,8 +16,8 @@ import sciris as sc
 import starsim as ss
 import stisim as sti
 import pandas as pd
+import utils as ut
 from model import make_sim, make_sim_pars
-from utils import get_scenarios
 
 
 # Run settings
@@ -116,11 +116,8 @@ if __name__ == '__main__':
     # Settings
     sc.heading('Running STI calibration')
 
-    scenarios = get_scenarios()
-    # scenarios = ['treat80']
-
     # Run the calibration
-    for scenario in scenarios:
+    for scenario in ut.scenarios:
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
         print(f'Best pars are {calib.best_pars}')
 
