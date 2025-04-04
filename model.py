@@ -177,6 +177,7 @@ def save_stats(sims):
         # Save age/sex epi results
         dfs = sc.autolist()
         age_bins = sim.diseases.ng.age_bins
+        sex_labels = {'f': 'Female', 'm': 'Male'}
         for disease in ['ng', 'ct', 'tv']:
             for sex in ['f', 'm']:
                 dd = dict()
@@ -185,7 +186,7 @@ def save_stats(sims):
                     if ab1 == 65:
                         age = '65+'  # Combine the last two age groups
                     dd['age'] = [age]
-                    dd['sex'] = sex
+                    dd['sex'] = sex_labels[sex]
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['disease'] = disease

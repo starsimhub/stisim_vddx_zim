@@ -124,7 +124,10 @@ if __name__ == '__main__':
         ax.set_title(disease.upper())
         ax.set_ylabel('')
         ax.set_xlabel('')
-        ax.get_legend().set_visible(False)
+        if ai == 0:
+            ax.legend(frameon=False, prop={'size': 16})
+        if ai != 0:
+            ax.get_legend().set_visible(False)
         ax.set_title(disease.upper()+' prevalence by age')
         ax.set_ylim(bottom=0)
 
@@ -133,6 +136,12 @@ if __name__ == '__main__':
     # ax = plot_hiv(hiv_df, ax=ax)
 
     fig.tight_layout()
+    pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
+    pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
+    pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
+    pl.figtext(0.07, 0.45, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.4, 0.45, 'F', fontsize=40, ha='center', va='center')
+    pl.figtext(0.73, 0.45, 'G', fontsize=40, ha='center', va='center')
     pl.savefig(f"figures/fig2_epi.png", dpi=100)
     if show:
         pl.show()

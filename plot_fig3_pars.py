@@ -102,6 +102,14 @@ if __name__ == '__main__':
         ax.set_xlabel('')
 
     fig.tight_layout()
+
+    pl.figtext(0.02, 0.92, 'A', fontsize=40, ha='center', va='center')
+    pl.figtext(0.35, 0.92, 'B', fontsize=40, ha='center', va='center')
+    pl.figtext(0.69, 0.92, 'C', fontsize=40, ha='center', va='center')
+    pl.figtext(0.02, 0.45, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.35, 0.45, 'F', fontsize=40, ha='center', va='center')
+    pl.figtext(0.69, 0.45, 'G', fontsize=40, ha='center', va='center')
+
     pl.savefig(f"figures/fig3_pars.png", dpi=100)
     if show:
         pl.show()
