@@ -34,33 +34,36 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 
     # Define the calibration parameters
     calib_par_dict = dict(
+        default=dict(
+            ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
+            ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
+            tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
+            p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
+            ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08),
+            ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06),
+            tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07),
+        ),
         treat50=dict(
             ng_p_symp=dict(low=0.15, high=0.25, guess=0.18),
             ct_p_symp=dict(low=0.25, high=0.3, guess=0.28),
             tv_p_symp=dict(low=0.5, high=0.75, guess=0.6),
-            p_symp_care=dict(low=0.35, high=0.75, guess=0.55),
+            p_symp_care=dict(low=0.45, high=0.75, guess=0.6),
         ),
         treat80=dict(
             ng_p_symp=dict(low=0.11, high=0.19, guess=0.15),
             ct_p_symp=dict(low=0.22, high=0.27, guess=0.25),
             tv_p_symp=dict(low=0.3, high=0.6, guess=0.45),
-            p_symp_care=dict(low=0.25, high=0.65, guess=0.45),
+            p_symp_care=dict(low=0.35, high=0.65, guess=0.5),
         ),
         treat100=dict(
             ng_p_symp=dict(low=0.09, high=0.15, guess=0.12),
             ct_p_symp=dict(low=0.2, high=0.25, guess=0.22),
             tv_p_symp=dict(low=0.15, high=0.5, guess=0.3),
-            p_symp_care=dict(low=0.15, high=0.55, guess=0.35),
+            p_symp_care=dict(low=0.25, high=0.55, guess=0.4),
         ),
     )
-    calib_pars = calib_par_dict[scenario]
-    beta_pars = dict(
-        ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08),
-        ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06),
-        tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07),
-    )
-    calib_pars = sc.mergedicts(calib_pars, beta_pars)
-
+    calib_pars = calib_par_dict['default']
+    calib_pars['p_symp_care'] = calib_par_dict[scenario]['p_symp_care']
 
     # Extra results to save
     sres = sc.autolist()
