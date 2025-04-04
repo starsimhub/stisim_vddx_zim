@@ -58,24 +58,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
         tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-        # ng_dur=dict(low=6, high=10, guess=8, step=0.5),
-        # ct_dur=dict(low=13, high=21, guess=15, step=0.5),
     )
     calib_pars = sc.mergedicts(calib_pars, beta_pars)
-    # calib_pars = dict(
-    #     # ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-    #     # ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-    #     # tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-    #     # ng_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
-    #     # ct_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
-    #     # tv_rel_beta_m2f=dict(low=1.5, high=3, guess=2),
-    #     ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
-    #     ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
-    #     tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
-    #     ng_dur=dict(low=6, high=10, guess=8, step=0.5),
-    #     ct_dur=dict(low=13, high=21, guess=15, step=0.5),
-    #     p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
-    # )
+
 
     # Extra results to save
     sres = sc.autolist()
@@ -95,9 +80,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         # ng_new_infections=0,
         # ct_new_infections=0,
         # tv_new_infections=0,
-        ng_prevalence=2,
+        ng_prevalence=10,
         ct_prevalence=2,
-        tv_prevalence=1,
+        # tv_prevalence=1,
     )
 
     # Make the calibration
@@ -122,7 +107,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 if __name__ == '__main__':
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat80', 'treat100']:  #ut.scenarios[1:]:
+    for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 
