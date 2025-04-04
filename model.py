@@ -188,7 +188,7 @@ def save_stats(sims):
                     dd['age'] = [age]
                     dd['sex'] = sex_labels[sex]
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
-                    dd['incidence'] = sim.results[disease][f'incidence_{sex}_{ab1}_{ab2}'][-1]
+                    dd['new_infections'] = sim.results[disease][f'new_infections_{sex}_{ab1}_{ab2}'][-120:].mean()
                     dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['disease'] = disease
                     dfs += pd.DataFrame(dd)
