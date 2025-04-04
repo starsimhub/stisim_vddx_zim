@@ -22,8 +22,8 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]    # How many cores to use
+n_trials = [2000, 2][debug]  # How many trials to run for calibration
+n_workers = [80, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -35,19 +35,19 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
     # Define the calibration parameters
     calib_par_dict = dict(
         treat50=dict(
-            ng_p_symp=dict(low=0.15, high=0.2, guess=0.18),
+            ng_p_symp=dict(low=0.15, high=0.25, guess=0.18),
             ct_p_symp=dict(low=0.25, high=0.3, guess=0.28),
             tv_p_symp=dict(low=0.5, high=0.75, guess=0.6),
             p_symp_care=dict(low=0.35, high=0.75, guess=0.55),
         ),
         treat80=dict(
-            ng_p_symp=dict(low=0.12, high=0.18, guess=0.15),
+            ng_p_symp=dict(low=0.11, high=0.19, guess=0.15),
             ct_p_symp=dict(low=0.22, high=0.27, guess=0.25),
             tv_p_symp=dict(low=0.3, high=0.6, guess=0.45),
             p_symp_care=dict(low=0.25, high=0.65, guess=0.45),
         ),
         treat100=dict(
-            ng_p_symp=dict(low=0.1, high=0.15, guess=0.12),
+            ng_p_symp=dict(low=0.09, high=0.15, guess=0.12),
             ct_p_symp=dict(low=0.2, high=0.25, guess=0.22),
             tv_p_symp=dict(low=0.15, high=0.5, guess=0.3),
             p_symp_care=dict(low=0.15, high=0.55, guess=0.35),
@@ -55,9 +55,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
     )
     calib_pars = calib_par_dict[scenario]
     beta_pars = dict(
-        ng_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-        ct_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
-        tv_beta_m2f=dict(low=0.02, high=0.2, guess=0.05),
+        ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08),
+        ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06),
+        tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07),
     )
     calib_pars = sc.mergedicts(calib_pars, beta_pars)
 
@@ -107,7 +107,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 if __name__ == '__main__':
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ut.scenarios:
+    for scenario in ['treat80']:  #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 

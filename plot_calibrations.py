@@ -34,7 +34,7 @@ if __name__ == '__main__':
         fext=scenario,
         percentile_pairs=percentile_pairs,
         title=f'{which}_calib',
-        show=True,
+        show=False,
     )
 
     # Plot
