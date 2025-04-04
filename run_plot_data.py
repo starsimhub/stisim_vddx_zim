@@ -32,6 +32,7 @@ if __name__ == '__main__':
         for scenario in ut.scenarios:
             calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
             df = calib.df[:500]
+            print(f'Saving {len(df)} results... ')
             df['scenario'] = ut.scenlabels[scenario]
             df['ng_p_treat'] = df['ng_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
             df['ct_p_treat'] = df['ct_p_symp']*df['p_symp_care']*int(scenario.strip('treat'))/100
