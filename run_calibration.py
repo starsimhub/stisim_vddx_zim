@@ -22,8 +22,8 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1000, 2][debug]  # How many trials to run for calibration
-n_workers = [50, 1][debug]    # How many cores to use
+n_trials = [2000, 2][debug]  # How many trials to run for calibration
+n_workers = [80, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -83,9 +83,9 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
         # ng_new_infections=0,
         # ct_new_infections=0,
         # tv_new_infections=0,
-        ng_prevalence=10,
+        ng_prevalence=2,
         ct_prevalence=2,
-        # tv_prevalence=1,
+        tv_prevalence=1,
     )
 
     # Make the calibration
@@ -117,20 +117,20 @@ if __name__ == '__main__':
     constrain = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat80']:  #ut.scenarios:
+    for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
-        resfolder = 'results/' if not constrain else 'results/constrained'
+        resfolder = 'results/' if not constrain else 'results/constrained'  # NB constrained not in repo
 
         # Save the results
         print('Shrinking and saving...')
         if do_shrink:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj', calib)
-            calib = calib.shrink(n_results=int(n_trials//10))  # Save 10% best results
+            calib = calib.shrink(n_results=int(n_trials//4))  # Save 25% best results
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
@@ -142,9 +142,9 @@ if __name__ == '__main__':
             from utils import percentiles
             df = calib.resdf
             df_stats = df.groupby(df.time).describe(percentiles=percentiles)
-            sc.saveobj(f'{resfolder}results/zim_sti_calib_stats_{scenario}.df', df_stats)
+            sc.saveobj(f'{resfolder}/zim_sti_calib_stats_{scenario}.df', df_stats)
             par_stats = calib.df.describe(percentiles=[0.05, 0.95])
-            sc.saveobj(f'{resfolder}results/zim_sti_par_stats_{scenario}.df', par_stats)
+            sc.saveobj(f'{resfolder}/zim_sti_par_stats_{scenario}.df', par_stats)
 
     print('Done!')
 
