@@ -22,8 +22,8 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [7500, 2][debug]  # How many trials to run for calibration
-n_workers = [75, 1][debug]    # How many cores to use
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
+n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         print('Shrinking and saving...')
         if do_shrink:
             sc.saveobj(f'results/zim_sti_calib_{scenario}_BIG.obj', calib)
-            calib = calib.shrink(n_results=int(n_trials//20))  # Save 5% best results
+            calib = calib.shrink(n_results=int(n_trials//10))  # Save 10% best results
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
