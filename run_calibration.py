@@ -30,7 +30,7 @@ do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
 
 
-def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
+def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, constrain=False):
 
     # Define the calibration parameters
     calib_par_dict = dict(
@@ -63,7 +63,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         ),
     )
     calib_pars = calib_par_dict['default']
-    calib_pars['p_symp_care'] = calib_par_dict[scenario]['p_symp_care']
+    if constrain: calib_pars['p_symp_care'] = calib_par_dict[scenario]['p_symp_care']
 
     # Extra results to save
     sres = sc.autolist()
@@ -100,6 +100,11 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
         die=True, reseed=False, storage=storage, save_results=True,
     )
 
+    # Run the calibration
+    printstr = f'Running calibration for {scenario}, {n_trials} trials'
+    if constrain:
+        printstr += ' with constraints'.upper()
+    sc.heading(printstr)
     calib.calibrate(load=True)
     if do_save: sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
@@ -109,34 +114,37 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False):
 
 if __name__ == '__main__':
 
+    constrain = False
+
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 
-        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
+        cstr = '' if not constrain else '_constrained'
 
         # Save the results
         print('Shrinking and saving...')
         if do_shrink:
-            sc.saveobj(f'results/zim_sti_calib_{scenario}_BIG.obj', calib)
+            sc.saveobj(f'results/zim_sti_calib_{scenario}_BIG{cstr}.obj', calib)
             calib = calib.shrink(n_results=int(n_trials//10))  # Save 10% best results
-            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+            sc.saveobj(f'results/zim_sti_calib_{scenario}{cstr}.obj', calib)
         else:
-            sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+            sc.saveobj(f'results/zim_sti_calib_{scenario}{cstr}.obj', calib)
         # Save the parameter dataframe
-        sc.saveobj(f'results/zim_sti_pars_{scenario}.df', calib.df)
+        sc.saveobj(f'results/zim_sti_pars_{scenario}{cstr}.df', calib.df)
 
         if make_stats:
             print('Making stats...')
             from utils import percentiles
             df = calib.resdf
             df_stats = df.groupby(df.time).describe(percentiles=percentiles)
-            sc.saveobj(f'results/zim_sti_calib_stats_{scenario}.df', df_stats)
+            sc.saveobj(f'results/zim_sti_calib_stats_{scenario}{cstr}.df', df_stats)
             par_stats = calib.df.describe(percentiles=[0.05, 0.95])
-            sc.saveobj(f'results/zim_sti_par_stats_{scenario}.df', par_stats)
+            sc.saveobj(f'results/zim_sti_par_stats_{scenario}{cstr}.df', par_stats)
 
     print('Done!')
 
