@@ -10,8 +10,8 @@ import sciris as sc
 import starsim as ss
 
 # From this repo
-from model import make_sim, load_calib_pars
-
+from model import make_sim
+import utils as ut
 
 def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     """
@@ -61,7 +61,7 @@ def process_results(df):
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
 
-    for scen in ['treat50', 'treat80', 'treat100']:
+    for scen in ut.sc:
         for parset in df.parset.unique():
             thisdf = df.loc[(df.parset == parset) & (df.scenario.str.contains(scen))]
 
