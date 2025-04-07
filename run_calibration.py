@@ -114,7 +114,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
 
 if __name__ == '__main__':
 
-    constrain = False
+    constrain = True  #False
 
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
