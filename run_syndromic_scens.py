@@ -62,7 +62,7 @@ def process_results(df):
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
 
-    for scen in ut.txscenarios:
+    for scen in ut.scenarios:
         for parset in df.parset.unique():
             thisdf = df.loc[(df.parset == parset) & (df.scenario.str.contains(scen))]
 
