@@ -61,7 +61,7 @@ def process_results(df):
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
 
-    for scen in ut.sc:
+    for scen in ut.scenarios:
         for parset in df.parset.unique():
             thisdf = df.loc[(df.parset == parset) & (df.scenario.str.contains(scen))]
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [50, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        'run_syndromic_scens',
+        # 'run_syndromic_scens',
         'process_results',
     ]
 
