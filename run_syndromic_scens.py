@@ -70,8 +70,8 @@ def process_results(df):
                 hres = pd.DataFrame()
                 hres['scenario'] = [scen_labels[scen]]
                 hres['parset'] = [parset]
-                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
-                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
+                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
+                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
                 hres['disease'] = [dis.upper()]
                 hres['infections'] = [(soc - poc)/soc*100]
                 healthdfs += hres
