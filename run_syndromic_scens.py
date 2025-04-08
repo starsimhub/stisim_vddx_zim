@@ -26,7 +26,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             poc = True if pocstr == 'poc' else False
             for i in range(n_scen_runs):
                 print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
-                sim = make_sim(use_calib=True, scenario=scenname, poc=poc, verbose=1/120, stop=stop)
+                sim = make_sim(use_calib=True, par_idx=i, scenario=scenname, poc=poc, verbose=1/120, stop=stop)
                 sim.label = scenname + str(i)
                 sim.parset = i
                 sims += sim
