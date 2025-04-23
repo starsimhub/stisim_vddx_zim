@@ -295,12 +295,22 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
     synd_end = intv_year if poc else stop
 
     # Testing interventions
-    def seeking_care_discharge(sim):
-        ng_care = sim.diseases.ng.symptomatic & (sim.diseases.ng.ti_seeks_care == sim.diseases.ng.ti)
-        tv_care = sim.diseases.tv.symptomatic & (sim.diseases.tv.ti_seeks_care == sim.diseases.tv.ti)
-        ct_care = sim.diseases.ct.symptomatic & (sim.diseases.ct.ti_seeks_care == sim.diseases.ct.ti)
-        bv_care = sim.diseases.bv.symptomatic & (sim.diseases.bv.ti_seeks_care == sim.diseases.bv.ti)
+    def seeking_care_vds(sim):
+        dis = sim.diseases
+        female = sim.people.female
+        ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & female
+        tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & female
+        ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & female
+        bv_care = dis.bv.symptomatic & (dis.bv.ti_seeks_care == dis.bv.ti) & female
         return (ng_care | ct_care | tv_care | bv_care).uids
+
+    def seeking_care_uds(sim):
+        dis = sim.diseases
+        male = sim.people.male
+        ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & male
+        tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & male
+        ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & male
+        return (ng_care | ct_care | tv_care ).uids
 
     ng_tx = sti.GonorrheaTreatment(
         name='ng_tx',
@@ -318,19 +328,33 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
     )
     tx_mix_cerv, tx_mix_noncerv = make_tx_mix(scenario)
 
-    # Syndromic management
-    syndromic = SyndromicMgmt(
+    # Syndromic management of VDS
+    syndromic_vds = SyndromicMgmt(
+        name='syndromic_vds',
+        label='syndromic_vds',
         tx_mix_cerv=tx_mix_cerv,
         tx_mix_noncerv=tx_mix_noncerv,
         stop=synd_end,
         diseases=[ng, ct, tv, bv],
-        eligibility=seeking_care_discharge,
+        eligibility=seeking_care_vds,
+        treatments=treatments,
+        outcome_treatment_map=outcome_treatment_map,
+    )
+
+    syndromic_uds = SyndromicMgmt(
+        name='syndromic_uds',
+        label='syndromic_uds',
+        tx_mix_cerv=tx_mix_cerv,
+        tx_mix_noncerv=tx_mix_noncerv,
+        stop=stop,
+        diseases=[ng, ct, tv],
+        eligibility=seeking_care_uds,
         treatments=treatments,
         outcome_treatment_map=outcome_treatment_map,
     )
 
     if not poc:
-        intvs = [syndromic, ng_tx, ct_tx, metronidazole]
+        intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
 
     if poc:
         disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
@@ -341,12 +365,12 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
             label='panel',
             start=intv_year,
             diseases=[ng, ct, tv],
-            eligibility=seeking_care_discharge,
+            eligibility=seeking_care_vds,
             treatments=treatments,
             disease_treatment_map=disease_treatment_map,
             p_mtnz=p_mtnz,
             negative_treatments=[metronidazole],
         )
-        intvs = [syndromic, panel, ng_tx, ct_tx, metronidazole]
+        intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole]
 
     return intvs
