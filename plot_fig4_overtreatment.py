@@ -11,7 +11,8 @@ import seaborn as sns
 import utils as ut
 
 
-def plot_overtx(odf, hdf, tdf):
+def plot_overtx(odf):
+
     # Plot settings
     ut.set_font(size=30)
     fig, axes = pl.subplots(1, 2, figsize=(12, 5))
@@ -59,29 +60,13 @@ def plot_overtx(odf, hdf, tdf):
     return
 
 
-def plot_health(odf, hdf, tdf):
+def plot_health(hdf):
     # Plot settings
     ut.set_font(size=20)
     fig, ax = pl.subplots(1, 1, figsize=(7, 4))
-    # axes = axes.ravel()
     legendfont = 14
 
     clist = sc.gridcolors(2)
-    colors = sc.objdict(treat50=clist[0], treat80=clist[1])
-
-    # # Cumulative reduction in overtreatment
-    # ax = axes[0]
-    # tdf.reset_index(inplace=True)
-    # toplot = tdf.loc[tdf.scenario != 'Treat-all']
-    # sns.boxplot(data=toplot, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
-    # ax.set_title('% reduction in overtreatment, 2027-2040')
-    # ax.set_ylim(0, 100)
-    # ax.get_legend().set_visible(False)
-    # ax.set_xlabel('')
-    # ax.set_ylabel('')
-    #
-    # Second row, plot 2: Cumulative reduction in infections
-    # ax = axes[0]
     hdf.reset_index(inplace=True)
     toploth = hdf.loc[hdf.scenario != 'Treat-all']
     sns.boxplot(data=toploth, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
@@ -96,7 +81,6 @@ def plot_health(odf, hdf, tdf):
     if show:
         pl.show()
     return
-
 
 
 def plot_fig4(odf, hdf, tdf):
@@ -177,10 +161,18 @@ if __name__ == '__main__':
     hdf = sc.loadobj('results/synd_health.obj')
     tdf = sc.loadobj('results/synd_treat.obj')
 
-    # Plot overtreatment
-    plot_overtx(odf, hdf, tdf)
-    # Plot health impact
-    plot_health(odf, hdf, tdf)
+    # Condensed versions for slides
+    make_main_fig = True
+    if make_main_fig:
+        plot_fig4(odf, hdf, tdf)
+
+    # Condensed versions for slides
+    make_slide_figs = False
+    if make_slide_figs:
+        # Plot overtreatment
+        plot_overtx(odf)
+        # Plot health impact
+        plot_health(hdf)
 
     print('Done!')
 
