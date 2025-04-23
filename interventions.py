@@ -18,7 +18,7 @@ class SyndromicMgmt(sti.STITest):
         super().__init__(years=years, start=start, stop=stop, eligibility=eligibility, name=name, label=label)
         self.define_pars(
             tx_mix_cerv=dict(
-                all3=[0.50, 0.05], # Women with cervical infection: 70% treated for NG/CT, aligns to IPM sens assumption
+                all3=[0.50, 0.05],  # Women with cervical infection: 70% treated for NG/CT, aligns to IPM sens assumption
                 ngct=[0.20, 0.80],
                 mtnz=[0.20, 0.00],
                 none=[0.10, 0.15],
