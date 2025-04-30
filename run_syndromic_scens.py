@@ -20,16 +20,18 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     sc.heading("Making sims... ")
 
     sims = sc.autolist()
-    for scenario in scenarios:
-        for pocstr in ['', 'poc']:
-            scenname = scenario + pocstr
-            poc = True if pocstr == 'poc' else False
-            for i in range(n_scen_runs):
-                print(f"Making sim: {scenname=}, param set {i+1}/{n_scen_runs}")
-                sim = make_sim(use_calib=True, par_idx=i, scenario=scenname, poc=poc, verbose=1/120, stop=stop)
-                sim.label = scenname + str(i)
-                sim.parset = i
-                sims += sim
+    amr_scens = ['baseline', 'moderate', 'aggressive']
+    for amr_scen in amr_scens:
+        for scenario in scenarios:
+            for pocstr in ['', 'poc']:
+                scenname = scenario + pocstr
+                poc = True if pocstr == 'poc' else False
+                for i in range(n_scen_runs):
+                    print(f"Making sim: {scenname=}, {amr_scen=}, param set {i+1}/{n_scen_runs}")
+                    sim = make_sim(use_calib=True, par_idx=i, scenario=scenname, poc=poc, amr_scen=amr_scen, verbose=1/120, stop=stop)
+                    sim.label = amr_scen + scenname + str(i)
+                    sim.parset = i
+                    sims += sim
 
     sc.heading(f"Running {n_scen_runs} sims... ")
     if parallel:

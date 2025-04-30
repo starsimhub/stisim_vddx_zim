@@ -243,6 +243,30 @@ class SyndromicMgmt(sti.STITest):
         return
 
 
+class AMR(ss.Intervention):
+    def __init__(self, amr_scen='baseline', **kwargs):
+        super().__init__(**kwargs)
+
+        self.years = [2027, 2030, 2035, 2040]
+        self.ng_tx_eff = None
+        if amr_scen == 'baseline':
+            self.ng_tx_eff_pars = [0.96, 0.96, 0.96, 0.96]
+        elif amr_scen == 'moderate':
+            self.ng_tx_eff_pars = [0.96, 0.93, 0.90, 0.87]
+        elif amr_scen == 'aggressive':
+            self.ng_tx_eff_pars = [0.96, 0.9, 0.84, 0.78]
+        return
+
+    def init_pre(self, sim):
+        super().init_pre(sim)
+        self.ng_tx_eff = sc.smoothinterp(self.t.yearvec, self.years, self.ng_tx_eff_pars, smoothness=0)
+        return
+
+    def step(self):
+        self.sim.interventions.ng_tx.pars.base_treat_eff.set(self.ng_tx_eff[self.ti])
+        return
+
+
 # %%  Algorithms
 def make_tx_mix(scenario):
     if 'treat100' in scenario:
@@ -287,7 +311,7 @@ def neg_panel_mix(scenario):
     return p_mtnz
 
 
-def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
+def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040, amr_scen='baseline'):
 
     intv_year = 2027
 
@@ -310,13 +334,14 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
         ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & male
         tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & male
         ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & male
-        return (ng_care | ct_care | tv_care ).uids
+        return (ng_care | ct_care | tv_care).uids
 
     ng_tx = sti.GonorrheaTreatment(
         name='ng_tx',
         rel_treat_unsucc=0.005,
         rel_treat_unneed=0.0005,
     )
+    amr = AMR(amr_scen=amr_scen)
     ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
     metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
     treatments = [ng_tx, ct_tx, metronidazole]
@@ -354,7 +379,7 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
     )
 
     if not poc:
-        intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
+        intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole, amr]
 
     if poc:
         disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
@@ -371,6 +396,6 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
             p_mtnz=p_mtnz,
             negative_treatments=[metronidazole],
         )
-        intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole]
+        intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole, amr]
 
     return intvs
