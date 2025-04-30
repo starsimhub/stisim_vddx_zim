@@ -272,31 +272,31 @@ class AMR(ss.Intervention):
 def make_tx_mix(scenario):
     if 'treat100' in scenario:
         tx_mix_cerv = dict(
-            all3=[1.00, 0.00],
-            ngct=[0.00, 1.00],
+            all3=[1.00, 0.10],
+            ngct=[0.00, 0.80],
             mtnz=[0.00, 0.00],
-            none=[0.00, 0.00],
+            none=[0.00, 0.10],
         )
         tx_mix_noncerv = sc.dcp(tx_mix_cerv)
     elif 'treat80' in scenario:
         tx_mix_cerv = dict(
-            all3=[0.50, 0.00],
+            all3=[0.50, 0.10],
             ngct=[0.20, 0.80],
             mtnz=[0.15, 0.00],
-            none=[0.15, 0.20],
+            none=[0.15, 0.10],
         )
         tx_mix_noncerv = dict(
-            all3=[0.40, 0.00],
+            all3=[0.40, 0.10],
             ngct=[0.10, 0.80],
             mtnz=[0.25, 0.00],
-            none=[0.25, 0.20],
+            none=[0.25, 0.10],
         )
     elif 'treat50' in scenario:
         tx_mix_cerv = dict(
-            all3=[0.25, 0.00],
-            ngct=[0.25, 0.50],
+            all3=[0.25, 0.10],
+            ngct=[0.25, 0.80],
             mtnz=[0.25, 0.00],
-            none=[0.25, 0.50],
+            none=[0.25, 0.10],
         )
         tx_mix_noncerv = sc.dcp(tx_mix_cerv)
     return tx_mix_cerv, tx_mix_noncerv
