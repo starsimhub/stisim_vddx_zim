@@ -13,7 +13,6 @@ os.environ.update(
 
 # %% Imports and settings
 import sciris as sc
-import starsim as ss
 import stisim as sti
 import pandas as pd
 import utils as ut
@@ -24,7 +23,6 @@ from model import make_sim, make_sim_pars
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
 n_trials = [2000, 2][debug]  # How many trials to run for calibration
 n_workers = [80, 1][debug]    # How many cores to use
-# storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
@@ -114,7 +112,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
 
 if __name__ == '__main__':
 
-    constrain = True  #False
+    constrain = False
 
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
