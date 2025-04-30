@@ -244,6 +244,7 @@ class SyndromicMgmt(sti.STITest):
 
 
 class AMR(ss.Intervention):
+    """ Sketch of AMR intervention, not in use and not tested """
     def __init__(self, amr_scen='baseline', **kwargs):
         super().__init__(**kwargs)
 
@@ -311,7 +312,7 @@ def neg_panel_mix(scenario):
     return p_mtnz
 
 
-def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040, amr_scen='baseline'):
+def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040):
 
     intv_year = 2027
 
@@ -341,7 +342,6 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040, amr_scen='b
         rel_treat_unsucc=0.005,
         rel_treat_unneed=0.0005,
     )
-    amr = AMR(amr_scen=amr_scen)
     ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
     metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
     treatments = [ng_tx, ct_tx, metronidazole]
@@ -379,7 +379,7 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040, amr_scen='b
     )
 
     if not poc:
-        intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole, amr]
+        intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
 
     if poc:
         disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
@@ -396,6 +396,6 @@ def make_testing(ng, ct, tv, bv, scenario=None, poc=None, stop=2040, amr_scen='b
             p_mtnz=p_mtnz,
             negative_treatments=[metronidazole],
         )
-        intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole, amr]
+        intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole]
 
     return intvs
