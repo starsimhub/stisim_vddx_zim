@@ -115,7 +115,7 @@ if __name__ == '__main__':
     constrain = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ut.scenarios:
+    for scenario in ['treat80']:  # ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 
