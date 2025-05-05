@@ -77,10 +77,13 @@ def process_results(df):
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
                 soc_n_inf = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.n_infected']
                 poc_n_inf = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.n_infected']
+                soc_false_neg = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
+                poc_false_neg = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
                 hres['disease'] = [dis.upper()]
                 hres['infections_f'] = [(soc_f - poc_f)/soc_f*100]
                 hres['infections'] = [(soc - poc)/soc*100]
                 hres['infected'] = [(soc_n_inf - poc_n_inf)/soc_n_inf*100]
+                hres['false_neg'] = [(soc_false_neg - poc_false_neg)/soc_false_neg*100]
                 healthdfs += hres
 
             for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
