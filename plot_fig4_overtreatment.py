@@ -138,9 +138,11 @@ def plot_fig4(odf, hdf, tdf):
     # Second row, plot 2: Cumulative reduction in infections
     ax = fig.add_subplot(gs2[1])
     hdf.reset_index(inplace=True)
-    sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
+    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
+    sns.boxplot(data=hdf, x="disease", y="n_infected", hue="scenario", palette=clist, ax=ax)
     ax.legend(frameon=False, prop={'size': legendfont})
-    ax.set_title('% reduction in infections, 2027-2040')
+    # ax.set_title('% reduction in infections, 2027-2040')
+    ax.set_title('% reduction in number infected, 2027-2040')
     ax.set_ylim(-25, 25)
     ax.set_xlabel('')
     ax.set_ylabel('')
