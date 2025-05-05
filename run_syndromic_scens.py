@@ -50,7 +50,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
         for res in results:
             for disease in ['ng', 'ct', 'tv']:
                 colname = f'{disease}.{res}'
-                thisdf = sim.results[disease][colname].to_df(resample='year', use_years=True, col_names=colname)
+                thisdf = sim.results[disease][res].to_df(resample='year', use_years=True, col_names=colname)
                 sdfs += thisdf
         sdf = pd.concat(sdfs, axis=1)
         # sdf = sim.to_df(resample='year', use_years=True, sep='.')
