@@ -75,8 +75,8 @@ def process_results(df):
                 poc_f = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
                 soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
-                soc_n_inf = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.n_infected']
-                poc_n_inf = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.n_infected']
+                soc_n_inf = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.n_infected'].values[0]
+                poc_n_inf = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.n_infected'].values[0]
                 soc_false_neg = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
                 poc_false_neg = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
                 hres['disease'] = [dis.upper()]
