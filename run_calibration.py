@@ -21,7 +21,7 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [1200, 2][debug]  # How many trials to run for calibration
+n_trials = [2000, 2][debug]  # How many trials to run for calibration
 n_workers = [80, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -82,7 +82,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
         ct_new_infections=0,
         tv_new_infections=0,
         ng_prevalence=2,
-        ct_prevalence=2,
+        ct_prevalence_f_25_30=2,
         tv_prevalence=1,
     )
 
@@ -112,7 +112,7 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
 
 if __name__ == '__main__':
 
-    constrain = False
+    constrain = True  # Whether to constrain the p_symp_care parameter
 
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
