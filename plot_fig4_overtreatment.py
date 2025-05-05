@@ -86,11 +86,11 @@ def plot_health(hdf):
 def plot_fig4(odf, hdf, tdf):
     # Plot settings
     ut.set_font(size=30)
-    fig = pl.figure(figsize=(20, 16))
+    fig = pl.figure(figsize=(25, 16))
     legendfont = 25
 
-    gs1 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.55, top=0.95, wspace=0.3)
-    gs2 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
+    gs1 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.55, top=0.92, wspace=0.2)
+    gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
 
     clist = sc.gridcolors(3)
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
@@ -127,40 +127,49 @@ def plot_fig4(odf, hdf, tdf):
         ax.set_ylim(bottom=0)
         sc.SIticks(ax)
 
-    # Second row, plot 1: Cumulative reduction in overtreatment
-    ax = fig.add_subplot(gs2[0])
+    # First row summary plot: Cumulative reduction in overtreatment
+    ax = fig.add_subplot(gs1[pn+1])
     tdf.reset_index(inplace=True)
-    sns.boxplot(data=tdf, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
-    ax.set_title('% reduction in overtreatment, 2027-2040')
+    # tdf_plot = tdf.loc[tdf.treatment != 'MTNZ']
+    tdf_plot = tdf
+    sns.boxplot(data=tdf_plot, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
+    ax.set_title('% reduction in overtreatment\n2027-2040')
     ax.set_ylim(0, 100)
     ax.get_legend().set_visible(False)
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+
+    # Second row, plot 1: Cumulative reduction in missed diagnoses
+    ax = fig.add_subplot(gs2[0])
+    hdf.reset_index(inplace=True)
+    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
+    sns.boxplot(data=hdf, x="disease", y="new_false_neg", hue="scenario", palette=clist, ax=ax)
+    ax.legend(frameon=False, prop={'size': legendfont})
+    # ax.set_title('% reduction in infections, 2027-2040')
+    ax.set_title('% reduction in undertreatment, 2027-2040')
+    # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
 
     # Second row, plot 2: Cumulative reduction in infections
     ax = fig.add_subplot(gs2[1])
     hdf.reset_index(inplace=True)
-    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
-    sns.boxplot(data=hdf, x="disease", y="infected", hue="scenario", palette=clist, ax=ax)
+    sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax)
     ax.legend(frameon=False, prop={'size': legendfont})
     # ax.set_title('% reduction in infections, 2027-2040')
-    ax.set_title('% reduction in number infected, 2027-2040')
-    ax.set_ylim(-15, 50)
-    ax.set_xlabel('')
-    ax.set_ylabel('')
-
-    ax = fig.add_subplot(gs2[2])
-    hdf.reset_index(inplace=True)
-    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
-    sns.boxplot(data=hdf, x="disease", y="false_neg", hue="scenario", palette=clist, ax=ax)
-    ax.legend(frameon=False, prop={'size': legendfont})
-    # ax.set_title('% reduction in infections, 2027-2040')
-    ax.set_title('% reduction in false negatives, 2027-2040')
+    ax.set_title('% reduction in number infected')
     # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
 
     fig.tight_layout()
+
+    pl.figtext(0.02, 0.93, 'A', fontsize=40, ha='center', va='center')
+    pl.figtext(0.35, 0.93, 'B', fontsize=40, ha='center', va='center')
+    pl.figtext(0.65, 0.93, 'C', fontsize=40, ha='center', va='center')
+    pl.figtext(0.02, 0.47, 'D', fontsize=40, ha='center', va='center')
+    pl.figtext(0.50, 0.47, 'E', fontsize=40, ha='center', va='center')
+
     pl.savefig(f"figures/fig4_poctx.png", dpi=100)
     if show:
         pl.show()

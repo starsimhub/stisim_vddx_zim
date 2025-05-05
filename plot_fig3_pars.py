@@ -96,7 +96,7 @@ if __name__ == '__main__':
             res = results[scenario]
             prevalence = np.array([r[disease+'_prevalence'] for r in res])
             ax.plot(t[si:ei], prevalence.transpose()[si:ei, :]*100, alpha=0.6, lw=0.5, label=scenario, color=colors[scenario])
-            ax.scatter(sti_data.time, sti_data[disease+'_prevalence']*100, color='k', label='Data')
+            # ax.scatter(sti_data.time, sti_data[disease+'_prevalence']*100, color='k', label='Data')
 
         ax.set_title(disease.upper()+' prevalence (%)')
         ax.set_ylim(bottom=0)
@@ -108,9 +108,9 @@ if __name__ == '__main__':
     pl.figtext(0.02, 0.92, 'A', fontsize=40, ha='center', va='center')
     pl.figtext(0.35, 0.92, 'B', fontsize=40, ha='center', va='center')
     pl.figtext(0.69, 0.92, 'C', fontsize=40, ha='center', va='center')
-    pl.figtext(0.02, 0.45, 'E', fontsize=40, ha='center', va='center')
-    pl.figtext(0.35, 0.45, 'F', fontsize=40, ha='center', va='center')
-    pl.figtext(0.69, 0.45, 'G', fontsize=40, ha='center', va='center')
+    pl.figtext(0.02, 0.45, 'D', fontsize=40, ha='center', va='center')
+    pl.figtext(0.35, 0.45, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.69, 0.45, 'F', fontsize=40, ha='center', va='center')
 
     pl.savefig(f"figures/fig3_pars.png", dpi=100)
     if show:

@@ -140,9 +140,9 @@ if __name__ == '__main__':
     pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
     pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
     pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
-    pl.figtext(0.07, 0.45, 'E', fontsize=40, ha='center', va='center')
-    pl.figtext(0.4, 0.45, 'F', fontsize=40, ha='center', va='center')
-    pl.figtext(0.73, 0.45, 'G', fontsize=40, ha='center', va='center')
+    pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
+    pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
     pl.savefig(f"figures/fig2_epi.png", dpi=100)
     if show:
         pl.show()

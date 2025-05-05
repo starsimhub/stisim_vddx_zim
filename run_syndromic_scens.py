@@ -42,8 +42,18 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     sc.heading(f"Processing sims... ")
     print("WARNING, this will take a while...")
     dfs = []
+    results = ['new_infections', 'new_infections_f', 'new_false_neg', 'n_infected', 'n_infected_f']
+
     for s, sim in enumerate(sims):
-        sdf = sim.to_df(resample='year', use_years=True, sep='.')
+        print(f"Processing sim {s+1}/{len(sims)}")
+        sdfs = sc.autolist()
+        for res in results:
+            for disease in ['ng', 'ct', 'tv']:
+                colname = f'{disease}.{res}'
+                thisdf = sim.results[disease][colname].to_df(resample='year', use_years=True, col_names=colname)
+                sdfs += thisdf
+        sdf = pd.concat(sdfs, axis=1)
+        # sdf = sim.to_df(resample='year', use_years=True, sep='.')
         sdf['parset'] = sim.parset
         sdf['scenario'] = sim.scenario
         sdf['poc'] = 1 if 'poc' in sim.scenario else 0
