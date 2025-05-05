@@ -71,7 +71,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             dur_hist = np.histogram(dur_inf, bins=np.arange(max_dur_dict[disease] + 1), density=True)
             dd = dict(
                 dur_inf=dur_hist[0],
-                months=dur_hist[1],
+                months=dur_hist[1][:-1],
                 disease=[disease],
                 parset=[sim.parset],
                 scenario=[sim.scenario],
