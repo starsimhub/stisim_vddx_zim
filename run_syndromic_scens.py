@@ -13,6 +13,7 @@ import starsim as ss
 from model import make_sim
 import utils as ut
 
+
 def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     """
     Run analyses
