@@ -69,12 +69,13 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             di = (sim.people[disease].dur_inf.notnan & sim.people.female).uids
             dur_inf = sim.people[disease].dur_inf[di]
             dur_hist = np.histogram(dur_inf, bins=np.arange(max_dur_dict[disease] + 1), density=True)
+            n = len(dur_hist[0])
             dd = dict(
                 dur_inf=dur_hist[0],
                 months=dur_hist[1][:-1],
-                disease=[disease],
-                parset=[sim.parset],
-                scenario=[sim.scenario],
+                disease=[disease]*n,
+                parset=[sim.parset]*n,
+                scenario=[sim.scenario]*n,
             )
             dur_dfs += pd.DataFrame(dd)
         dur_df = pd.concat(dur_dfs)
