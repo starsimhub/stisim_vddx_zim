@@ -71,8 +71,8 @@ def process_results(df):
                 hres = pd.DataFrame()
                 hres['scenario'] = [scen_labels[scen]]
                 hres['parset'] = [parset]
-                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
-                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
+                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
+                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
                 hres['disease'] = [dis.upper()]
                 hres['infections'] = [(soc - poc)/soc*100]
                 healthdfs += hres
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [50, 1][debug]  # Number of parameter sets to run per scenario
+    n_scen_runs = [20, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
         'run_syndromic_scens',
         'process_results',
