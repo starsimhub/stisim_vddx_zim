@@ -62,6 +62,8 @@ def process_results(df):
 
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
+    flow_results = ['new_infections', 'new_infections_f', 'new_false_neg']
+    stock_results = ['n_infected', 'n_infected_f']
 
     for scen in ut.scenarios:
         for parset in df.parset.unique():
@@ -71,19 +73,15 @@ def process_results(df):
                 hres = pd.DataFrame()
                 hres['scenario'] = [scen_labels[scen]]
                 hres['parset'] = [parset]
-                soc_f = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
-                poc_f = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections_f'].sum()
-                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
-                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_infections'].sum()
-                soc_n_inf = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.n_infected'].values[0]
-                poc_n_inf = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.n_infected'].values[0]
-                soc_false_neg = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
-                poc_false_neg = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.new_false_neg'].sum()
+                for fr in flow_results:
+                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.'+fr].sum()
+                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.'+fr].sum()
+                    hres[fr] = [(soc - poc)/soc*100]
+                for sr in stock_results:
+                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.'+sr].values[0]
+                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.'+sr].values[0]
+                    hres[sr] = [(soc - poc)/soc*100]
                 hres['disease'] = [dis.upper()]
-                hres['infections_f'] = [(soc_f - poc_f)/soc_f*100]
-                hres['infections'] = [(soc - poc)/soc*100]
-                hres['infected'] = [(soc_n_inf - poc_n_inf)/soc_n_inf*100]
-                hres['false_neg'] = [(soc_false_neg - poc_false_neg)/soc_false_neg*100]
                 healthdfs += hres
 
             for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
