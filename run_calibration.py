@@ -122,7 +122,7 @@ if __name__ == '__main__':
         sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
-        resfolder = 'results/' if not constrain else 'results/constrained'  # NB constrained not in repo
+        resfolder = 'results/'  #if not constrain else 'results/constrained'  # NB constrained not in repo
 
         # Save the results
         print('Shrinking and saving...')

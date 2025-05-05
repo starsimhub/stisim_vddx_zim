@@ -58,7 +58,7 @@ def make_sim_pars(sim, calib_pars):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', use_calib=False, par_idx=0, poc=False, analyzers=None):
+             scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
@@ -131,7 +131,9 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     # If using calibration parameters, update the simulation
     if use_calib:
         calibname = scenario.strip('poc')
-        pars_df = sc.loadobj(f'results/zim_sti_pars_{calibname}.df')
+        if calib_folder is None:
+            calib_folder = 'results'
+        pars_df = sc.loadobj(f'{calib_folder}/zim_sti_pars_{calibname}.df')
         calib_pars = pars_df.iloc[par_idx].to_dict()
         sim.init()
         sim = make_sim_pars(sim, calib_pars)
@@ -140,7 +142,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     return sim
 
 
-def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_save=True):
+def run_msim(scenarios=None, use_calib=True, calib_folder=None, par_idx=0, seed=1, debug=False, do_save=True):
 
     # Mave individual sims
     sims = sc.autolist()
@@ -149,7 +151,7 @@ def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_
         scenarios = ut.scenarios
 
     for scenario in scenarios:
-        sim = make_sim(scenario=scenario, use_calib=use_calib, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
+        sim = make_sim(scenario=scenario, use_calib=use_calib, calib_folder=calib_folder, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
         if use_calib:
             print('Using calibration parameters:')
             print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
@@ -167,7 +169,7 @@ def run_msim(scenarios=None, use_calib=True, par_idx=0, seed=1, debug=False, do_
     return sims
 
 
-def save_stats(sims):
+def save_stats(sims, resfolder='results'):
 
     for sim in sims:
 
@@ -193,18 +195,18 @@ def save_stats(sims):
                     dd['disease'] = disease
                     dfs += pd.DataFrame(dd)
         epi_df = pd.concat(dfs)
-        sc.saveobj(f'results/epi_df_{scenario}.df', epi_df)
+        sc.saveobj(f'{resfolder}/epi_df_{scenario}.df', epi_df)
 
         # Save SW stats
         sw_res = sim.results['sw_stats']
         sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
-        sc.saveobj(f'results/sw_df_{scenario}.df', sw_df)
+        sc.saveobj(f'{resfolder}/sw_df_{scenario}.df', sw_df)
 
         # Save HIV results
         hiv_res = sim.results['total_symptomatic']
         hiv_df = hiv_res.to_df(resample='year', use_years=True, sep='.')
         hiv_df['timevec'] = df.timevec
-        sc.saveobj(f'results/hiv_df_{scenario}.df', hiv_df)
+        sc.saveobj(f'{resfolder}/hiv_df_{scenario}.df', hiv_df)
 
     return
 

@@ -16,13 +16,15 @@ if __name__ == '__main__':
 
     # Settings
     sc.heading('Saving plot files')
+    constrain = True  # Whether to use the constrained calibration parameters
+    calib_folder = 'results/constrained' if constrain else 'results'
 
     to_run = [
         'fig2',  # Epi stats - requires running the model with the calibration pars
         'fig3',  # STI calibration pars
     ]
     if 'fig2' in to_run:
-        sims = run_msim(scenarios=ut.scenarios, use_calib=True, seed=1, debug=False, do_save=True)
+        sims = run_msim(scenarios=ut.scenarios, use_calib=True, calib_folder=calib_folder, seed=1, debug=False, do_save=True)
         save_stats(sims)
 
     if 'fig3' in to_run:
@@ -30,7 +32,7 @@ if __name__ == '__main__':
         cs_dfs = sc.autolist()  # care seeking for VDS - not by disease
         results = sc.objdict()
         for scenario in ut.scenarios:
-            calib = sc.loadobj(f'results/zim_sti_calib_{scenario}.obj')
+            calib = sc.loadobj(f'{calib_folder}/zim_sti_calib_{scenario}.obj')
             df = calib.df[:500]
             print(f'Saving {len(df)} results... ')
             df['scenario'] = ut.scenlabels[scenario]
@@ -64,9 +66,9 @@ if __name__ == '__main__':
         dfm['par'] = dfm['variable'].apply(lambda x: x[3:])
 
         # Save results for figure 3
-        sc.saveobj('results/zim_sti_calib_df.obj', dfm)
-        sc.saveobj('results/zim_sti_care_seeking.obj', cs_df)
-        sc.saveobj('results/zim_sti_calib_res.obj', results)
+        sc.saveobj(f'{calib_folder}/zim_sti_calib_df.obj', dfm)
+        sc.saveobj(f'{calib_folder}/zim_sti_care_seeking.obj', cs_df)
+        sc.saveobj(f'{calib_folder}/zim_sti_calib_res.obj', results)
 
     print('Done!')
 
