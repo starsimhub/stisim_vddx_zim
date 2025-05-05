@@ -72,9 +72,9 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             dd = dict(
                 dur_inf=dur_hist[0],
                 months=dur_hist[1],
-                disease=disease,
-                parset=sim.parset,
-                scenario=sim.scenario,
+                disease=[disease],
+                parset=[sim.parset],
+                scenario=[sim.scenario],
             )
             dur_dfs += pd.DataFrame(dd)
         dur_df = pd.concat(dur_dfs)
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [20, 1][debug]  # Number of parameter sets to run per scenario
+    n_scen_runs = [2, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
         'run_syndromic_scens',
         'process_results',
