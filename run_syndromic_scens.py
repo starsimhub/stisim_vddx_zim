@@ -3,6 +3,7 @@ Run syndromic scenarios
 
 Run on VMs - should take approx 10 min
 """
+import numpy as np
 
 # %% Imports and settings
 import pandas as pd
@@ -59,6 +60,26 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
         sdf['poc'] = 1 if 'poc' in sim.scenario else 0
         dfs += [sdf]
     df = pd.concat(dfs)
+
+    # Process durations
+    max_dur_dict = {'ng': 18, 'ct': 24, 'tv': 12}
+    for disease in ['ng', 'ct', 'tv']:
+        dur_dfs = sc.autolist()
+        for s, sim in enumerate(sims):
+            di = (sim.people[disease].dur_inf.notnan & sim.people.female).uids
+            dur_inf = sim.people[disease].dur_inf[di]
+            dur_hist = np.histogram(dur_inf, bins=np.arange(max_dur_dict[disease] + 1), density=True)
+            dd = dict(
+                dur_inf=dur_hist[0],
+                months=dur_hist[1],
+                disease=disease,
+                parset=sim.parset,
+                scenario=sim.scenario,
+            )
+            dur_dfs += pd.DataFrame(dd)
+        dur_df = pd.concat(dur_dfs)
+        sc.saveobj(f'results/dur_df_{disease}.obj', dur_df)
+
     print("Finished processing sims.")
 
     return sims, df
@@ -84,12 +105,12 @@ def process_results(df):
                 hres['scenario'] = [scen_labels[scen]]
                 hres['parset'] = [parset]
                 for fr in flow_results:
-                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][dis+'.'+fr].sum()
-                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][dis+'.'+fr].sum()
+                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.index > 2027)][dis+'.'+fr].sum()
+                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.index > 2027)][dis+'.'+fr].sum()
                     hres[fr] = [(soc - poc)/soc*100]
                 for sr in stock_results:
-                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec == 2040)][dis+'.'+sr].values[0]
-                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec == 2040)][dis+'.'+sr].values[0]
+                    soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.index == 2040)][dis+'.'+sr].values[0]
+                    poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.index == 2040)][dis+'.'+sr].values[0]
                     hres[sr] = [(soc - poc)/soc*100]
                 hres['disease'] = [dis.upper()]
                 healthdfs += hres
@@ -98,8 +119,8 @@ def process_results(df):
                 tres = pd.DataFrame()
                 tres['scenario'] = [scen_labels[scen]]
                 tres['parset'] = [parset]
-                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.timevec > 2027)][tx+'.new_treated_unnecessary_f'].sum()
-                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.timevec > 2027)][tx+'.new_treated_unnecessary_f'].sum()
+                soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.index > 2027)][tx+'.new_treated_unnecessary_f'].sum()
+                poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.index > 2027)][tx+'.new_treated_unnecessary_f'].sum()
                 tres['treatment'] = tx_labels[tx]
                 tres['overtreatments'] = [(soc - poc)/soc*100]
                 treatdfs += tres
@@ -112,12 +133,12 @@ def process_results(df):
     results += [tx+'.new_treated_f' for tx in treatments]
     results += ['parset', 'scenario', 'timevec', 'poc']
 
-    odf = df.loc[:, df.columns.isin(['timevec']+results)]
+    odf = df.loc[:, df.columns.isin(results)]
     for tx in treatments:
         odf[tx+'.overtx'] = odf[tx+'.new_treated_unnecessary_f']/df[tx+'.new_treated_f']
 
     # Melt dataframe to long form
-    dfm = odf.melt(id_vars=['timevec', 'scenario'], var_name='variable', value_name='value')
+    dfm = odf.melt(id_vars=['scenario'], var_name='variable', value_name='value')
     dfm['treatment'] = dfm['variable'].apply(lambda x: x.split('.')[0])
 
     return healthdf, treatdf, dfm
