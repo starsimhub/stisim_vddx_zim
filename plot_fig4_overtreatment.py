@@ -89,8 +89,8 @@ def plot_fig4(odf, hdf, tdf):
     fig = pl.figure(figsize=(20, 16))
     legendfont = 25
 
-    gs1 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.55, top=0.95, wspace=0.3)
-    gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
+    gs1 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.55, top=0.95, wspace=0.3)
+    gs2 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
 
     clist = sc.gridcolors(3)
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
@@ -100,7 +100,9 @@ def plot_fig4(odf, hdf, tdf):
     si = sc.findfirst(t, 2010)
     ei = sc.findfirst(t, 2040)
 
-    for pn, (txname, txlabel) in enumerate(ut.tx_labels.items()):
+    tx_dict = {'ng_tx': 'NG', 'ct_tx': 'CT'}  #ut.tx_labels
+
+    for pn, (txname, txlabel) in enumerate(tx_dict.items()):
         ax = fig.add_subplot(gs1[pn])
         for scenario in ut.scenarios:
             socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
@@ -143,7 +145,18 @@ def plot_fig4(odf, hdf, tdf):
     ax.legend(frameon=False, prop={'size': legendfont})
     # ax.set_title('% reduction in infections, 2027-2040')
     ax.set_title('% reduction in number infected, 2027-2040')
-    ax.set_ylim(-25, 25)
+    ax.set_ylim(-15, 50)
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+
+    ax = fig.add_subplot(gs2[2])
+    hdf.reset_index(inplace=True)
+    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
+    sns.boxplot(data=hdf, x="disease", y="false_neg", hue="scenario", palette=clist, ax=ax)
+    ax.legend(frameon=False, prop={'size': legendfont})
+    # ax.set_title('% reduction in infections, 2027-2040')
+    ax.set_title('% reduction in false negatives, 2027-2040')
+    # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
 

@@ -157,6 +157,26 @@ class SyndromicMgmt(sti.STITest):
                     none=f_cerv_uids[ofc == 3] | f_noncerv_uids[ofnc == 3] | m_uids[om == 3],
                 )
 
+                # Figure out missed diagnoses
+                for disease in self.diseases:
+                    disease.results['new_true_pos'][self.ti] += len(outcomes['all3'] & disease.treatable)
+                    disease.results['new_false_pos'][self.ti] += len(outcomes['all3'] & disease.susceptible)
+                    disease.results['new_true_neg'][self.ti] += len(outcomes['none'] & disease.susceptible)
+                    disease.results['new_false_neg'][self.ti] += len(outcomes['none'] & disease.treatable)
+
+                # Additional cervical
+                for disease in [self.sim.diseases.ng, self.sim.diseases.ct]:
+                    disease.results['new_true_pos'][self.ti] += len(outcomes['ngct'] & disease.treatable)
+                    disease.results['new_false_pos'][self.ti] += len(outcomes['ngct'] & disease.susceptible)
+                    disease.results['new_false_neg'][self.ti] += len(outcomes['mtnz'] & disease.treatable)
+                    disease.results['new_true_neg'][self.ti] += len(outcomes['mtnz'] & disease.susceptible)
+
+                for disease in [self.sim.diseases.tv]:
+                    disease.results['new_true_pos'][self.ti] += len(outcomes['mtnz'] & disease.treatable)
+                    disease.results['new_false_pos'][self.ti] += len(outcomes['mtnz'] & disease.susceptible)
+                    disease.results['new_false_neg'][self.ti] += len(outcomes['ngct'] & disease.treatable)
+                    disease.results['new_true_neg'][self.ti] += len(outcomes['ngct'] & disease.susceptible)
+
                 # Update treatment eligibility
                 for outcome, txs in self.outcome_treatment_map.items():
                     for tx in txs:
