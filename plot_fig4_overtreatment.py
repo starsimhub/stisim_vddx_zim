@@ -141,7 +141,7 @@ def plot_fig4(odf, hdf, tdf):
     sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
     ax.legend(frameon=False, prop={'size': legendfont})
     ax.set_title('% reduction in infections, 2027-2040')
-    ax.set_ylim(-5, 25)
+    ax.set_ylim(-25, 25)
     ax.set_xlabel('')
     ax.set_ylabel('')
 
