@@ -89,28 +89,31 @@ def plot_fig4(odf, hdf, tdf, ddf):
     fig = pl.figure(figsize=(30, 16))
     legendfont = 25
 
-    gs1 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.55, top=0.92, wspace=0.2)
-    gs2 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.2)
+    gs1 = pl.GridSpec(1, 4, left=0.05, right=0.99, bottom=0.55, top=0.92, wspace=0.2)
+    gs2 = pl.GridSpec(1, 3, left=0.05, right=0.99, bottom=0.05, top=0.45, wspace=0.2)
 
     clist = sc.gridcolors(3)
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
     # First row: reduction in overtreatment over time, by treatment type
     t = odf.timevec.unique()
-    si = sc.findfirst(t, 2010)
+    si = sc.findfirst(t, 2020)
     ei = sc.findfirst(t, 2040)
 
-    tx_dict = {'ng_tx': 'NG', 'ct_tx': 'CT'}  #ut.tx_labels
+    # tx_dict = {'ng_tx': 'NG', 'ct_tx': 'CT'}  #ut.tx_labels
 
-    for pn, (txname, txlabel) in enumerate(tx_dict.items()):
+    # for pn, (txname, txlabel) in enumerate(tx_dict.items()):
+    for pn, disease in enumerate(['ng', 'ct', 'tv']):
         ax = fig.add_subplot(gs1[pn])
         for scenario in ut.scenarios:
-            socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
+            socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
+            # socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
         for scenario in ut.scenarios:
-            pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
+            pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
+            # pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--')
@@ -120,10 +123,10 @@ def plot_fig4(odf, hdf, tdf, ddf):
             l1 = ax.legend(h[:3], l[:3], loc='upper left', frameon=False, prop={'size': legendfont})
             from matplotlib.lines import Line2D
             myHandle = [Line2D([], [], ls='-', color='k'), Line2D([], [], ls='--', color='k')]
-            l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='upper left', bbox_to_anchor=(0, .7), frameon=False, prop={'size': legendfont})
+            l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='lower left', bbox_to_anchor=(0, .1), frameon=False, prop={'size': legendfont})
             ax.add_artist(l1)
 
-        ax.set_title(f'{txlabel} overtreatment')
+        ax.set_title(f'{disease.upper()} overtreatment')
         ax.set_ylim(bottom=0)
         sc.SIticks(ax)
 
@@ -133,7 +136,7 @@ def plot_fig4(odf, hdf, tdf, ddf):
     # tdf_plot = tdf.loc[tdf.treatment != 'MTNZ']
     tdf_plot = tdf
     sns.boxplot(data=tdf_plot, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
-    ax.set_title('% reduction in overtreatment\n2027-2040')
+    ax.set_title('% reduction in\novertreatment 2027-2040')
     ax.set_ylim(0, 100)
     ax.get_legend().set_visible(False)
     ax.set_xlabel('')
@@ -148,7 +151,7 @@ def plot_fig4(odf, hdf, tdf, ddf):
     ax.legend(frameon=False, prop={'size': legendfont}, loc='upper right')
     # ax.legend(frameon=False, prop={'size': legendfont})
     # ax.set_title('% reduction in infections, 2027-2040')
-    ax.set_title('% reduction in undertreatment\n2027-2040')
+    ax.set_title('% reduction in\nundertreatment 2027-2040')
     # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
@@ -189,12 +192,13 @@ def plot_fig4(odf, hdf, tdf, ddf):
 
     fig.tight_layout()
 
-    pl.figtext(0.02, 0.93, 'A', fontsize=40, ha='center', va='center')
-    pl.figtext(0.35, 0.93, 'B', fontsize=40, ha='center', va='center')
-    pl.figtext(0.65, 0.93, 'C', fontsize=40, ha='center', va='center')
-    pl.figtext(0.02, 0.47, 'D', fontsize=40, ha='center', va='center')
-    pl.figtext(0.35, 0.47, 'E', fontsize=40, ha='center', va='center')
-    pl.figtext(0.65, 0.47, 'F', fontsize=40, ha='center', va='center')
+    pl.figtext(0.04, 0.95, 'A', fontsize=40, ha='center', va='center')
+    pl.figtext(0.28, 0.95, 'B', fontsize=40, ha='center', va='center')
+    pl.figtext(0.52, 0.95, 'C', fontsize=40, ha='center', va='center')
+    pl.figtext(0.77, 0.95, 'D', fontsize=40, ha='center', va='center')
+    pl.figtext(0.04, 0.48, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.37, 0.48, 'F', fontsize=40, ha='center', va='center')
+    pl.figtext(0.70, 0.48, 'G', fontsize=40, ha='center', va='center')
 
     pl.savefig(f"figures/fig4_poctx.png", dpi=100)
     if show:

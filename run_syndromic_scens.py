@@ -60,6 +60,11 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
                 colname = f'{tx}.{tres}'
                 thisdf = sim.results[tx][tres].to_df(resample='year', use_years=True, col_names=colname)
                 sdfs += thisdf
+
+        # Add HIV results
+        sdfs += sim.results.hiv.new_infections.to_df(resample='year', use_years=True, col_names='hiv.new_infections')
+        sdfs += sim.results.hiv.n_infected.to_df(resample='year', use_years=True, col_names='hiv.n_infected')
+
         sdf = pd.concat(sdfs, axis=1)
         # sdf = sim.to_df(resample='year', use_years=True, sep='.')
         sdf['parset'] = sim.parset
@@ -140,13 +145,13 @@ def process_results(df):
                 hres['disease'] = [dis.upper()]
                 healthdfs += hres
 
-            for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
+            for tx in ['ng', 'ct', 'tv']:  #['ng_tx', 'ct_tx', 'metronidazole']:
                 tres = pd.DataFrame()
                 tres['scenario'] = [scen_labels[scen]]
                 tres['parset'] = [parset]
                 soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.index > 2027)][tx+'.new_treated_unnecessary_f'].sum()
                 poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.index > 2027)][tx+'.new_treated_unnecessary_f'].sum()
-                tres['treatment'] = tx_labels[tx]
+                tres['treatment'] = tx.upper()  #tx_labels[tx]
                 tres['overtreatments'] = [(soc - poc)/soc*100]
                 treatdfs += tres
 
@@ -178,7 +183,7 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [50, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        'run_syndromic_scens',
+        # 'run_syndromic_scens',
         'process_results',
     ]
 
