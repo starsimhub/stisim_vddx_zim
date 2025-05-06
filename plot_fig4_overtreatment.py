@@ -85,8 +85,8 @@ def plot_health(hdf):
 
 def plot_fig4(odf, hdf, tdf, ddf):
     # Plot settings
-    ut.set_font(size=30)
-    fig = pl.figure(figsize=(30, 16))
+    ut.set_font(size=40)
+    fig = pl.figure(figsize=(32, 16))
     legendfont = 25
 
     gs1 = pl.GridSpec(1, 4, left=0.05, right=0.99, bottom=0.55, top=0.92, wspace=0.2)
@@ -100,20 +100,16 @@ def plot_fig4(odf, hdf, tdf, ddf):
     si = sc.findfirst(t, 2020)
     ei = sc.findfirst(t, 2040)
 
-    # tx_dict = {'ng_tx': 'NG', 'ct_tx': 'CT'}  #ut.tx_labels
-
     # for pn, (txname, txlabel) in enumerate(tx_dict.items()):
     for pn, disease in enumerate(['ng', 'ct', 'tv']):
         ax = fig.add_subplot(gs1[pn])
         for scenario in ut.scenarios:
             socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
-            # socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
         for scenario in ut.scenarios:
             pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
-            # pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == txname) & (odf.variable == txname+'.new_treated_unnecessary_f')]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--')
@@ -133,7 +129,6 @@ def plot_fig4(odf, hdf, tdf, ddf):
     # First row summary plot: Cumulative reduction in overtreatment
     ax = fig.add_subplot(gs1[pn+1])
     tdf.reset_index(inplace=True)
-    # tdf_plot = tdf.loc[tdf.treatment != 'MTNZ']
     tdf_plot = tdf
     sns.boxplot(data=tdf_plot, x="treatment", y="overtreatments", hue="scenario", palette=clist, ax=ax)
     ax.set_title('% reduction in\novertreatment 2027-2040')
@@ -146,13 +141,9 @@ def plot_fig4(odf, hdf, tdf, ddf):
     pn = 0
     ax = fig.add_subplot(gs2[pn])
     hdf.reset_index(inplace=True)
-    # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
     sns.boxplot(data=hdf, x="disease", y="new_false_neg", hue="scenario", palette=clist, ax=ax)
     ax.legend(frameon=False, prop={'size': legendfont}, loc='upper right')
-    # ax.legend(frameon=False, prop={'size': legendfont})
-    # ax.set_title('% reduction in infections, 2027-2040')
     ax.set_title('% reduction in\nundertreatment 2027-2040')
-    # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
     pn += 1
@@ -161,11 +152,8 @@ def plot_fig4(odf, hdf, tdf, ddf):
     ax = fig.add_subplot(gs2[pn])
     hdf.reset_index(inplace=True)
     sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax)
-    # ax.legend(frameon=False, prop={'size': legendfont})
     ax.get_legend().set_visible(False)
-    # ax.set_title('% reduction in infections, 2027-2040')
     ax.set_title('% reduction in number infected')
-    # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
     pn += 1
@@ -182,7 +170,6 @@ def plot_fig4(odf, hdf, tdf, ddf):
         ax.get_legend().set_visible(False)
         if wn == 1: ax.set_title(f'% of cases resolved within 3m')
         if wn != 0: ax.set_yticklabels([])
-        # if wn == 2: ax.legend(frameon=False, prop={'size': legendfont})
         ax.text(0.5, 95, disease.upper(), va="center", ha="center")
 
         ax.set_ylim(0, 100)

@@ -120,6 +120,7 @@ def process_results(df):
     sc.heading(f"Processing results... ")
     healthdfs = sc.autolist()
     treatdfs = sc.autolist()
+    hivdfs = sc.autolist()
 
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
@@ -155,8 +156,18 @@ def process_results(df):
                 tres['overtreatments'] = [(soc - poc)/soc*100]
                 treatdfs += tres
 
+            # Make HIV dataframe
+            hivres = pd.DataFrame()
+            hivres['scenario'] = [scen_labels[scen]]
+            hivres['parset'] = [parset]
+            soc = thisdf.loc[(thisdf.poc == 0) & (thisdf.index > 2027)]['hiv.new_infections'].sum()
+            poc = thisdf.loc[(thisdf.poc == 1) & (thisdf.index > 2027)]['hiv.new_infections'].sum()
+            hivres['hiv'] = [(soc - poc)/soc*100]
+            hivdfs += hivres
+
     healthdf = pd.concat(healthdfs)
     treatdf = pd.concat(treatdfs)
+    hivdf = pd.concat(hivdfs)
 
     # Overtreatment stats - proportion reduction
     diseases = ['ng', 'ct', 'tv']
@@ -173,7 +184,7 @@ def process_results(df):
     dfm = odf.melt(id_vars=['scenario', 'timevec'], var_name='variable', value_name='value')
     dfm['treatment'] = dfm['variable'].apply(lambda x: x.split('.')[0])
 
-    return healthdf, treatdf, dfm
+    return healthdf, treatdf, dfm, hivdf
 
 
 if __name__ == '__main__':
@@ -198,10 +209,11 @@ if __name__ == '__main__':
     if 'process_results' in to_run:
         # Load
         df = sc.loadobj('results/synd_scens.obj')
-        healthdf, treatdf, overdf = process_results(df)
+        healthdf, treatdf, overdf, hivdf = process_results(df)
         sc.saveobj('results/synd_health.obj', healthdf)  # In repo
         sc.saveobj('results/synd_treat.obj', treatdf)  # In repo
         sc.saveobj(f'results/overtx.obj', overdf)  # In repo
+        sc.saveobj(f'results/hiv_scens.obj', hivdf)  # In repo
 
     print('Done!')
 
