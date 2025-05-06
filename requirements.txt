@@ -1,2 +1,2 @@
 starsim>=2.0.0
-stisim>=0.2.0
+stisim>=1.0.0

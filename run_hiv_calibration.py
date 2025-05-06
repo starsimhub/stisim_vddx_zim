@@ -15,15 +15,17 @@ os.environ.update(
 import sciris as sc
 import stisim as sti
 import pandas as pd
-from model import make_sim
+from model import make_sim, make_scenpars
 
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
 n_trials = [5000, 2][debug]  # How many trials to run for calibration
-n_workers = [40, 1][debug]    # How many cores to use
+n_workers = [50, 1][debug]    # How many cores to use
 # storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
 storage = None
+do_shrink = True  # Whether to shrink the calibration results
+make_stats = True  # Whether to make stats
 
 
 def build_sim(sim, calib_pars):
@@ -66,40 +68,48 @@ def run_calibration(n_trials=None, n_workers=None, do_save=True):
     )
 
     # Make the sim
-    sim = make_sim(scenario='soc', start=1990, stop=2030, n_agents=5e3)
+    scenpars = make_scenpars(scenario='treat80')
+    sim = make_sim(scenario='treat80', **scenpars, start=1990, stop=2030, n_agents=5e3, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_hiv_calib.csv')
+    extra_results = ['hiv_n_diagnosed', 'hiv_n_on_art', 'n_alive']
 
     # Make the calibration
     calib = sti.Calibration(
         calib_pars=calib_pars,
         build_fn = build_sim,
         sim=sim,
+        extra_results=extra_results,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
-        die=True, reseed=True, storage=storage, save_results=True,
+        die=True, reseed=False, storage=storage, save_results=True,
     )
 
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_calib.obj', calib)
-    print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
 
 
 if __name__ == '__main__':
 
-    to_run = [
-        'run_calib',
-        # 'load_calib'
-    ]
+    sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+    print(f'Best pars are {calib.best_pars}')
 
-    if 'run_calib' in to_run:
-        sim, calib = run_calibration(n_trials=n_trials, n_workers=n_workers)
+    # Save the results
+    print('Shrinking and saving...')
+    if do_shrink:
+        calib = calib.shrink(n_results=500)
+        sc.saveobj(f'results/zim_hiv_calib.obj', calib)
+    else:
+        sc.saveobj(f'results/zim_hiv_calib.obj', calib)
 
-    if 'load_calib' in to_run:
-        calib = sc.loadobj('results/zim_calib.obj')
-        df = calib.df
-        sc.saveobj(f'results/zim_calib_df.obj', df)
-        res = calib.sim_results
-        sc.saveobj(f'results/zim_calib_res.obj', res)
+    # Make stats
+    if make_stats:
+        print('Making stats...')
+        from utils import percentiles
+        df = calib.resdf
+        df_stats = df.groupby(df.time).describe(percentiles=percentiles)
+        sc.saveobj(f'results/zim_hiv_calib_stats.df', df_stats)
+        par_stats = calib.df.describe(percentiles=[0.05, 0.95])
+        sc.saveobj(f'results/zim_hiv_par_stats.df', par_stats)
 
+    print('Done!')

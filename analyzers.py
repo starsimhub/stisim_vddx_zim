@@ -158,8 +158,8 @@ class total_symptomatic(ss.Analyzer):
         self.results['symp_prev_no_hiv_m'][ti] = self.cond_prob(n_symp_m, no_hiv_m)
         self.results['symp_prev_has_hiv_m'][ti] = self.cond_prob(n_symp_m, has_hiv_m)
 
-        for disease in ['ng', 'ct', 'tv', 'bv']:
-            if self.results['symp_prev_f'][ti] < sim.results[disease]['female_symp_adult_prevalence'][ti]:
+        for disease in ['ng', 'ct', 'tv']:
+            if self.results['symp_prev_f'][ti] < sim.results[disease]['symp_prevalence_f'][ti]:
                 errormsg = f'Overall symptomatic prevalence should not be lower than for disease {disease}'
                 raise ValueError(errormsg)
 

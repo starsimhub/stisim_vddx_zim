@@ -15,51 +15,53 @@ os.environ.update(
 import sciris as sc
 import stisim as sti
 import pandas as pd
-from model import make_sim, make_scenpars
+import utils as ut
+from model import make_sim, make_sim_pars
 
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [5000, 2][debug]  # How many trials to run for calibration
-n_workers = [60, 1][debug]    # How many cores to use
-# storage = ["mysql://hpvsim_user@localhost/hpvsim_db", None][debug]  # Storage for calibrations
+n_trials = [10000, 2][debug]  # How many trials to run for calibration
+n_workers = [80, 1][debug]    # How many cores to use
 storage = None
+do_shrink = True  # Whether to shrink the calibration results
+make_stats = True  # Whether to make stats
 
 
-def build_sim(sim, calib_pars):
-
-   # Apply the calibration parameters
-    for k, pars in calib_pars.items():  # Loop over the calibration parameters
-        if k == 'rand_seed':
-            sim.pars.rand_seed = v
-            continue
-
-        v = pars['value']
-        if 'beta' in k:
-            sim.diseases[k[:2]].pars[k[3:]] = v
-        elif 'p_symp' in k and k != 'p_symp_care':
-            sim.diseases[k[:2]].pars[k[3:]][0] = v
-        elif 'p_symp_care' in k:
-            for dis in ['ng', 'ct', 'tv']:
-                sim.diseases[dis].pars[k][0] = v
-        else:
-            raise NotImplementedError(f'Parameter {k} not recognized')
-
-    return sim
-
-
-def run_calibration(scenario, n_trials=None, n_workers=None):
+def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, constrain=False):
 
     # Define the calibration parameters
-    calib_pars = dict(
-        ng_beta_m2f=dict(low=0.05, high=0.3, guess=0.06),
-        ct_beta_m2f=dict(low=0.02, high=0.3, guess=0.05),
-        tv_beta_m2f=dict(low=0.08, high=0.3, guess=0.10),
-        ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
-        ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
-        tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
-        p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
+    calib_par_dict = dict(
+        default=dict(
+            ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
+            ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
+            tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
+            p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
+            ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08),
+            ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06),
+            tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07),
+        ),
+        treat50=dict(
+            ng_p_symp=dict(low=0.15, high=0.25, guess=0.18),
+            ct_p_symp=dict(low=0.25, high=0.3, guess=0.28),
+            tv_p_symp=dict(low=0.5, high=0.75, guess=0.6),
+            p_symp_care=dict(low=0.45, high=0.75, guess=0.6),
+        ),
+        treat80=dict(
+            ng_p_symp=dict(low=0.11, high=0.19, guess=0.15),
+            ct_p_symp=dict(low=0.22, high=0.27, guess=0.25),
+            tv_p_symp=dict(low=0.3, high=0.6, guess=0.45),
+            p_symp_care=dict(low=0.35, high=0.65, guess=0.5),
+        ),
+        treat100=dict(
+            ng_p_symp=dict(low=0.09, high=0.15, guess=0.12),
+            ct_p_symp=dict(low=0.2, high=0.25, guess=0.22),
+            tv_p_symp=dict(low=0.15, high=0.5, guess=0.3),
+            p_symp_care=dict(low=0.25, high=0.55, guess=0.4),
+        ),
     )
+    calib_pars = calib_par_dict['default']
+    if constrain: calib_pars['p_symp_care'] = calib_par_dict[scenario]['p_symp_care']
 
     # Extra results to save
     sres = sc.autolist()
@@ -69,23 +71,40 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
                 sres += dis+'_'+res+sk
 
     # Make the sim
-    scenpars = make_scenpars(scenario)
-    sim = make_sim(scenario=scenario, **scenpars, start=1990, stop=2040, n_agents=5e3, verbose=-1, seed=1)
+    sim = make_sim(scenario=scenario, use_calib=False, start=1990, stop=2040, verbose=-1, seed=1)
     data = pd.read_csv('data/zimbabwe_sti_data.csv')
+
+    weights = dict(
+        ng_n_infected=0,
+        ct_n_infected=0,
+        tv_n_infected=0,
+        ng_new_infections=0,
+        ct_new_infections=0,
+        tv_new_infections=0,
+        ng_prevalence=2,
+        ct_prevalence_f_25_30=2,
+        tv_prevalence=1,
+    )
 
     # Make the calibration
     calib = sti.Calibration(
         calib_pars=calib_pars,
         extra_results=sres,
-        build_fn=build_sim,
+        build_fn=make_sim_pars,
+        weights=weights,
         sim=sim,
         data=data,
         total_trials=n_trials, n_workers=n_workers,
         die=True, reseed=False, storage=storage, save_results=True,
     )
 
+    # Run the calibration
+    printstr = f'Running calibration for {scenario}, {n_trials} trials'
+    if constrain:
+        printstr += ' with constraints'.upper()
+    sc.heading(printstr)
     calib.calibrate(load=True)
-    sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
+    if do_save: sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
     return sim, calib
@@ -93,8 +112,38 @@ def run_calibration(scenario, n_trials=None, n_workers=None):
 
 if __name__ == '__main__':
 
-    scenario = 'treat100'
-    sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers)
+    constrain = True  # Whether to constrain the p_symp_care parameter
+
+    # Loop over scenarios and run calibrations for each
+    for scenario in ut.scenarios:
+
+        sc.heading(f'Running calibration: {scenario}')
+
+        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
+        print(f'... finished calibration: {scenario}')
+        print(f'Best pars are {calib.best_pars}')
+        resfolder = 'results/'  #if not constrain else 'results/constrained'  # NB constrained not in repo
+
+        # Save the results
+        print('Shrinking and saving...')
+        if do_shrink:
+            sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj', calib)
+            calib = calib.shrink(n_results=int(n_trials//20))  # Save 5% best results
+            sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
+        else:
+            sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
+        # Save the parameter dataframe
+        sc.saveobj(f'{resfolder}/zim_sti_pars_{scenario}.df', calib.df)
+
+        if make_stats:
+            print('Making stats...')
+            from utils import percentiles
+            df = calib.resdf
+            df_stats = df.groupby(df.time).describe(percentiles=percentiles)
+            sc.saveobj(f'{resfolder}/zim_sti_calib_stats_{scenario}.df', df_stats)
+            par_stats = calib.df.describe(percentiles=[0.05, 0.95])
+            sc.saveobj(f'{resfolder}/zim_sti_par_stats_{scenario}.df', par_stats)
+
     print('Done!')
 
 
