@@ -69,12 +69,24 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
 
     # Process durations
     max_dur_dict = {'ng': 18, 'ct': 24, 'tv': 12}
+    av_dur_dfs = sc.autolist()
     for disease in ['ng', 'ct', 'tv']:
         dur_dfs = sc.autolist()
         for s, sim in enumerate(sims):
             di = (sim.people[disease].dur_inf.notnan & sim.people.female).uids
             dur_inf = sim.people[disease].dur_inf[di]
             dur_hist = np.histogram(dur_inf, bins=np.arange(max_dur_dict[disease] + 1), density=True)
+            mean_dur = np.mean(dur_inf)
+            median_dur = np.median(dur_inf)
+            ee = dict(
+                mean_dur=mean_dur,
+                median_dur=median_dur,
+                parset=sim.parset,
+                scenario=sim.scenario,
+                disease=disease,
+            )
+            av_dur_dfs += pd.DataFrame(ee)
+
             n = len(dur_hist[0])
             dd = dict(
                 dur_inf=dur_hist[0],
@@ -86,6 +98,9 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             dur_dfs += pd.DataFrame(dd)
         dur_df = pd.concat(dur_dfs)
         sc.saveobj(f'results/dur_df_{disease}.obj', dur_df)
+
+    av_dur_df = pd.concat(av_dur_dfs)
+    sc.saveobj(f'results/av_dur_df.obj', av_dur_df)
 
     print("Finished processing sims.")
 

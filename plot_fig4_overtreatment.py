@@ -205,6 +205,8 @@ if __name__ == '__main__':
                 ax.bar(toplot.index.values+offset, toplot.values, width=width, label=poclabel)
                 multiplier += 1
             ax.set_title(f'{disease.upper()} duration of infection')
+            if rn == 1 and cn == 0:
+                ax.legend()
     pl.show()
 
     # Condensed versions for slides
