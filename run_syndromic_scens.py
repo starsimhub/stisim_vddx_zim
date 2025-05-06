@@ -44,7 +44,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     print("WARNING, this will take a while...")
     dfs = []
     results = ['new_infections', 'new_infections_f', 'new_false_neg', 'n_infected', 'n_infected_f']
-    results += ['new_treated_unnecessary_f', 'new_treated_f']
+    tx_results = ['new_treated_unnecessary_f', 'new_treated_f']
 
     for s, sim in enumerate(sims):
         print(f"Processing sim {s+1}/{len(sims)}")
@@ -53,6 +53,11 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
             for disease in ['ng', 'ct', 'tv']:
                 colname = f'{disease}.{res}'
                 thisdf = sim.results[disease][res].to_df(resample='year', use_years=True, col_names=colname)
+                sdfs += thisdf
+        for tres in tx_results:
+            for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
+                colname = f'{tx}.{tres}'
+                thisdf = sim.results[tx][tres].to_df(resample='year', use_years=True, col_names=colname)
                 sdfs += thisdf
         sdf = pd.concat(sdfs, axis=1)
         # sdf = sim.to_df(resample='year', use_years=True, sep='.')
