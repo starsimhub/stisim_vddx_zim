@@ -186,9 +186,26 @@ if __name__ == '__main__':
     tdf = sc.loadobj('results/synd_treat.obj')
 
     # Condensed versions for slides
-    make_main_fig = True
+    make_main_fig = False
     if make_main_fig:
         plot_fig4(odf, hdf, tdf)
+
+    # Make durations plot
+    # ut.set_font(size=30)
+    fig, axes = pl.subplots(3, 3, figsize=(15, 12))
+    width = 0.45
+    multiplier = 0
+    for rn, disease in enumerate(['ng', 'ct', 'tv']):
+        dur_df = sc.loadobj(f'results/dur_df_{disease}.obj')
+        for cn, scenario in enumerate(['treat50', 'treat80', 'treat100']):
+            ax = axes[rn, cn]
+            for pocflag, poclabel in {'':'SOC', 'poc':'POC'}.items():
+                offset = width*multiplier-width/2
+                toplot = dur_df.loc[dur_df.scenario.isin([scenario+pocflag])].groupby('months')['dur_inf'].mean()
+                ax.bar(toplot.index.values+offset, toplot.values, width=width, label=poclabel)
+                multiplier += 1
+            ax.set_title(f'{disease.upper()} duration of infection')
+    pl.show()
 
     # Condensed versions for slides
     make_slide_figs = False
