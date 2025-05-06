@@ -83,14 +83,14 @@ def plot_health(hdf):
     return
 
 
-def plot_fig4(odf, hdf, tdf):
+def plot_fig4(odf, hdf, tdf, ddf):
     # Plot settings
     ut.set_font(size=30)
-    fig = pl.figure(figsize=(25, 16))
+    fig = pl.figure(figsize=(30, 16))
     legendfont = 25
 
     gs1 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.55, top=0.92, wspace=0.2)
-    gs2 = pl.GridSpec(1, 2, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.1)
+    gs2 = pl.GridSpec(1, 3, left=0.05, right=0.95, bottom=0.05, top=0.45, wspace=0.2)
 
     clist = sc.gridcolors(3)
     colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
@@ -140,27 +140,52 @@ def plot_fig4(odf, hdf, tdf):
     ax.set_ylabel('')
 
     # Second row, plot 1: Cumulative reduction in missed diagnoses
-    ax = fig.add_subplot(gs2[0])
+    pn = 0
+    ax = fig.add_subplot(gs2[pn])
     hdf.reset_index(inplace=True)
     # sns.boxplot(data=hdf, x="disease", y="infections", hue="scenario", palette=clist, ax=ax)
     sns.boxplot(data=hdf, x="disease", y="new_false_neg", hue="scenario", palette=clist, ax=ax)
-    ax.legend(frameon=False, prop={'size': legendfont})
+    ax.legend(frameon=False, prop={'size': legendfont}, loc='upper right')
+    # ax.legend(frameon=False, prop={'size': legendfont})
     # ax.set_title('% reduction in infections, 2027-2040')
-    ax.set_title('% reduction in undertreatment, 2027-2040')
+    ax.set_title('% reduction in undertreatment\n2027-2040')
     # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
+    pn += 1
 
     # Second row, plot 2: Cumulative reduction in infections
-    ax = fig.add_subplot(gs2[1])
+    ax = fig.add_subplot(gs2[pn])
     hdf.reset_index(inplace=True)
     sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax)
-    ax.legend(frameon=False, prop={'size': legendfont})
+    # ax.legend(frameon=False, prop={'size': legendfont})
+    ax.get_legend().set_visible(False)
     # ax.set_title('% reduction in infections, 2027-2040')
     ax.set_title('% reduction in number infected')
     # ax.set_ylim(-15, 50)
     ax.set_xlabel('')
     ax.set_ylabel('')
+    pn += 1
+
+    # Reduction in time to treatment
+    gs01 = gs2[pn].subgridspec(1, 3, wspace=0)
+
+    for wn, disease in enumerate(['ng', 'ct', 'tv']):
+        ax = fig.add_subplot(gs01[wn])
+        toplot = ddf.loc[(ddf.disease == disease.upper())]
+        sns.pointplot(data=toplot, x="poc", y="prop_fast", hue="scenario", palette=clist, ax=ax)
+
+        # Labeling
+        ax.get_legend().set_visible(False)
+        if wn == 1: ax.set_title(f'% of cases resolved within 3m')
+        if wn != 0: ax.set_yticklabels([])
+        # if wn == 2: ax.legend(frameon=False, prop={'size': legendfont})
+        ax.text(0.5, 95, disease.upper(), va="center", ha="center")
+
+        ax.set_ylim(0, 100)
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+    pn += 1
 
     fig.tight_layout()
 
@@ -168,7 +193,8 @@ def plot_fig4(odf, hdf, tdf):
     pl.figtext(0.35, 0.93, 'B', fontsize=40, ha='center', va='center')
     pl.figtext(0.65, 0.93, 'C', fontsize=40, ha='center', va='center')
     pl.figtext(0.02, 0.47, 'D', fontsize=40, ha='center', va='center')
-    pl.figtext(0.50, 0.47, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.35, 0.47, 'E', fontsize=40, ha='center', va='center')
+    pl.figtext(0.65, 0.47, 'F', fontsize=40, ha='center', va='center')
 
     pl.savefig(f"figures/fig4_poctx.png", dpi=100)
     if show:
@@ -184,30 +210,56 @@ if __name__ == '__main__':
     odf = sc.loadobj(f'results/overtx.obj')
     hdf = sc.loadobj('results/synd_health.obj')
     tdf = sc.loadobj('results/synd_treat.obj')
+    ddf = sc.loadobj('results/dur_df.obj')
+
+    # Process durations
+    process_durs = False
+    if process_durs:
+        mt = 4
+        dfs = sc.autolist()
+        idx = 0
+        for rn, disease in enumerate(['ng', 'ct', 'tv']):
+            dur_df = sc.loadobj(f'results/dur_df_{disease}.obj')
+            for scenario, scenlabel in ut.scenlabels.items():
+                for pocflag, poclabel in {'': 'SOC', 'poc': 'POC'}.items():
+                    durs = dur_df.loc[dur_df.scenario.isin([scenario+pocflag])].groupby('months')['dur_inf'].mean()
+                    res = durs.loc[durs.index <= mt].sum()
+                    dd = dict(
+                        scenario=scenlabel,
+                        disease=disease.upper(),
+                        poc=poclabel,
+                        prop_fast=res*100,
+                    )
+                    dfs += pd.DataFrame(dd, index=[idx])
+                    idx += 1
+        ddf = pd.concat(dfs)
+        sc.saveobj('results/dur_df.obj', ddf)
 
     # Condensed versions for slides
-    make_main_fig = False
+    make_main_fig = True
     if make_main_fig:
-        plot_fig4(odf, hdf, tdf)
+        plot_fig4(odf, hdf, tdf, ddf)
 
     # Make durations plot
     # ut.set_font(size=30)
-    fig, axes = pl.subplots(3, 3, figsize=(15, 12))
-    width = 0.45
-    multiplier = 0
-    for rn, disease in enumerate(['ng', 'ct', 'tv']):
-        dur_df = sc.loadobj(f'results/dur_df_{disease}.obj')
-        for cn, scenario in enumerate(['treat50', 'treat80', 'treat100']):
-            ax = axes[rn, cn]
-            for pocflag, poclabel in {'':'SOC', 'poc':'POC'}.items():
-                offset = width*multiplier-width/2
-                toplot = dur_df.loc[dur_df.scenario.isin([scenario+pocflag])].groupby('months')['dur_inf'].mean()
-                ax.bar(toplot.index.values+offset, toplot.values, width=width, label=poclabel)
-                multiplier += 1
-            ax.set_title(f'{disease.upper()} duration of infection')
-            if rn == 1 and cn == 0:
-                ax.legend()
-    pl.show()
+    make_dur_plot = False
+    if make_dur_plot:
+        fig, axes = pl.subplots(3, 3, figsize=(15, 12))
+        width = 0.45
+        multiplier = 0
+        for rn, disease in enumerate(['ng', 'ct', 'tv']):
+            dur_df = sc.loadobj(f'results/dur_df_{disease}.obj')
+            for cn, scenario in enumerate(['treat50', 'treat80', 'treat100']):
+                ax = axes[rn, cn]
+                for pocflag, poclabel in {'':'SOC', 'poc':'POC'}.items():
+                    offset = width*multiplier-width/2
+                    toplot = dur_df.loc[dur_df.scenario.isin([scenario+pocflag])].groupby('months')['dur_inf'].mean()
+                    ax.bar(toplot.index.values+offset, toplot.values, width=width, label=poclabel)
+                    multiplier += 1
+                ax.set_title(f'{disease.upper()} duration of infection')
+                if rn == 1 and cn == 0:
+                    ax.legend()
+        pl.show()
 
     # Condensed versions for slides
     make_slide_figs = False

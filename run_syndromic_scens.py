@@ -45,6 +45,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     dfs = []
     results = ['new_infections', 'new_infections_f', 'new_false_neg', 'n_infected', 'n_infected_f']
     tx_results = ['new_treated_unnecessary_f', 'new_treated_f']
+    results = results + tx_results
 
     for s, sim in enumerate(sims):
         print(f"Processing sim {s+1}/{len(sims)}")
@@ -70,6 +71,7 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
     # Process durations
     max_dur_dict = {'ng': 18, 'ct': 24, 'tv': 12}
     av_dur_dfs = sc.autolist()
+    idx = 0
     for disease in ['ng', 'ct', 'tv']:
         dur_dfs = sc.autolist()
         for s, sim in enumerate(sims):
@@ -85,7 +87,8 @@ def run_syndromic_scens(scenarios, stop=2040, parallel=True):
                 scenario=sim.scenario,
                 disease=disease,
             )
-            av_dur_dfs += pd.DataFrame(ee)
+            av_dur_dfs += pd.DataFrame(ee, index=[idx])
+            idx += 1
 
             n = len(dur_hist[0])
             dd = dict(
@@ -115,7 +118,7 @@ def process_results(df):
 
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
-    flow_results = ['new_infections', 'new_infections_f', 'new_false_neg']
+    flow_results = ['new_infections', 'new_infections_f', 'new_false_neg', 'new_treated_unnecessary_f']
     stock_results = ['n_infected', 'n_infected_f']
 
     for scen in ut.scenarios:
@@ -151,16 +154,18 @@ def process_results(df):
     treatdf = pd.concat(treatdfs)
 
     # Overtreatment stats - proportion reduction
-    results = [tx+'.new_treated_unnecessary_f' for tx in treatments]
-    results += [tx+'.new_treated_f' for tx in treatments]
-    results += ['parset', 'scenario', 'timevec', 'poc']
+    diseases = ['ng', 'ct', 'tv']
+    results = [dis+'.new_treated_unnecessary_f' for dis in diseases]
+    results += [dis+'.new_treated_f' for dis in diseases]
+    results += ['parset', 'scenario', 'poc']
 
     odf = df.loc[:, df.columns.isin(results)]
-    for tx in treatments:
-        odf[tx+'.overtx'] = odf[tx+'.new_treated_unnecessary_f']/df[tx+'.new_treated_f']
+    odf['timevec'] = odf.index
+    for dis in diseases:
+        odf[dis+'.overtx'] = odf[dis+'.new_treated_unnecessary_f']/df[dis+'.new_treated_f']
 
     # Melt dataframe to long form
-    dfm = odf.melt(id_vars=['scenario'], var_name='variable', value_name='value')
+    dfm = odf.melt(id_vars=['scenario', 'timevec'], var_name='variable', value_name='value')
     dfm['treatment'] = dfm['variable'].apply(lambda x: x.split('.')[0])
 
     return healthdf, treatdf, dfm
@@ -173,7 +178,7 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [50, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        'run_syndromic_scens',
+        # 'run_syndromic_scens',
         'process_results',
     ]
 
