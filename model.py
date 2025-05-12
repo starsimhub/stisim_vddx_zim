@@ -27,6 +27,10 @@ def make_sim_pars(sim, calib_pars):
     """
     Update the simulation parameters with the calibration parameters
     """
+    def set_par(k, sim):
+        idx = [d.name for d in sim.pars.diseases].index(k[:2])
+        return sim.pars.diseases[idx].pars
+
     for k, pars in calib_pars.items():  # Loop over the calibration parameters
         if k == 'rand_seed':
             sim.pars.rand_seed = v
@@ -40,15 +44,16 @@ def make_sim_pars(sim, calib_pars):
             raise NotImplementedError(f'Parameter {k} not recognized')
 
         if 'beta_m2f' in k:
-            sim.diseases[k[:2]].pars[k[3:]] = v
+            set_par(k, sim)[k[3:]] = v
         elif 'dur' in k:
-            sim.diseases[k[:2]].pars['dur_symp2clear'][0][0] = ss.dur(v, 'month')
-            sim.diseases[k[:2]].pars['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
+            set_par(k, sim)['dur_symp2clear'][0][0] = ss.dur(v, 'month')
+            set_par(k, sim)['dur_asymp2clear'][0][0] = ss.dur(v, 'month')
         elif 'p_symp' in k and k != 'p_symp_care':
-            sim.diseases[k[:2]].pars[k[3:]][0] = v
+            set_par(k, sim)[k[3:]][0] = v
         elif 'p_symp_care' in k:
             for dis in ['ng', 'ct', 'tv']:
-                sim.diseases[dis].pars[k][0] = v
+                didx = [d.name for d in sim.pars.diseases].index(dis)
+                sim.pars.diseases[didx].pars[k][0] = v
         elif k in ['index', 'mismatch']:
             continue
         else:

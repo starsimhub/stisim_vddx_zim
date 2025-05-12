@@ -21,8 +21,8 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [2, 2][debug]  # How many trials to run for calibration
-n_workers = [1, 1][debug]    # How many cores to use
+n_trials = [2000, 2][debug]  # How many trials to run for calibration
+n_workers = [80, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     constrain = True  # Whether to constrain the p_symp_care parameter
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ut.scenarios:
+    for scenario in ['treat80']:  #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
 
