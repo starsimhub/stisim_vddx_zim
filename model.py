@@ -19,7 +19,7 @@ def make_stis():
     ng = sti.Gonorrhea(eff_condom=0.7)
     ct = sti.Chlamydia(eff_condom=0.8)
     tv = sti.Trichomoniasis(eff_condom=0.8)
-    bv = sti.BV()
+    bv = sti.SimpleBV()
     return ng, ct, tv, bv
 
 
