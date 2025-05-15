@@ -120,7 +120,7 @@ def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=Fal
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
-    load_partial = False
+    load_partial = True
 
     # Loop over scenarios and run calibrations for each
     for scenario in ['treat80']: #ut.scenarios:
@@ -133,7 +133,7 @@ if __name__ == '__main__':
             import optuna as op
             print(calib.run_args.study_name)
             study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
-            output = study.optimize(calib.run_trial, n_trials=1)
+            output = study.optimize(calib.run_trial, n_trials=203)
             calib.best_pars = sc.objdict(study.best_params)
             calib.parse_study(study)
             print('Best pars:', calib.best_pars)
