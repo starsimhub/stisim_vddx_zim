@@ -26,9 +26,10 @@ n_workers = [100, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
+study_name = 'starsim_calibration'
 
 
-def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, constrain=False):
+def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
 
     # Define the calibration parameters
     ckw = dict(suggest_type='suggest_float')
@@ -99,6 +100,11 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
         die=True, reseed=False, storage=storage, save_results=True,
     )
 
+    return sim, calib
+
+
+def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=False):
+
     # Run the calibration
     printstr = f'Running calibration for {scenario}, {n_trials} trials'
     if constrain:
@@ -108,19 +114,39 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
     if do_save: sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
-    return sim, calib
+    return calib
 
 
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
+    load_partial = True
 
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
+        sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
 
-        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
+        if load_partial:
+            # Load a partially-run calibration study
+            import optuna as op
+
+            study = op.load_study(storage=storage, study_name=study_name)
+            output = study.optimize(calib.run_trial, n_trials=calib.run_args.n_trials)
+            calib.best_pars = sc.objdict(study.best_params)
+            calib.parse_study(study)
+            print('Best pars:', calib.best_pars)
+
+            # Tidy up
+            calib.calibrated = True
+            if not calib.run_args.keep_db:
+                calib.remove_db()
+
+        else:
+            calib = run_calibration(scenario, calib, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
+
+
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
         resfolder = 'results/'  #if not constrain else 'results/constrained'  # NB constrained not in repo
