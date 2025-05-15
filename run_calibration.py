@@ -144,7 +144,7 @@ if __name__ == '__main__':
                 calib.remove_db()
 
         else:
-            calib = run_calibration(scenario, calib, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
+            calib = run_calibration(scenario, calib, n_trials=n_trials, constrain=constrain)
 
 
         print(f'... finished calibration: {scenario}')
