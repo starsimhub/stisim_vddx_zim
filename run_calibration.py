@@ -123,7 +123,7 @@ if __name__ == '__main__':
     load_partial = True
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat80']: #ut.scenarios:
+    for scenario in ['treat100']: #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
             import optuna as op
             print(calib.run_args.study_name)
             study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
-            output = study.optimize(calib.run_trial, n_trials=203)
+            output = study.optimize(calib.run_trial, n_trials='x')
             calib.best_pars = sc.objdict(study.best_params)
             calib.parse_study(study)
             print('Best pars:', calib.best_pars)
