@@ -133,7 +133,7 @@ if __name__ == '__main__':
             import optuna as op
             print(calib.run_args.study_name)
             study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
-            output = study.optimize(calib.run_trial, n_trials=calib.run_args.n_trials)
+            output = study.optimize(calib.run_trial, n_trials=1)
             calib.best_pars = sc.objdict(study.best_params)
             calib.parse_study(study)
             print('Best pars:', calib.best_pars)
