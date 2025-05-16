@@ -21,7 +21,7 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [500, 2][debug]  # How many trials to run for calibration
+n_trials = [100, 2][debug]  # How many trials to run for calibration
 n_workers = [100, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     load_partial = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat50']: #ut.scenarios:
+    for scenario in ['treat50']:  #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
@@ -145,7 +145,6 @@ if __name__ == '__main__':
 
         else:
             calib = run_calibration(scenario, calib, n_trials=n_trials, constrain=constrain)
-
 
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
