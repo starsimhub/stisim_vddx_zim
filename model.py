@@ -29,8 +29,11 @@ def make_sim_pars(sim, calib_pars):
     Update the simulation parameters with the calibration parameters
     """
     def set_par(k, sim):
-        idx = [d.name for d in sim.pars.diseases].index(k[:2])
-        return sim.pars.diseases[idx].pars
+        if sim.initialized:
+            return sim.diseases[k[:2]].pars
+        else:
+            idx = [d.name for d in sim.pars.diseases].index(k[:2])
+            return sim.pars.diseases[idx].pars
 
     for k, pars in calib_pars.items():  # Loop over the calibration parameters
         if k == 'rand_seed':
