@@ -3,6 +3,7 @@ Create a model with HIV plus 4 co-circulating discharging STIs:
     - chlamydia, gonorrhea, trichomoniasis, and other (BV+)
 Used for evaluation of etiological tests compared to syndromic management.
 """
+import scipy.special
 
 # %% Imports and settings
 import starsim as ss
@@ -147,7 +148,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     return sim
 
 
-def run_msim(scenarios=None, use_calib=True, calib_folder=None, par_idx=0, seed=1, debug=False, do_save=True):
+def run_msim(scenarios=None, use_calib=True, calib_folder=None, n_pars=1, seed=1, debug=False, do_save=True):
 
     # Mave individual sims
     sims = sc.autolist()
@@ -156,33 +157,48 @@ def run_msim(scenarios=None, use_calib=True, calib_folder=None, par_idx=0, seed=
         scenarios = ut.scenarios
 
     for scenario in scenarios:
-        sim = make_sim(scenario=scenario, use_calib=use_calib, calib_folder=calib_folder, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
-        if use_calib:
-            print('Using calibration parameters:')
-            print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
-            print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
-        sims += sim
+        for par_idx in range(n_pars):
+            sim = make_sim(scenario=scenario, use_calib=use_calib, calib_folder=calib_folder, par_idx=par_idx, seed=seed, debug=debug, start=1990, stop=2026)
+            if use_calib:
+                print('Using calibration parameters:')
+                print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
+                print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+            sim.par_idx = par_idx
+            sims += sim
 
     sims = ss.parallel(sims).sims
 
     if do_save:
+        dfs = sc.autolist()
         for sim in sims:
             scenario = sim.scenario
+            par_idx = sim.par_idx
             df = sim.to_df(resample='year', use_years=True, sep='.')
-            sc.saveobj(f'results/{scenario}_sim.df', df)
+            df['res_no'] = par_idx
+            df['scenario'] = scenario
+            dfs += df
+        df = pd.concat(dfs)
+        sc.saveobj(f'results/msim.df', df)
+
+        # for sim in sims:
+        #     scenario = sim.scenario
+        #     df = sim.to_df(resample='year', use_years=True, sep='.')
+        #     sc.saveobj(f'results/{scenario}_sim.df', df)
 
     return sims
 
 
-def save_stats(sims, resfolder='results'):
+def save_stats(sims, resfolder='results', scenario='treat80'):
 
+    # Epi stats: save for all runs
+    dfs = sc.autolist()
     for sim in sims:
 
         scenario = sim.scenario
+        par_idx = sim.par_idx
         df = sim.to_df(resample='year', use_years=True, sep='.')
 
         # Save age/sex epi results
-        dfs = sc.autolist()
         age_bins = sim.diseases.ng.age_bins
         sex_labels = {'f': 'Female', 'm': 'Male'}
         for disease in ['ng', 'ct', 'tv']:
@@ -198,20 +214,23 @@ def save_stats(sims, resfolder='results'):
                     dd['new_infections'] = sim.results[disease][f'new_infections_{sex}_{ab1}_{ab2}'][-120:].mean()
                     dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['disease'] = disease
+                    dd['par_idx'] = par_idx
+                    dd['scenario'] = scenario
                     dfs += pd.DataFrame(dd)
-        epi_df = pd.concat(dfs)
-        sc.saveobj(f'{resfolder}/epi_df_{scenario}.df', epi_df)
+    epi_df = pd.concat(dfs)
+    sc.saveobj(f'{resfolder}/epi_df_{scenario}.df', epi_df)
 
-        # Save SW stats
-        sw_res = sim.results['sw_stats']
-        sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
-        sc.saveobj(f'{resfolder}/sw_df_{scenario}.df', sw_df)
+    # Save SW stats
+    sim = [sim for sim in sims if sim.par_idx == 0][0]
+    sw_res = sim.results['sw_stats']
+    sw_df = sw_res.to_df(resample='year', use_years=True, sep='.')
+    sc.saveobj(f'{resfolder}/sw_df_{scenario}.df', sw_df)
 
-        # Save HIV results
-        hiv_res = sim.results['total_symptomatic']
-        hiv_df = hiv_res.to_df(resample='year', use_years=True, sep='.')
-        hiv_df['timevec'] = df.timevec
-        sc.saveobj(f'{resfolder}/hiv_df_{scenario}.df', hiv_df)
+    # Save HIV results
+    hiv_res = sim.results['total_symptomatic']
+    hiv_df = hiv_res.to_df(resample='year', use_years=True, sep='.')
+    hiv_df['timevec'] = df.timevec
+    sc.saveobj(f'{resfolder}/hiv_df_{scenario}.df', hiv_df)
 
     return
 
