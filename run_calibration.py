@@ -120,10 +120,10 @@ def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=Fal
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
-    load_partial = True
+    load_partial = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat50']:  #ut.scenarios:
+    for scenario in ['treat80']:  #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
