@@ -120,7 +120,7 @@ def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=Fal
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
-    load_partial = False
+    load_partial = True
 
     # Loop over scenarios and run calibrations for each
     for scenario in ['treat50']:  #ut.scenarios:
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         print('Shrinking and saving...')
         if do_shrink:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj', calib)
-            calib = calib.shrink(n_results=int(n_trials//20))  # Save 5% best results
+            calib = calib.shrink(n_results=int(n_trials//10))  # Save 5% best results
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
