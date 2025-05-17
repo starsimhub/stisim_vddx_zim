@@ -120,7 +120,7 @@ def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=Fal
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
-    load_partial = False
+    load_partial = True
 
     # Loop over scenarios and run calibrations for each
     for scenario in ['treat80']:  #ut.scenarios:
@@ -132,18 +132,18 @@ if __name__ == '__main__':
             # Load a partially-run calibration study
             import optuna as op
             print(calib.run_args.study_name)
-            # study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
-            calib.run_args.continue_db = True
-            calib.calibrate()
-            # output = study.optimize(calib.run_trial, n_trials=108)
-            # calib.best_pars = sc.objdict(study.best_params)
-            # calib.parse_study(study)
-            # print('Best pars:', calib.best_pars)
-            #
-            # # Tidy up
-            # calib.calibrated = True
-            # if not calib.run_args.keep_db:
-            #     calib.remove_db()
+            study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
+            # calib.run_args.continue_db = True
+            # calib.calibrate()
+            output = study.optimize(calib.run_trial, n_trials=2)
+            calib.best_pars = sc.objdict(study.best_params)
+            calib.parse_study(study)
+            print('Best pars:', calib.best_pars)
+
+            # Tidy up
+            calib.calibrated = True
+            if not calib.run_args.keep_db:
+                calib.remove_db()
 
         else:
             calib = run_calibration(scenario, calib, n_trials=n_trials, constrain=constrain)
