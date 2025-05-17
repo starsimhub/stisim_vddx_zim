@@ -56,8 +56,11 @@ def make_sim_pars(sim, calib_pars):
             set_par(k, sim)[k[3:]][0] = v
         elif 'p_symp_care' in k:
             for dis in ['ng', 'ct', 'tv']:
-                didx = [d.name for d in sim.pars.diseases].index(dis)
-                sim.pars.diseases[didx].pars[k][0] = v
+                if sim.initialized:
+                    sim.diseases[dis].pars[k][0] = v
+                else:
+                    didx = [d.name for d in sim.pars.diseases].index(dis)
+                    sim.pars.diseases[didx].pars[k][0] = v
         elif k in ['index', 'mismatch']:
             continue
         else:
