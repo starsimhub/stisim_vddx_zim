@@ -86,7 +86,7 @@ def plot_health(hdf):
 def plot_fig4(odf, hdf, tdf, ddf):
     # Plot settings
     ut.set_font(size=40)
-    fig = pl.figure(figsize=(32, 16))
+    fig = pl.figure(figsize=(32, 20))
     legendfont = 25
 
     gs1 = pl.GridSpec(1, 4, left=0.05, right=0.99, bottom=0.55, top=0.92, wspace=0.2)
@@ -101,15 +101,17 @@ def plot_fig4(odf, hdf, tdf, ddf):
     ei = sc.findfirst(t, 2040)
 
     # for pn, (txname, txlabel) in enumerate(tx_dict.items()):
+    # res_to_plot = '.new_treated_unnecessary_f'
+    res_to_plot = '.new_false_neg'
     for pn, disease in enumerate(['ng', 'ct', 'tv']):
         ax = fig.add_subplot(gs1[pn])
         for scenario in ut.scenarios:
-            socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
+            socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == disease) & (odf.variable == disease+res_to_plot)]
             socy = socdf['value'][si:ei]
             socy = socy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
         for scenario in ut.scenarios:
-            pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == disease) & (odf.variable == disease+'.new_treated_unnecessary_f')]
+            pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == disease) & (odf.variable == disease+res_to_plot)]
             pocy = pocdf['value'][si:ei]
             pocy = pocy.rolling(3, min_periods=1).mean()
             ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--')
@@ -151,7 +153,7 @@ def plot_fig4(odf, hdf, tdf, ddf):
     # Second row, plot 2: Cumulative reduction in infections
     ax = fig.add_subplot(gs2[pn])
     hdf.reset_index(inplace=True)
-    sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax)
+    sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax, showfliers=False)
     ax.get_legend().set_visible(False)
     ax.set_title('% reduction in number infected')
     ax.set_xlabel('')
