@@ -20,7 +20,7 @@ if __name__ == '__main__':
     calib_folder = 'results/constrained' if constrain else 'results'
 
     to_run = [
-        'fig2',  # Epi stats - requires running the model with the calibration pars
+        # 'fig2',  # Epi stats - requires running the model with the calibration pars
         'fig3',  # STI calibration pars
     ]
     if 'fig2' in to_run:
