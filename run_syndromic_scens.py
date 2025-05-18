@@ -169,12 +169,13 @@ def process_results(df):
     treatdf = pd.concat(treatdfs)
     hivdf = pd.concat(hivdfs)
 
-    # Overtreatment stats - time series
+    # More treatment stats - time series
     diseases = ['ng', 'ct', 'tv']
     results = [dis+'.new_treated_unnecessary_f' for dis in diseases]
     results += [dis+'.new_treated_f' for dis in diseases]
     results += [dis+'.new_false_neg' for dis in diseases]
     results += [dis+'.new_false_neg_f' for dis in diseases]
+    results += [dis+'.n_infected_f' for dis in diseases]
     results += ['parset', 'scenario', 'poc']
 
     odf = df.loc[:, df.columns.isin(results)]
