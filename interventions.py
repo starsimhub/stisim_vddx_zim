@@ -120,6 +120,7 @@ class SyndromicMgmt(sti.STITest):
 
     def step(self, uids=None):
         sim = self.sim
+        ppl = sim.people
         self.treated_by_uid = None
 
         # If this intervention has stopped, reset eligibility for all associated treatments
@@ -159,23 +160,30 @@ class SyndromicMgmt(sti.STITest):
 
                 # Figure out missed diagnoses
                 for disease in self.diseases:
-                    disease.results['new_true_pos'][self.ti] += len(outcomes['all3'] & disease.treatable)
-                    disease.results['new_false_pos'][self.ti] += len(outcomes['all3'] & disease.susceptible)
-                    disease.results['new_true_neg'][self.ti] += len(outcomes['none'] & disease.susceptible)
-                    disease.results['new_false_neg'][self.ti] += len(outcomes['none'] & disease.treatable)
+                    for pkey, pattr in disease.sex_keys.items():
+                        skk = '' if pkey == '' else f'_{pkey}'
+
+                        disease.results[f'new_true_pos{skk}'][self.ti] += len(outcomes['all3'] & disease.treatable & ppl[pattr])
+                        disease.results[f'new_false_pos{skk}'][self.ti] += len(outcomes['all3'] & disease.susceptible & ppl[pattr])
+                        disease.results[f'new_true_neg{skk}'][self.ti] += len(outcomes['none'] & disease.susceptible & ppl[pattr])
+                        disease.results[f'new_false_neg{skk}'][self.ti] += len(outcomes['none'] & disease.treatable & ppl[pattr])
 
                 # Additional cervical
                 for disease in [self.sim.diseases.ng, self.sim.diseases.ct]:
-                    disease.results['new_true_pos'][self.ti] += len(outcomes['ngct'] & disease.treatable)
-                    disease.results['new_false_pos'][self.ti] += len(outcomes['ngct'] & disease.susceptible)
-                    disease.results['new_false_neg'][self.ti] += len(outcomes['mtnz'] & disease.treatable)
-                    disease.results['new_true_neg'][self.ti] += len(outcomes['mtnz'] & disease.susceptible)
+                    for pkey, pattr in disease.sex_keys.items():
+                        skk = '' if pkey == '' else f'_{pkey}'
+                        disease.results[f'new_true_pos{skk}'][self.ti] += len(outcomes['ngct'] & disease.treatable & ppl[pattr])
+                        disease.results[f'new_false_pos{skk}'][self.ti] += len(outcomes['ngct'] & disease.susceptible & ppl[pattr])
+                        disease.results[f'new_false_neg{skk}'][self.ti] += len(outcomes['mtnz'] & disease.treatable & ppl[pattr])
+                        disease.results[f'new_true_neg{skk}'][self.ti] += len(outcomes['mtnz'] & disease.susceptible & ppl[pattr])
 
                 for disease in [self.sim.diseases.tv]:
-                    disease.results['new_true_pos'][self.ti] += len(outcomes['mtnz'] & disease.treatable)
-                    disease.results['new_false_pos'][self.ti] += len(outcomes['mtnz'] & disease.susceptible)
-                    disease.results['new_false_neg'][self.ti] += len(outcomes['ngct'] & disease.treatable)
-                    disease.results['new_true_neg'][self.ti] += len(outcomes['ngct'] & disease.susceptible)
+                    for pkey, pattr in disease.sex_keys.items():
+                        skk = '' if pkey == '' else f'_{pkey}'
+                        disease.results[f'new_true_pos{skk}'][self.ti] += len(outcomes['mtnz'] & disease.treatable & ppl[pattr])
+                        disease.results[f'new_false_pos{skk}'][self.ti] += len(outcomes['mtnz'] & disease.susceptible & ppl[pattr])
+                        disease.results[f'new_false_neg{skk}'][self.ti] += len(outcomes['ngct'] & disease.treatable & ppl[pattr])
+                        disease.results[f'new_true_neg{skk}'][self.ti] += len(outcomes['ngct'] & disease.susceptible & ppl[pattr])
 
                 # Update treatment eligibility
                 for outcome, txs in self.outcome_treatment_map.items():

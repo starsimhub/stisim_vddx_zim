@@ -102,7 +102,7 @@ def plot_fig4(odf, hdf, tdf, ddf):
 
     # for pn, (txname, txlabel) in enumerate(tx_dict.items()):
     # res_to_plot = '.new_treated_unnecessary_f'
-    res_to_plot = '.new_false_neg'
+    res_to_plot = '.new_false_neg_f'
     for pn, disease in enumerate(['ng', 'ct', 'tv']):
         ax = fig.add_subplot(gs1[pn])
         for scenario in ut.scenarios:
