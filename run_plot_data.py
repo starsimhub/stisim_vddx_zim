@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Settings
     sc.heading('Saving plot files')
     constrain = True  # Whether to use the constrained calibration parameters
-    calib_folder = 'results/constrained' if constrain else 'results'
+    calib_folder = 'results' if constrain else 'results'
 
     to_run = [
         # 'fig2',  # Epi stats - requires running the model with the calibration pars
