@@ -120,10 +120,10 @@ def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=Fal
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
-    load_partial = True
+    load_partial = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat100']:  #ut.scenarios:
+    for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
@@ -151,6 +151,11 @@ if __name__ == '__main__':
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
         resfolder = 'results/'  #if not constrain else 'results/constrained'  # NB constrained not in repo
+
+        # # Load calib
+        # calib = sc.loadobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj')
+        # new_results = [calib.sim_results[i] for i in calib.df.index]
+        # calib.sim_results = new_results
 
         # Save the results
         print('Shrinking and saving...')

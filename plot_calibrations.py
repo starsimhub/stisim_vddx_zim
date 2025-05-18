@@ -18,7 +18,7 @@ from utils import percentile_pairs
 if __name__ == '__main__':
 
     which = ['hiv', 'sti'][1]
-    scenario = 'treat50'
+    scenario = 'treat100'
 
     # Load files - these should all be committed to the repository
     df_filename = f'results/zim_{which}_calib_stats' + (f'_{scenario}' if which == 'sti' else '') + '.df'

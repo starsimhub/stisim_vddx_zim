@@ -124,7 +124,7 @@ def process_results(df):
 
     from utils import treatments, tx_labels
     from utils import txscenlabels as scen_labels
-    flow_results = ['new_infections', 'new_infections_f', 'new_false_neg', 'new_treated_unnecessary_f']
+    flow_results = ['new_infections', 'new_infections_f', 'new_false_neg', 'new_false_neg_f', 'new_treated_unnecessary_f']
     stock_results = ['n_infected', 'n_infected_f']
 
     for scen in ut.scenarios:
@@ -169,10 +169,12 @@ def process_results(df):
     treatdf = pd.concat(treatdfs)
     hivdf = pd.concat(hivdfs)
 
-    # Overtreatment stats - proportion reduction
+    # Overtreatment stats - time series
     diseases = ['ng', 'ct', 'tv']
     results = [dis+'.new_treated_unnecessary_f' for dis in diseases]
     results += [dis+'.new_treated_f' for dis in diseases]
+    results += [dis+'.new_false_neg' for dis in diseases]
+    results += [dis+'.new_false_neg_f' for dis in diseases]
     results += ['parset', 'scenario', 'poc']
 
     odf = df.loc[:, df.columns.isin(results)]
