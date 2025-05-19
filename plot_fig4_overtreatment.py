@@ -277,6 +277,21 @@ if __name__ == '__main__':
         # Plot health impact
         plot_health(hdf)
 
+    # Make table
+    for tx in ['ng', 'ct', 'tv']:
+        for scen in ut.txscenlabels.keys():
+            for var,label in {'.new_treated_unnecessary_f':'over', '.new_false_neg_f':'under'}.items():
+                thisdf = odf.loc[(odf.scenario == scen) & (odf.treatment == tx) & (odf.variable == tx+var) & (odf.timevec >= 2027)]
+                res = f"{tx.upper()}, {scen}, {label}: {round(thisdf.groupby('timevec')['value'].mean().sum(),-3):.0f}"
+                print(res)
+
+    for tx in ['ng', 'ct', 'tv']:
+        for scen in ut.txscenlabels.keys():
+            for var, label in {'.n_infected_f': 'burden'}.items():
+                thisdf = odf.loc[(odf.scenario == scen) & (odf.treatment == tx) & (odf.variable == tx+var) & (odf.timevec == 2040)]
+                res = f"{tx.upper()}, {scen}, {label}: {round(thisdf.groupby('timevec')['value'].mean().values[-1],-3):.0f}"
+                print(res)
+
     print('Done!')
 
 
