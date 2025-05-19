@@ -123,7 +123,7 @@ if __name__ == '__main__':
         thisdf['prevalence'] *= 100
         sns.barplot(data=thisdf, x="age", y="prevalence", hue="sex", ax=ax, palette=scolors)
         ax.set_title(disease.upper())
-        ax.set_ylabel('')
+        ax.set_ylabel('Prevalence (%)')
         ax.set_xlabel('')
         if ai == 0:
             ax.legend(frameon=False, prop={'size': 16})

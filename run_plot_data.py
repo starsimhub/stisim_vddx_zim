@@ -17,14 +17,14 @@ if __name__ == '__main__':
     # Settings
     sc.heading('Saving plot files')
     constrain = True  # Whether to use the constrained calibration parameters
-    calib_folder = 'results/constrained' if constrain else 'results'
+    calib_folder = 'results' if constrain else 'results'
 
     to_run = [
         'fig2',  # Epi stats - requires running the model with the calibration pars
         'fig3',  # STI calibration pars
     ]
     if 'fig2' in to_run:
-        sims = run_msim(scenarios=ut.scenarios, use_calib=True, calib_folder=calib_folder, seed=1, debug=False, do_save=True)
+        sims = run_msim(scenarios=['treat80'], n_pars=500, use_calib=True, calib_folder=calib_folder, seed=1, debug=False, do_save=False)
         save_stats(sims)
 
     if 'fig3' in to_run:

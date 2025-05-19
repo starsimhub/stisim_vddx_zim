@@ -21,43 +21,45 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [10000, 2][debug]  # How many trials to run for calibration
-n_workers = [80, 1][debug]    # How many cores to use
+n_trials = [5000, 2][debug]  # How many trials to run for calibration
+n_workers = [100, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
 make_stats = True  # Whether to make stats
+study_name = 'starsim_calibration'
 
 
-def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, constrain=False):
+def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
 
     # Define the calibration parameters
+    ckw = dict(suggest_type='suggest_float')
     calib_par_dict = dict(
         default=dict(
-            ng_p_symp=dict(low=0.1, high=0.2, guess=0.15),
-            ct_p_symp=dict(low=0.2, high=0.3, guess=0.25),
-            tv_p_symp=dict(low=0.15, high=0.75, guess=0.45),
-            p_symp_care=dict(low=0.25, high=0.75, guess=0.5),
-            ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08),
-            ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06),
-            tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07),
+            ng_p_symp=dict(low=0.1, high=0.2, guess=0.15, **ckw),
+            ct_p_symp=dict(low=0.2, high=0.3, guess=0.25, **ckw),
+            tv_p_symp=dict(low=0.15, high=0.75, guess=0.45, **ckw),
+            p_symp_care=dict(low=0.25, high=0.75, guess=0.5, **ckw),
+            ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08, **ckw, log=True),
+            ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06, **ckw, log=True),
+            tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07, **ckw, log=True),
         ),
         treat50=dict(
-            ng_p_symp=dict(low=0.15, high=0.25, guess=0.18),
-            ct_p_symp=dict(low=0.25, high=0.3, guess=0.28),
-            tv_p_symp=dict(low=0.5, high=0.75, guess=0.6),
-            p_symp_care=dict(low=0.45, high=0.75, guess=0.6),
+            ng_p_symp=dict(low=0.15, high=0.25, guess=0.18, **ckw),
+            ct_p_symp=dict(low=0.25, high=0.3, guess=0.28, **ckw),
+            tv_p_symp=dict(low=0.5, high=0.75, guess=0.6, **ckw),
+            p_symp_care=dict(low=0.45, high=0.75, guess=0.6, **ckw),
         ),
         treat80=dict(
-            ng_p_symp=dict(low=0.11, high=0.19, guess=0.15),
-            ct_p_symp=dict(low=0.22, high=0.27, guess=0.25),
-            tv_p_symp=dict(low=0.3, high=0.6, guess=0.45),
-            p_symp_care=dict(low=0.35, high=0.65, guess=0.5),
+            ng_p_symp=dict(low=0.11, high=0.19, guess=0.15, **ckw),
+            ct_p_symp=dict(low=0.22, high=0.27, guess=0.25, **ckw),
+            tv_p_symp=dict(low=0.3, high=0.6, guess=0.45, **ckw),
+            p_symp_care=dict(low=0.35, high=0.65, guess=0.5, **ckw),
         ),
         treat100=dict(
-            ng_p_symp=dict(low=0.09, high=0.15, guess=0.12),
-            ct_p_symp=dict(low=0.2, high=0.25, guess=0.22),
-            tv_p_symp=dict(low=0.15, high=0.5, guess=0.3),
-            p_symp_care=dict(low=0.25, high=0.55, guess=0.4),
+            ng_p_symp=dict(low=0.09, high=0.15, guess=0.12, **ckw),
+            ct_p_symp=dict(low=0.2, high=0.25, guess=0.22, **ckw),
+            tv_p_symp=dict(low=0.15, high=0.5, guess=0.3, **ckw),
+            p_symp_care=dict(low=0.25, high=0.55, guess=0.4, **ckw),
         ),
     )
     calib_pars = calib_par_dict['default']
@@ -98,37 +100,68 @@ def run_calibration(scenario, n_trials=None, n_workers=None, do_save=False, cons
         die=True, reseed=False, storage=storage, save_results=True,
     )
 
+    return sim, calib
+
+
+def run_calibration(scenario, calib, n_trials=None, do_save=False, constrain=False):
+
     # Run the calibration
     printstr = f'Running calibration for {scenario}, {n_trials} trials'
     if constrain:
         printstr += ' with constraints'.upper()
     sc.heading(printstr)
-    calib.calibrate(load=True)
+    calib.calibrate()
     if do_save: sc.saveobj(f'results/zim_sti_calib_{scenario}.obj', calib)
     print(f'Best pars are {calib.best_pars}')
 
-    return sim, calib
+    return calib
 
 
 if __name__ == '__main__':
 
     constrain = True  # Whether to constrain the p_symp_care parameter
+    load_partial = False
 
     # Loop over scenarios and run calibrations for each
     for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
+        sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
 
-        sim, calib = run_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)
+        if load_partial:
+            # Load a partially-run calibration study
+            import optuna as op
+            print(calib.run_args.study_name)
+            study = op.load_study(storage=calib.run_args.storage, study_name=calib.run_args.study_name)
+            # calib.run_args.continue_db = True
+            # calib.calibrate()
+            output = study.optimize(calib.run_trial, n_trials=2)
+            calib.best_pars = sc.objdict(study.best_params)
+            calib.parse_study(study)
+            print('Best pars:', calib.best_pars)
+
+            # Tidy up
+            calib.calibrated = True
+            if not calib.run_args.keep_db:
+                calib.remove_db()
+
+        else:
+            calib = run_calibration(scenario, calib, n_trials=n_trials, constrain=constrain)
+
         print(f'... finished calibration: {scenario}')
         print(f'Best pars are {calib.best_pars}')
         resfolder = 'results/'  #if not constrain else 'results/constrained'  # NB constrained not in repo
+
+        # # Load calib
+        # calib = sc.loadobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj')
+        # new_results = [calib.sim_results[i] for i in calib.df.index]
+        # calib.sim_results = new_results
 
         # Save the results
         print('Shrinking and saving...')
         if do_shrink:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}_BIG.obj', calib)
-            calib = calib.shrink(n_results=int(n_trials//20))  # Save 5% best results
+            calib = calib.shrink(n_results=int(n_trials//10))  # Save 5% best results
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
         else:
             sc.saveobj(f'{resfolder}/zim_sti_calib_{scenario}.obj', calib)
