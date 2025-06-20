@@ -248,7 +248,7 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat30'
+    scenario = 'treat100'
     use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
@@ -270,15 +270,20 @@ if __name__ == '__main__':
 
     if 'stis' in to_run:
 
-        sim = make_sim(scenario=scenario, use_calib=use_calib, seed=seed, debug=debug, start=1990, stop=2041)
+        if do_run:
+            sim = make_sim(scenario=scenario, use_calib=use_calib, seed=seed, debug=debug, start=1990, stop=2041)
+            if use_calib:
+                print('Using calibration parameters:')
+                print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
+                print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+            sim.run()
 
-        if use_calib:
-            print('Using calibration parameters:')
-            print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
-            print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+            df = sim.to_df(resample='year', use_years=True, sep='_')
+            if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
-        sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='_')
+        else:
+            df = sc.loadobj(f'results/{scenario}_sim.df')
+
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
         plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
 

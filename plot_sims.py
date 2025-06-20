@@ -207,10 +207,10 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None, show=show
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt_new_sti1'+sex],
-        dfplot['syndromicmgmt_new_sti2'+sex],
-        dfplot['syndromicmgmt_new_sti3'+sex],
-        dfplot['syndromicmgmt_new_sti4'+sex],
+        dfplot['syndromic_vds_new_sti1'+sex],
+        dfplot['syndromic_vds_new_sti2'+sex],
+        dfplot['syndromic_vds_new_sti3'+sex],
+        dfplot['syndromic_vds_new_sti4'+sex],
     ]
     labels = ["1 infection", "2 infections", "3 infections", "4 infections"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
@@ -224,10 +224,10 @@ def plot_sti_tx(df, start_year=2000, end_year=2025, fext='', sex=None, show=show
     ax = axes[pn]
     x = dfplot.index
     Y = [
-        dfplot['syndromicmgmt_new_tx0'+sex],
-        dfplot['syndromicmgmt_new_tx1'+sex],
-        dfplot['syndromicmgmt_new_tx2'+sex],
-        dfplot['syndromicmgmt_new_tx3'+sex],
+        dfplot['syndromic_vds_new_tx0'+sex],
+        dfplot['syndromic_vds_new_tx1'+sex],
+        dfplot['syndromic_vds_new_tx2'+sex],
+        dfplot['syndromic_vds_new_tx3'+sex],
     ]
     labels = ["0", "1", "2", "3"]
     ax.stackplot(x, *Y, baseline='zero', labels=labels, colors=sc.vectocolor(4, reverse=True))
