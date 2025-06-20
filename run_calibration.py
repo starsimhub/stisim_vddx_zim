@@ -21,7 +21,7 @@ from model import make_sim, make_sim_pars
 
 # Run settings
 debug = False  # If True, this will do smaller runs that can be run locally for debugging
-n_trials = [5000, 2][debug]  # How many trials to run for calibration
+n_trials = [4000, 2][debug]  # How many trials to run for calibration
 n_workers = [100, 1][debug]    # How many cores to use
 storage = None
 do_shrink = True  # Whether to shrink the calibration results
@@ -42,6 +42,12 @@ def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
             ng_beta_m2f=dict(low=0.02, high=0.25, guess=0.08, **ckw, log=True),
             ct_beta_m2f=dict(low=0.02, high=0.25, guess=0.06, **ckw, log=True),
             tv_beta_m2f=dict(low=0.02, high=0.25, guess=0.07, **ckw, log=True),
+        ),
+        treat30=dict(
+            ng_p_symp=dict(low=0.17, high=0.30, guess=0.20, **ckw),
+            ct_p_symp=dict(low=0.27, high=0.35, guess=0.30, **ckw),
+            tv_p_symp=dict(low=0.55, high=0.85, guess=0.65, **ckw),
+            p_symp_care=dict(low=0.55, high=0.85, guess=0.7, **ckw),
         ),
         treat50=dict(
             ng_p_symp=dict(low=0.15, high=0.25, guess=0.18, **ckw),
@@ -123,7 +129,7 @@ if __name__ == '__main__':
     load_partial = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ut.scenarios:
+    for scenario in ['treat30']:  #ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)

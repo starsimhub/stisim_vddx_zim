@@ -88,7 +88,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     # People and networks
     ####################################################################################################################
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
-    sexual = sti.FastStructuredSexual(
+    sexual = sti.StructuredSexual(
         prop_f0=0.79,
         prop_m0=0.83,
         f1_conc=0.16,
@@ -118,7 +118,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     else:
         connectors = []
 
-    if analyzers is None:
+    if analyzers is None and add_stis:
         analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
 
     sim = ss.Sim(
@@ -248,8 +248,8 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat80'
-    use_calib = True  # Whether to use the calibrated parameters
+    scenario = 'treat30'
+    use_calib = False  # Whether to use the calibrated parameters
 
     # What to run
     to_run = [
@@ -260,16 +260,17 @@ if __name__ == '__main__':
     if 'hiv' in to_run:
         sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
+        df = sim.to_df(resample='year', use_years=True, sep='_')  # Use dots to separate columns
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
+        df.index = df.timevec
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
 
-        sim = make_sim(scenario=scenario, use_calib=True, seed=seed, debug=debug, start=1990, stop=2041)
+        sim = make_sim(scenario=scenario, use_calib=use_calib, seed=seed, debug=debug, start=1990, stop=2041)
 
         if use_calib:
             print('Using calibration parameters:')
