@@ -249,7 +249,7 @@ if __name__ == '__main__':
     do_save = True
     do_run = True
     scenario = 'treat30'
-    use_calib = False  # Whether to use the calibrated parameters
+    use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
     to_run = [
