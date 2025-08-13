@@ -207,7 +207,7 @@ def save_stats(sims, resfolder='results', scenario='treat80'):
         # Save age/sex epi results
         age_bins = sim.diseases.ng.age_bins
         sex_labels = {'f': 'Female', 'm': 'Male'}
-        for disease in ['ng', 'ct', 'tv']:
+        for disease in ['ng', 'ct', 'tv', 'hiv']:
             for sex in ['f', 'm']:
                 dd = dict()
                 for ab1, ab2 in zip(age_bins[:-1], age_bins[1:]):
@@ -218,7 +218,7 @@ def save_stats(sims, resfolder='results', scenario='treat80'):
                     dd['sex'] = sex_labels[sex]
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['new_infections'] = sim.results[disease][f'new_infections_{sex}_{ab1}_{ab2}'][-120:].mean()
-                    dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
+                    # dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['disease'] = disease
                     dd['par_idx'] = par_idx
                     dd['scenario'] = scenario

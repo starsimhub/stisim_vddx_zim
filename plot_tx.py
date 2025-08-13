@@ -12,7 +12,7 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    do_process = True
+    do_process = False
     start_year = 2000
     end_year = 2025
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     ut.set_font(size=25)
     legend_font = 20
     n_plots = len(results)
-    fig, axes = pl.subplots(1, 2, figsize=(20, 5))
+    fig, axes = pl.subplots(1, 2, figsize=(20, 8))
 
     # Coinfection plot
     ax = axes[0]

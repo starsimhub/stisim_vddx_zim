@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     to_run = [
         'fig2',  # Epi stats - requires running the model with the calibration pars
-        'fig3',  # STI calibration pars
+        # 'fig3',  # STI calibration pars
     ]
     if 'fig2' in to_run:
         sims = run_msim(scenarios=['treat80'], n_pars=500, use_calib=True, calib_folder=calib_folder, seed=1, debug=False, do_save=False)

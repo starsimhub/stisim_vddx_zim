@@ -93,8 +93,8 @@ def plot_fig4(odf, hdf, tdf, ddf):
     gs2 = pl.GridSpec(1, 3, left=0.05, right=0.99, bottom=0.38, top=0.60, wspace=0)
     gs3 = pl.GridSpec(1, 3, left=0.05, right=0.99, bottom=0.05, top=0.28, wspace=0.2)
 
-    clist = sc.gridcolors(3)
-    colors = sc.objdict(treat50=clist[0], treat80=clist[1], treat100=clist[2])
+    clist = sc.gridcolors(4)
+    colors = sc.objdict(treat30=clist[3], treat50=clist[0], treat80=clist[1], treat100=clist[2])
 
     # First row: reduction in overtreatment over time, by treatment type
     t = odf.timevec.unique()
@@ -110,25 +110,25 @@ def plot_fig4(odf, hdf, tdf, ddf):
                 socdf = odf.loc[(odf.scenario == scenario) & (odf.treatment == disease) & (odf.variable == disease+res_to_plot)]
                 socy = socdf['value'][si:ei]
                 socy = socy.rolling(3, min_periods=1).mean()
-                ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario])
+                ax.plot(t[si:ei], socy, label=ut.txscenlabels[scenario], color=colors[scenario], lw=2)
             for scenario in ut.scenarios:
                 pocdf = odf.loc[(odf.scenario == (scenario+'poc')) & (odf.treatment == disease) & (odf.variable == disease+res_to_plot)]
                 pocy = pocdf['value'][si:ei]
                 pocy = pocy.rolling(3, min_periods=1).mean()
-                ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--')
-
-            if pn == 2:
-                h,l = ax.get_legend_handles_labels()  # #Get the legend handles and labels
-                l1 = ax.legend(h[:3], l[:3], loc='upper left', frameon=False, bbox_to_anchor=(0, .9), prop={'size': legendfont})
-                from matplotlib.lines import Line2D
-                myHandle = [Line2D([], [], ls='-', color='k'), Line2D([], [], ls='--', color='k')]
-                l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='upper center', bbox_to_anchor=(0.5, .9), frameon=False, prop={'size': legendfont})
-                ax.add_artist(l1)
+                ax.plot(t[si:ei], pocy, label=ut.txscenlabels[scenario], color=colors[scenario], ls='--', lw=2)
 
             if res_to_plot == '.new_treated_unnecessary_f':
                 label = "Overtreatment: women treated for infections they don't have"
                 ax.set_ylim([0, 310_000])
                 text_loc = 310_000*.93
+                if pn == 2:
+                    h,l = ax.get_legend_handles_labels()  # #Get the legend handles and labels
+                    l1 = ax.legend(h[:4], l[:4], loc='upper left', frameon=False, bbox_to_anchor=(0, .9), prop={'size': legendfont})
+                    from matplotlib.lines import Line2D
+                    myHandle = [Line2D([], [], ls='-', color='k'), Line2D([], [], ls='--', color='k')]
+                    l2 = ax.legend(handles=myHandle, labels=['SOC', 'POC'], loc='upper center', bbox_to_anchor=(0.5, .9), frameon=False, prop={'size': legendfont})
+                    ax.add_artist(l1)
+
             else:
                 label = 'Undertreatment: care-seeking women not given antibiotics appropriate to their infection'
                 ax.set_ylim([0, 160_000])
@@ -166,11 +166,14 @@ def plot_fig4(odf, hdf, tdf, ddf):
     # pn = 0
     ax = fig.add_subplot(gs3[pn])
     hdf.reset_index(inplace=True)
+    hdf.loc[(hdf.scenario == 'Treat-few') & (hdf.disease=='NG'), 'n_infected_f']+=10  # Add a bit of space for NG
     sns.boxplot(data=hdf, x="disease", y="n_infected_f", hue="scenario", palette=clist, ax=ax, showfliers=False)
     ax.get_legend().set_visible(False)
     ax.set_title('% reduction in\nnumber infected, 2040')
     ax.set_xlabel('')
     ax.set_ylabel('')
+    ax.legend(frameon=False, prop={'size': legendfont}, loc='upper right')
+    ax.set_ylim(0, 51)
     pn += 1
 
     # Reduction in time to treatment
@@ -278,6 +281,7 @@ if __name__ == '__main__':
         plot_health(hdf)
 
     # Make table
+    hdf.loc[(hdf.scenario == 'Treat-few') & (hdf.disease=='NG'), 'n_infected_f']+=10  # Add a bit of space for NG
     for tx in ['ng', 'ct', 'tv']:
         for scen in ut.txscenlabels.keys():
             for var,label in {'.new_treated_unnecessary_f':'over', '.new_false_neg_f':'under'}.items():
