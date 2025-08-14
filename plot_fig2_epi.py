@@ -103,19 +103,19 @@ if __name__ == '__main__':
     set_font(size=20)
     # fig = pl.figure(figsize=(20, 12))
     # gs1 = GridSpec(3, 3, left=0.05, right=0.98, wspace=0.05, hspace=0.05)
-    fig, axes = pl.subplots(2, 3, figsize=(20, 8))
+    fig, axes = pl.subplots(2, 4, figsize=(25, 8))
     color = sc.vectocolor([.5, .8, 1])[1]
     axes = axes.ravel()
     scolors = ['#ee7989', '#4682b4']
 
     # Plot transmission and acquisition
-    for ai, disease in enumerate(['ng', 'ct', 'tv']):
+    for ai, disease in enumerate(['ng', 'ct', 'tv', 'hiv']):
         # ax = fig.add_subplot(gs1[0, ai])
         ax = axes[ai]
         ax = plot_infections_by_sw(sw_df, disease=disease, ax=ax)
 
     # Plot prevalence by age
-    for ai, disease in enumerate(['ng', 'ct', 'tv']):
+    for ai, disease in enumerate(['ng', 'ct', 'tv', 'hiv']):
         # ax = fig.add_subplot(gs1[1, ai])
         ax = axes[ai+3]
         thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')].copy()
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
     pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
     pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
-    pl.savefig(f"figures/fig2_epi.png", dpi=100)
+    pl.savefig(f"figures/fig2_epi_hiv.png", dpi=100)
     if show:
         pl.show()
 

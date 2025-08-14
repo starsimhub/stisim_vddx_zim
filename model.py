@@ -119,7 +119,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         connectors = []
 
     if analyzers is None and add_stis:
-        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
+        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv', 'hiv']), ts()]
 
     sim = ss.Sim(
         dt=dt,
