@@ -70,7 +70,8 @@ def make_sim_pars(sim, calib_pars):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None):
+             scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None,
+             analyze_network=False):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
@@ -120,6 +121,14 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
 
     if analyzers is None and add_stis:
         analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv', 'hiv']), ts()]
+
+    # Add network analyzers
+    if analyze_network:
+        analyzers = sc.autolist(analyzers)
+        analyzers += sti.NetworkDegree(relationship_types=['partners', 'stable', 'casual'])
+        analyzers += sti.RelationshipDurations()
+        analyzers += sti.DebutAge()
+        analyzers += sti.partner_age_diff()
 
     sim = ss.Sim(
         dt=dt,
@@ -248,7 +257,7 @@ if __name__ == '__main__':
     seed = 1  # 533833
     do_save = True
     do_run = True
-    scenario = 'treat30'
+    scenario = 'treat80'
     use_calib = True  # Whether to use the calibrated parameters
 
     # What to run
@@ -286,4 +295,6 @@ if __name__ == '__main__':
 
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
         plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
+
+
 
