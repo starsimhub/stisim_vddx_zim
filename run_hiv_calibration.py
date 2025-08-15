@@ -15,7 +15,7 @@ os.environ.update(
 import sciris as sc
 import stisim as sti
 import pandas as pd
-from model import make_sim, make_scenpars
+from model import make_sim
 
 
 # Run settings

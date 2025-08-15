@@ -70,7 +70,8 @@ def make_sim_pars(sim, calib_pars):
 
 
 def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
-             scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None):
+             scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None,
+             analyze_network=False):
 
     total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
@@ -88,7 +89,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     # People and networks
     ####################################################################################################################
     ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
-    sexual = sti.FastStructuredSexual(
+    sexual = sti.StructuredSexual(
         prop_f0=0.79,
         prop_m0=0.83,
         f1_conc=0.16,
@@ -118,8 +119,16 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
     else:
         connectors = []
 
-    if analyzers is None:
-        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv']), ts()]
+    if analyzers is None and add_stis:
+        analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv', 'hiv']), ts()]
+
+    # Add network analyzers
+    if analyze_network:
+        analyzers = sc.autolist(analyzers)
+        analyzers += sti.NetworkDegree(relationship_types=['partners', 'stable', 'casual'])
+        analyzers += sti.RelationshipDurations()
+        analyzers += sti.DebutAge()
+        analyzers += sti.partner_age_diff()
 
     sim = ss.Sim(
         dt=dt,
@@ -207,7 +216,7 @@ def save_stats(sims, resfolder='results', scenario='treat80'):
         # Save age/sex epi results
         age_bins = sim.diseases.ng.age_bins
         sex_labels = {'f': 'Female', 'm': 'Male'}
-        for disease in ['ng', 'ct', 'tv']:
+        for disease in ['ng', 'ct', 'tv', 'hiv']:
             for sex in ['f', 'm']:
                 dd = dict()
                 for ab1, ab2 in zip(age_bins[:-1], age_bins[1:]):
@@ -260,24 +269,32 @@ if __name__ == '__main__':
     if 'hiv' in to_run:
         sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='.')  # Use dots to separate columns
+        df = sim.to_df(resample='year', use_years=True, sep='_')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
         # Process and plot
         df = sc.loadobj(f'results/{scenario}_sim.df')
+        df.index = df.timevec
         plot_hiv_sims(df, start_year=1990, which='single')
 
     if 'stis' in to_run:
 
-        sim = make_sim(scenario=scenario, use_calib=True, seed=seed, debug=debug, start=1990, stop=2041)
+        if do_run:
+            sim = make_sim(scenario=scenario, use_calib=use_calib, seed=seed, debug=debug, start=1990, stop=2041)
+            if use_calib:
+                print('Using calibration parameters:')
+                print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
+                print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+            sim.run()
 
-        if use_calib:
-            print('Using calibration parameters:')
-            print(f'ng_p_symp: {sim.diseases.ng.pars.p_symp}')
-            print(f'p_symp_care: {sim.diseases.ct.pars.p_symp_care}')
+            df = sim.to_df(resample='year', use_years=True, sep='_')
+            if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
-        sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='_')
+        else:
+            df = sc.loadobj(f'results/{scenario}_sim.df')
+
         plot_sti_sims(df, start_year=2000, end_year=2040, which='single', fext=scenario)
         plot_sti_tx(df, start_year=2000, fext=scenario, sex='f')
+
+
 

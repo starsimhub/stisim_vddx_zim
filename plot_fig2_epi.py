@@ -58,9 +58,12 @@ def plot_infections_by_sw(df, disease=None, ax=None, start_year=2000, end_year=2
     total_trans_ng = sw_df[f'new_transmissions_fsw_ng'][si:ei].mean()+sw_df[f'new_transmissions_client_ng'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ng'][10:30].mean()+sw_df[f'new_transmissions_non_client_ng'][10:30].mean()
     total_trans_ct = sw_df[f'new_transmissions_fsw_ct'][si:ei].mean()+sw_df[f'new_transmissions_client_ct'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_ct'][10:30].mean()+sw_df[f'new_transmissions_non_client_ct'][10:30].mean()
     total_trans_tv = sw_df[f'new_transmissions_fsw_tv'][si:ei].mean()+sw_df[f'new_transmissions_client_tv'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_tv'][10:30].mean()+sw_df[f'new_transmissions_non_client_tv'][10:30].mean()
+    total_trans_hiv = sw_df[f'new_transmissions_fsw_hiv'][si:ei].mean()+sw_df[f'new_transmissions_client_hiv'][10:30].mean()+sw_df[f'new_transmissions_non_fsw_hiv'][10:30].mean()+sw_df[f'new_transmissions_non_client_hiv'][10:30].mean()
     print(f'NG SW share: {(sw_df[f"new_transmissions_fsw_ng"][si:ei].mean()+sw_df[f"new_transmissions_client_ng"][10:30].mean())/total_trans_ng}')
     print(f'CT SW share: {(sw_df[f"new_transmissions_fsw_ct"][si:ei].mean()+sw_df[f"new_transmissions_client_ct"][10:30].mean())/total_trans_ct}')
     print(f'TV SW share: {(sw_df[f"new_transmissions_fsw_tv"][si:ei].mean()+sw_df[f"new_transmissions_client_tv"][10:30].mean())/total_trans_tv}')
+    print(f'HIV SW share: {(sw_df[f"new_transmissions_fsw_hiv"][si:ei].mean()+sw_df[f"new_transmissions_client_hiv"][10:30].mean())/total_trans_hiv}')
+
     # ax.set_ylim(bottom=0)
     return ax
 
@@ -99,11 +102,13 @@ if __name__ == '__main__':
     sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
     hiv_df = sc.loadobj(f'results/hiv_df_{scenario}.df')
 
+    dis_to_plot = ['ng', 'ct', 'tv']
+    xdim = 5*(1+len(dis_to_plot))
     # Initialize plot
     set_font(size=20)
     # fig = pl.figure(figsize=(20, 12))
     # gs1 = GridSpec(3, 3, left=0.05, right=0.98, wspace=0.05, hspace=0.05)
-    fig, axes = pl.subplots(2, 3, figsize=(20, 8))
+    fig, axes = pl.subplots(2, len(dis_to_plot), figsize=(xdim, 8))
     color = sc.vectocolor([.5, .8, 1])[1]
     axes = axes.ravel()
     scolors = ['#ee7989', '#4682b4']
@@ -115,9 +120,9 @@ if __name__ == '__main__':
         ax = plot_infections_by_sw(sw_df, disease=disease, ax=ax)
 
     # Plot prevalence by age
-    for ai, disease in enumerate(['ng', 'ct', 'tv']):
+    for ai, disease in enumerate(dis_to_plot):
         # ax = fig.add_subplot(gs1[1, ai])
-        ax = axes[ai+3]
+        ax = axes[ai+4]
         thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')].copy()
         # sns.barplot(data=thisdf, x="age", y="new_infections", hue="sex", ax=ax, palette=scolors)
         thisdf['prevalence'] *= 100
@@ -137,15 +142,17 @@ if __name__ == '__main__':
     # ax = plot_hiv(hiv_df, ax=ax)
 
     fig.tight_layout()
-    pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
-    pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
-    pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
-    pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
-    pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
-    pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
-    pl.savefig(f"figures/fig2_epi.png", dpi=100)
+    figname = 'fig2_epi'
+    if 'hiv' in dis_to_plot: figname += '_hiv'
+    else:
+        pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
+        pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
+        pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
+        pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
+        pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
+        pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
+    pl.savefig(f"figures/{figname}.png", dpi=100)
     if show:
         pl.show()
-
 
     print('Done.')
