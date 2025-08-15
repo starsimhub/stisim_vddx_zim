@@ -17,7 +17,7 @@ from utils import percentile_pairs
 # %% Run as a script
 if __name__ == '__main__':
 
-    which = ['hiv', 'sti'][0]
+    which = ['hiv', 'sti'][1]
     scenario = 'treat100'
 
     # Load files - these should all be committed to the repository
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         start_year=2000,
         end_year=2025,
         which='multi',
-        # fext=scenario,
+        fext=scenario,
         percentile_pairs=percentile_pairs,
         title=f'{which}_calib',
         show=False,

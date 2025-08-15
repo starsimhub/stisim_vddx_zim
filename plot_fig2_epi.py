@@ -102,23 +102,25 @@ if __name__ == '__main__':
     sw_df = sc.loadobj(f'results/sw_df_{scenario}.df')
     hiv_df = sc.loadobj(f'results/hiv_df_{scenario}.df')
 
+    dis_to_plot = ['ng', 'ct', 'tv']
+    xdim = 5*(1+len(dis_to_plot))
     # Initialize plot
     set_font(size=20)
     # fig = pl.figure(figsize=(20, 12))
     # gs1 = GridSpec(3, 3, left=0.05, right=0.98, wspace=0.05, hspace=0.05)
-    fig, axes = pl.subplots(2, 4, figsize=(25, 8))
+    fig, axes = pl.subplots(2, len(dis_to_plot), figsize=(xdim, 8))
     color = sc.vectocolor([.5, .8, 1])[1]
     axes = axes.ravel()
     scolors = ['#ee7989', '#4682b4']
 
     # Plot transmission and acquisition
-    for ai, disease in enumerate(['ng', 'ct', 'tv', 'hiv']):
+    for ai, disease in enumerate(['ng', 'ct', 'tv']):
         # ax = fig.add_subplot(gs1[0, ai])
         ax = axes[ai]
         ax = plot_infections_by_sw(sw_df, disease=disease, ax=ax)
 
     # Plot prevalence by age
-    for ai, disease in enumerate(['ng', 'ct', 'tv', 'hiv']):
+    for ai, disease in enumerate(dis_to_plot):
         # ax = fig.add_subplot(gs1[1, ai])
         ax = axes[ai+4]
         thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')].copy()
@@ -140,15 +142,17 @@ if __name__ == '__main__':
     # ax = plot_hiv(hiv_df, ax=ax)
 
     fig.tight_layout()
-    # pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
-    # pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
-    # pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
-    # pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
-    # pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
-    # pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
-    pl.savefig(f"figures/fig2_epi_hiv.png", dpi=100)
+    figname = 'fig2_epi'
+    if 'hiv' in dis_to_plot: figname += '_hiv'
+    else:
+        pl.figtext(0.07, 0.92, 'A', fontsize=40, ha='center', va='center')
+        pl.figtext(0.4, 0.92, 'B', fontsize=40, ha='center', va='center')
+        pl.figtext(0.73, 0.92, 'C', fontsize=40, ha='center', va='center')
+        pl.figtext(0.07, 0.45, 'D', fontsize=40, ha='center', va='center')
+        pl.figtext(0.4, 0.45, 'E', fontsize=40, ha='center', va='center')
+        pl.figtext(0.73, 0.45, 'F', fontsize=40, ha='center', va='center')
+    pl.savefig(f"figures/{figname}.png", dpi=100)
     if show:
         pl.show()
-
 
     print('Done.')

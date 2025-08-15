@@ -227,7 +227,7 @@ def save_stats(sims, resfolder='results', scenario='treat80'):
                     dd['sex'] = sex_labels[sex]
                     dd['prevalence'] = sim.results[disease][f'prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['new_infections'] = sim.results[disease][f'new_infections_{sex}_{ab1}_{ab2}'][-120:].mean()
-                    # dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
+                    dd['symp_prevalence'] = sim.results[disease][f'symp_prevalence_{sex}_{ab1}_{ab2}'][-1]
                     dd['disease'] = disease
                     dd['par_idx'] = par_idx
                     dd['scenario'] = scenario
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     if 'hiv' in to_run:
         sim = make_sim(add_stis=False, scenario=scenario, seed=seed, debug=debug, start=1990, stop=2041)
         sim.run()
-        df = sim.to_df(resample='year', use_years=True, sep='_')  # Use dots to separate columns
+        df = sim.to_df(resample='year', use_years=True, sep='_')
         if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
         # Process and plot
