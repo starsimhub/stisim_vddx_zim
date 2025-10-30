@@ -75,8 +75,10 @@ def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
     sres = sc.autolist()
     for dis in ['ng', 'ct', 'tv']:
         for res in ['prevalence', 'new_infections', 'n_infected']:
-            for sk in ['', '_f', '_m']:
+            for sk in ['', '_f']:
                 sres += dis+'_'+res+sk
+    sres += 'ng_prevalence_m'
+    sres += 'ct_prevalence_m'
 
     # Make the sim
     sim = make_sim(scenario=scenario, use_calib=False, start=1990, stop=2040, verbose=-1, seed=1)
