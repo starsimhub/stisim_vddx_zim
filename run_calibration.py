@@ -80,12 +80,12 @@ def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
 
     # Make the sim
     sim = make_sim(scenario=scenario, use_calib=False, start=1990, stop=2040, verbose=-1, seed=1)
-    data = pd.read_csv('data/zimbabwe_sti_data.csv')
+    data = pd.read_csv('data/zimbabwe_sti_data_all.csv')
 
     weights = dict(
-        # ng_n_infected=0,
-        # ct_n_infected=0,
-        # tv_n_infected=0,
+        ng_n_infected=0,
+        ct_n_infected=0,
+        tv_n_infected=0,
         ng_new_infections=1,
         ct_new_infections=1,
         tv_new_infections=1,
