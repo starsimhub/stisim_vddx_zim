@@ -73,7 +73,7 @@ def make_calibration(scenario, n_trials=None, n_workers=None, constrain=False):
 
     # Extra results to save
     sres = sc.autolist()
-    for dis in ['ng', 'ct', 'tv']:
+    for dis in ['ng', 'ct']:
         for res in ['prevalence', 'new_infections', 'n_infected']:
             for sk in ['', '_f']:
                 sres += dis+'_'+res+sk
