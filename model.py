@@ -69,26 +69,15 @@ def make_sim_pars(sim, calib_pars):
     return sim
 
 
-def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
+def make_sim(seed=1, n_agents=None, start=1990, stop=2030, debug=False, verbose=1/12, add_stis=True,
              scenario='treat100', use_calib=False, calib_folder=None, par_idx=0, poc=False, analyzers=None,
              analyze_network=False):
 
-    total_pop = {1970: 5.203e6, 1980: 7.05e6, 1985: 8.691e6, 1990: 9980999, 2000: 11.83e6}[start]
     if n_agents is None: n_agents = [int(10e3), int(5e2)][debug]
-    if dt is None: dt = [1/12, 1][debug]
 
     ####################################################################################################################
-    # Demographic modules
+    # Networks
     ####################################################################################################################
-    fertility_data = pd.read_csv(f'data/asfr.csv')
-    pregnancy = ss.Pregnancy(unit='month', fertility_rate=fertility_data)
-    death_data = pd.read_csv(f'data/deaths.csv')
-    death = ss.Deaths(death_rate=death_data, rate_units=1)
-
-    ####################################################################################################################
-    # People and networks
-    ####################################################################################################################
-    ppl = ss.People(n_agents, age_data=pd.read_csv(f'data/age_dist_{start}.csv', index_col='age')['value'])
     sexual = sti.StructuredSexual(
         prop_f0=0.79,
         prop_m0=0.83,
@@ -97,7 +86,7 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         p_pair_form=0.58,
         condom_data=pd.read_csv(f'data/condom_use.csv'),
     )
-    maternal = ss.MaternalNet(unit='month')
+    maternal = ss.MaternalNet()
 
     ####################################################################################################################
     # Diseases
@@ -130,16 +119,15 @@ def make_sim(seed=1, n_agents=None, dt=1/12, start=1990, stop=2030, debug=False,
         analyzers += sti.DebutAge()
         analyzers += sti.partner_age_diff()
 
-    sim = ss.Sim(
-        dt=dt,
+    sim = sti.Sim(
+        n_agents=n_agents,
         rand_seed=seed,
-        total_pop=total_pop,
         start=start,
         stop=stop,
-        people=ppl,
         diseases=diseases,
         networks=[sexual, maternal],
-        demographics=[pregnancy, death],
+        datafolder='data/',
+        demographics='zimbabwe',
         interventions=intvs,
         analyzers=analyzers,
         connectors=connectors,
@@ -288,6 +276,7 @@ if __name__ == '__main__':
             sim.run()
 
             df = sim.to_df(resample='year', use_years=True, sep='_')
+            df.index = df.timevec
             if do_save: sc.saveobj(f'results/{scenario}_sim.df', df)
 
         else:

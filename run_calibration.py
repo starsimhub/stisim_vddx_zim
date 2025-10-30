@@ -129,7 +129,7 @@ if __name__ == '__main__':
     load_partial = False
 
     # Loop over scenarios and run calibrations for each
-    for scenario in ['treat30']:  #ut.scenarios:
+    for scenario in ut.scenarios:
 
         sc.heading(f'Running calibration: {scenario}')
         sim, calib = make_calibration(scenario, n_trials=n_trials, n_workers=n_workers, constrain=constrain)

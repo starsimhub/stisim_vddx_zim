@@ -102,6 +102,7 @@ class total_symptomatic(ss.Analyzer):
         return
 
     def init_results(self):
+        super().init_results()
         self.define_results(
             ss.Result('new_symptoms', dtype=int, label='Symptomatic incidence'),
             ss.Result('n_symptomatic', dtype=int, label='Number with symptoms'),

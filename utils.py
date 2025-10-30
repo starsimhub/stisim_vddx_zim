@@ -9,9 +9,9 @@ percentile_pairs = [[.01, .99], [.1, .9], [.25, .75]]  # Order by wide to narrow
 percentiles = [percentile for percentile_pair in percentile_pairs for percentile in percentile_pair]
 
 # Set scenarios and labels
-scenlabels = {'treat30': 'Treat-few', 'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100':'Treat-all'}
-txscenarios = ['treat30poc', 'treat50poc', 'treat80poc', 'treat100poc']
-txscenlabels = sc.mergedicts(scenlabels, {'treat30poc': 'Treat-few (POC)', 'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'})
+scenlabels = {'treat50': 'Treat-half', 'treat80': 'Treat-most', 'treat100':'Treat-all'}  # 'treat30': 'Treat-few',
+txscenarios = ['treat50poc', 'treat80poc', 'treat100poc']  #'treat30poc',
+txscenlabels = sc.mergedicts(scenlabels, {'treat50poc': 'Treat-half (POC)', 'treat80poc': 'Treat-most (POC)', 'treat100poc': 'Treat-all (POC)'})  # 'treat30poc': 'Treat-few (POC)',
 treatments = ['ng_tx', 'ct_tx', 'metronidazole']
 tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
 scenarios = scenlabels.keys()
@@ -20,6 +20,7 @@ unneeded_results = [
     'pregnancy', 'deaths', 'structuredsexual', 'maternalnet', 'new_deaths', 'cum_deaths',
     'fsw_testing', 'other_testing', 'low_cd4_testing', 'art', 'vmmc', 'hivdx'
 ]
+
 
 # Helper functions
 def set_font(size=None, font='Libertinus Sans'):
