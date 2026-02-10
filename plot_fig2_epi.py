@@ -122,7 +122,7 @@ if __name__ == '__main__':
     # Plot prevalence by age
     for ai, disease in enumerate(dis_to_plot):
         # ax = fig.add_subplot(gs1[1, ai])
-        ax = axes[ai+4]
+        ax = axes[ai+3]
         thisdf = epi_df.loc[(epi_df.disease == disease) & (epi_df.age != '0-15') & (epi_df.age != '65+')].copy()
         # sns.barplot(data=thisdf, x="age", y="new_infections", hue="sex", ax=ax, palette=scolors)
         thisdf['prevalence'] *= 100
