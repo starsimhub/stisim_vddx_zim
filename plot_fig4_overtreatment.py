@@ -221,11 +221,9 @@ if __name__ == '__main__':
     odf = sc.loadobj(f'results/overtx.obj')
     hdf = sc.loadobj('results/synd_health.obj')
     tdf = sc.loadobj('results/synd_treat.obj')
-    # ddf = sc.loadobj('results/dur_df.obj')
 
     # Process durations
-    process_durs = True
-    if process_durs:
+    def process_durs():
         mt = 4
         dfs = sc.autolist()
         idx = 0
@@ -245,10 +243,16 @@ if __name__ == '__main__':
                     idx += 1
         ddf = pd.concat(dfs)
         sc.saveobj('results/dur_df.obj', ddf)
+        return ddf
 
     # Condensed versions for slides
     make_main_fig = True
     if make_main_fig:
+        try: 
+            ddf = sc.loadobj('results/dur_df.obj')
+        except:
+            print('Processing durations...')
+            ddf = process_durs()
         plot_fig4(odf, hdf, tdf, ddf)
 
     # Make durations plot
