@@ -221,10 +221,10 @@ if __name__ == '__main__':
     odf = sc.loadobj(f'results/overtx.obj')
     hdf = sc.loadobj('results/synd_health.obj')
     tdf = sc.loadobj('results/synd_treat.obj')
-    ddf = sc.loadobj('results/dur_df.obj')
+    # ddf = sc.loadobj('results/dur_df.obj')
 
     # Process durations
-    process_durs = False
+    process_durs = True
     if process_durs:
         mt = 4
         dfs = sc.autolist()

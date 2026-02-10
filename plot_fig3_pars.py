@@ -87,7 +87,7 @@ if __name__ == '__main__':
     end_year = 2025
     si = sc.findfirst(t, start_year)
     ei = sc.findfirst(t, end_year)
-    sti_data = pd.read_csv(f'data/zimbabwe_sti_data_plot.csv')
+    sti_data = pd.read_csv(f'data/zimbabwe_sti_data.csv')
     sti_data = sti_data.loc[(sti_data.time >= start_year) & (sti_data.time <= end_year)]
 
     for i, disease in enumerate(diseases):
